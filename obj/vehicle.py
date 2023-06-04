@@ -67,7 +67,7 @@ class Vehicle:
         self.ppos=translate(self.ppos[0],self.min,self.max,0,100),translate(self.ppos[1],self.min,self.max,0,100)
         print(self.ppos)
         
-        pass
+        return self.ppos
         
     def set_destination(self):
         fleet=self.sumo.vehicle.getTaxiFleet(0)

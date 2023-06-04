@@ -42,7 +42,11 @@ class Basic(gym.Env):
       self.render_mode=None
       self.episode_count=0
       self.vehicle=None
-    #   self.observation_space=
+      self.min,self.max,self.diff=getMinMax(self._net)
+      low=np.array([self.min,self.min])
+      high=np.array([self.max,self.max])
+      self.observation_space=gym.spaces.Box(low,high, dtype=np.float32)
+      self.action_space=gym.spaces.Discrete(3)
       
       self.label = str(Basic.CONNECTION_LABEL)
       Basic.CONNECTION_LABEL += 1
@@ -92,11 +96,13 @@ class Basic(gym.Env):
             self.sumo = traci.getConnection(self.label)
         self.sumo.simulationStep()
         self.vehicle=Vehicle("1",self._net,self._route)
-        self.vehicle.location()
+        self.person=Person("p_0",self._net,self._route)
+        vloc=self.vehicle.location()
+        ploc=self.person.location()
         self.vehicle.set_destination()
         self.vehicle.pickup()
-        
-        return 
+        state=np.array([vloc,ploc])
+        return state
         
         
         
@@ -111,7 +117,12 @@ class Basic(gym.Env):
         
         self.done=True
         self.use_gui=False
-        return 
+        vloc=self.vehicle.location()
+        ploc=self.person.location()
+        # self.vehicle.set_destination()
+        # self.vehicle.pickup()
+        state=np.array([vloc,ploc])
+        return state
        
     
     

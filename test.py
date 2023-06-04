@@ -15,7 +15,9 @@ for episode in range(EPISODES):
     count+=1
     if episode % SHOW_EVERY==0:
         env.render()
-    env.reset()
+    state = env.reset()
+    print(state)
     for  steps in range(STEPS):
-        env.step()
+        state=env.step()
+        print(state)
     env.close()

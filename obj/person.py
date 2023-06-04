@@ -1,6 +1,6 @@
 import os
 import sys
-
+from core.util import getMinMax
 if 'SUMO_HOME' in os.environ:
     tools = os.path.join(os.environ['SUMO_HOME'], 'tools')
     sys.path.append(tools)
@@ -29,6 +29,9 @@ class Person:
         self.destination = None
         self._net = net_file
         self._route = route_file
+        self.min=0
+        self.max=0
+        self.diff=0
         
         
         self.label = str(Person.CONNECTION_LABEL)
@@ -50,7 +53,7 @@ class Person:
       
    
             
-   
+        self.min,self.max,self.diff=getMinMax(self._net)
         conn.close()
         
         
@@ -60,13 +63,11 @@ class Person:
     
     def location(self):
         self.sumo = traci.getConnection(self.label) 
-       
-        scale=self.sumo.person.getPosition(self.person_id)
-        translate()
-        self.ppos
+        self.ppos=self.sumo.person.getPosition(self.person_id)
+        self.ppos=translate(self.ppos[0],self.min,self.max,0,100),translate(self.ppos[1],self.min,self.max,0,100)
         print(self.ppos)
         
-        pass
+        return self.ppos
         
     def set_destination(self):
         

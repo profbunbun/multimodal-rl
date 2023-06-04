@@ -5,6 +5,12 @@ from keras.optimizers import Adam
 import tensorflow as tf
 from collections import deque
 import numpy as np
+from envs.env import Basic
+import time
+
+REPLAY_MEMORY_SIZE = 50_000
+MIN_REPLAY_MEMORY_SIZE = 1_000
+MODEL_NAME = "256x2"
 
 class ModifiedTensorBoard(TensorBoard):
 
@@ -42,27 +48,22 @@ class DQNAgent:
     def __init__(self) -> None:
       
 
-        # Main model
+        # main model  # gets trained every step
         self.model = self.create_model()
 
-        # Target network
+        # Target model this is what we .predict against every step
         self.target_model = self.create_model()
         self.target_model.set_weights(self.model.get_weights())
 
-        # An array with last n steps for training
         self.replay_memory = deque(maxlen=REPLAY_MEMORY_SIZE)
-
-        # Custom tensorboard object
-        self.tensorboard = ModifiedTensorBoard(log_dir="logs/{}-{}".format(MODEL_NAME, int(time.time())))
-
-        # Used to count when to update target network with main network's weights
+        self.tensorboard = ModifiedTensorBoard(log_dir=f"logs/{MODEL_NAME}-{int(time.time())}")
         self.target_update_counter = 0
         pass
     
     def creat_model(self):
         model = Sequential()
 
-        model.add(Conv2D(256, (3, 3), input_shape=env.OBSERVATION_SPACE_VALUES))  # OBSERVATION_SPACE_VALUES = (10, 10, 3) a 10x10 RGB image.
+        model.add(Conv2D(256, (3, 3), input_shape=Basic.observation_space))  
         model.add(Activation('relu'))
         model.add(MaxPooling2D(pool_size=(2, 2)))
         model.add(Dropout(0.2))
@@ -75,7 +76,7 @@ class DQNAgent:
         model.add(Flatten())  # this converts our 3D feature maps to 1D feature vectors
         model.add(Dense(64))
 
-        model.add(Dense(env.ACTION_SPACE_SIZE, activation='linear'))  # ACTION_SPACE_SIZE = how many choices (9)
+        model.add(Dense(Basic.action_space, activation='linear'))  # ACTION_SPACE_SIZE = how many choices (9)
         model.compile(loss="mse", optimizer=Adam(lr=0.001), metrics=['accuracy'])
         return model
     # Adds step's data to a memory replay array
@@ -85,4 +86,4 @@ class DQNAgent:
         
     # Queries main network for Q values given current observation space (environment state)
     def get_qs(self, state):
-        return self.model.predict(np.array(state).reshape(-1, *state.shape)/255)[0]
+        return self.model.predict(np.array(state).reshape(-1, *state.shape))[0]

@@ -1,6 +1,6 @@
 import os
 import sys
-from core.util import getMinMax
+
 if 'SUMO_HOME' in os.environ:
     tools = os.path.join(os.environ['SUMO_HOME'], 'tools')
     sys.path.append(tools)
@@ -10,7 +10,6 @@ import sumolib
 from sumolib import net
 import traci
 LIBSUMO = "LIBSUMO_AS_TRACI" in os.environ
-
 def translate(value, leftMin, leftMax, rightMin, rightMax):
     # Figure out how 'wide' each range is
         leftSpan = leftMax - leftMin
@@ -21,22 +20,19 @@ def translate(value, leftMin, leftMax, rightMin, rightMax):
 
     # Convert the 0-1 range into a value in the right range.
         return int(round((rightMin + (valueScaled * rightSpan)),0))
-
-class Vehicle:
+    
+class Person:
     CONNECTION_LABEL = 0 
-    def __init__(self,vehicle_id,net_file,route_file) -> None:
+    def __init__(self,person_id,net_file,route_file) -> None:
         
-        self.vehicle_id =vehicle_id
+        self.person_id =person_id
         self.destination = None
         self._net = net_file
         self._route = route_file
-        self.min=0
-        self.max=0
-        self.diff=0
         
         
-        self.label = str(Vehicle.CONNECTION_LABEL)
-        Vehicle.CONNECTION_LABEL += 1
+        self.label = str(Person.CONNECTION_LABEL)
+        Person.CONNECTION_LABEL += 1
         self.sumo = None
       
         if LIBSUMO:
@@ -54,36 +50,33 @@ class Vehicle:
       
    
             
-        self.min,self.max,self.diff=getMinMax(self._net)
-        
+   
         conn.close()
         
         
         pass
     
+    
+    
     def location(self):
         self.sumo = traci.getConnection(self.label) 
-        self.ppos=self.sumo.vehicle.getPosition(self.vehicle_id)
-        self.ppos=translate(self.ppos[0],self.min,self.max,0,100),translate(self.ppos[1],self.min,self.max,0,100)
+       
+        scale=self.sumo.person.getPosition(self.person_id)
+        translate()
+        self.ppos
         print(self.ppos)
         
         pass
         
     def set_destination(self):
-        fleet=self.sumo.vehicle.getTaxiFleet(0)
-        self.sumo.vehicle.changeTarget("1",edgeID="1e")
-        print(fleet)
+        
+  
+        
         pass
-    
     def set_pickup(self):
         pass
-    
     def pickup(self):
-        reservation=self.sumo.person.getTaxiReservations(0)
-        reservation_id=reservation[0]
-        self.sumo.vehicle.dispatchTaxi("1","0")
-        print(reservation_id)
+   
         pass
-    
     
     

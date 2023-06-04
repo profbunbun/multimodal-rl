@@ -1,13 +1,11 @@
 import sys
 import os
-import math
+
 import numpy as np
-import random
 import gymnasium as gym
 from obj.vehicle import Vehicle
-from gymnasium import error, spaces, utils
-from gymnasium.utils import seeding
-
+from obj.person import Person
+from core.util import getMinMax
 
 
 
@@ -44,6 +42,7 @@ class Basic(gym.Env):
       self.render_mode=None
       self.episode_count=0
       self.vehicle=None
+    #   self.observation_space=
       
       self.label = str(Basic.CONNECTION_LABEL)
       Basic.CONNECTION_LABEL += 1
@@ -97,7 +96,7 @@ class Basic(gym.Env):
         self.vehicle.set_destination()
         self.vehicle.pickup()
         
-        return
+        return 
         
         
         

@@ -1,5 +1,11 @@
 {
-    "python.defaultInterpreterPath": "C:/ProgramData/Anaconda3/envs/gym/python.exe",
-    "python.analysis.typeCheckingMode": "off",
+    "python.autoComplete.extraPaths": [
+       "/usr/share/sumo/bin","/usr/share/sumo/tools" 
+    ],
+    "python.analysis.extraPaths": [
+        "/usr/share/sumo/bin",
+        "/usr/share/sumo/tools"
+    ]
+    
     
 }

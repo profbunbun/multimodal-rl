@@ -23,6 +23,7 @@ SPDX-License-Identifier: EPL-2.0 OR GPL-2.0-or-later
 
     <taxi_device>
         <device.taxi.dispatch-algorithm value="traci"/>
+        <device.taxi.idle-algorithm value="randomCircling"/>
     </taxi_device>
 
 </configuration>

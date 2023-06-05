@@ -5,7 +5,8 @@ import numpy as np
 import gymnasium as gym
 from obj.vehicle import Vehicle
 from obj.person import Person
-from core.util import getMinMax
+from core.util import getMinMax,translate
+from core import network_map_data_structures
 
 
 
@@ -33,6 +34,12 @@ class Basic(gym.Env):
         ) -> None:
         
     
+      self.length_dict = None
+      self.out_dict = None
+      self.index_dict = None
+      self.edge_list = None
+      self.network = network_map_data_structures.getNetInfo(net_file)
+      [self.length_dict, self.out_dict, self.index_dict, self.edge_list] = network_map_data_structures.getEdgesInfo(self.network)
       self.__current_target_xml_file__ = ""
       self.done=False
       self._net = net_file
@@ -41,6 +48,7 @@ class Basic(gym.Env):
       self.speed=None
       self.render_mode=None
       self.episode_count=0
+      self.episode_step = 0
       self.vehicle=None
       self.min,self.max,self.diff=getMinMax(self._net)
       low=np.array([self.min,self.min])
@@ -75,7 +83,7 @@ class Basic(gym.Env):
     
     def reset(self):
         
-        self.episode_count+=1
+        self.episode_step += 1
         self.done=False
         if self.use_gui or self.render_mode is not None:
             self._sumo_binary = sumolib.checkBinary("sumo-gui")
@@ -94,14 +102,20 @@ class Basic(gym.Env):
         else:
             traci.start(sumo_cmd, label=self.label)
             self.sumo = traci.getConnection(self.label)
+        
         self.sumo.simulationStep()
-        self.vehicle=Vehicle("1",self._net,self._route)
+        self.vehicle=Vehicle("1",self._net,self._route,self.out_dict, self.index_dict)
         self.person=Person("p_0",self._net,self._route)
-        vloc=self.vehicle.location()
-        ploc=self.person.location()
-        self.vehicle.set_destination()
-        self.vehicle.pickup()
-        state=np.array([vloc,ploc])
+        self.vloc=self.vehicle.location()
+        self.vloc=translate(self.vloc[0],self.min,self.max,0,100),translate(self.vloc[1],self.min,self.max,0,100)
+        
+        self.ploc=self.person.location()
+        self.ploc=translate(self.ploc[0],self.min,self.max,0,100),translate(self.ploc[1],self.min,self.max,0,100)
+        
+        self.episode_step = 0
+        # self.vehicle.set_destination()
+        # self.vehicle.pickup()
+        state=np.array([self.vloc,self.ploc])
         return state
         
         
@@ -111,6 +125,8 @@ class Basic(gym.Env):
         
     def step(self, action=None):
         
+        
+        
        
         self.sumo.simulationStep()
         
@@ -119,7 +135,8 @@ class Basic(gym.Env):
         self.use_gui=False
         vloc=self.vehicle.location()
         ploc=self.person.location()
-        # self.vehicle.set_destination()
+        self.vehicle.set_destination(action)
+        # print(self.sumo.vehicle.getRoute("1"))
         # self.vehicle.pickup()
         state=np.array([vloc,ploc])
         return state

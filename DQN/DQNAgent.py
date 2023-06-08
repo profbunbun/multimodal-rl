@@ -1,161 +1,124 @@
-from keras.models import Sequential
-
-from keras.layers import Dense, Dropout, Conv2D, MaxPooling2D, Activation, Flatten
-from keras.callbacks import TensorBoard
-from keras.optimizers import Adam
-import tensorflow as tf
-from collections import deque
+import torch as T
+import torch.nn as nn
+import torch.nn.functional as F
+import torch.optim as optim
 import numpy as np
-from envs.env import Basic
-import time
-import random
-from tqdm import tqdm
-import os
 
+class DeepQNetwork(nn.Module):
+    def __init__(self, lr, input_dims, fc1_dims, fc2_dims, n_actions):
+        super(DeepQNetwork,self).__init__()
+        self.input_dims=input_dims
+        self.fc1_dims=fc1_dims
+        self.fc2_dims=fc2_dims
+        self.n_actions=n_actions
+        self.fc1=nn.Linear(*self.input_dims,self.fc1_dims)
+        self.fc2=nn.Linear(self.fc1_dims,self.fc2_dims)
+        self.fc3=nn.Linear(self.fc2_dims,self.n_actions)
+        self.optimizer=optim.Adam(self.parameters(),lr=lr)
+        self.loss=nn.MSELoss()
+        self.device=T.device('cuda:0' if T.cuda.is_available() else 'cpu')
+        self.to(self.device)
+    
+    def forward(self,state):
+        
+        x=F.relu(self.fc1(state))
+        x=F.relu(self.fc2(x))
+        actions=self.fc3(x)
+        
+        return actions
+    
+        
 
-DISCOUNT = 0.99
-REPLAY_MEMORY_SIZE = 2000  # How many last steps to keep for model training
-MIN_REPLAY_MEMORY_SIZE = 10
-MINIBATCH_SIZE = 64  # How many steps (samples) to use for training
-UPDATE_TARGET_EVERY = 5  # Terminal states (end of episodes)
-MODEL_NAME = "taxi"
+        
+    
+    
+  
 
-class ModifiedTensorBoard(TensorBoard):
-
-    # Overriding init to set initial step and writer (we want one log file for all .fit() calls)
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.step = 1
-        # self.writer = tf.summary.FileWriter(self.log_dir)
-        self.writer = tf.summary.create_file_writer(self.log_dir)
-
-    # Overriding this method to stop creating default log writer
-    def set_model(self, model):
-        pass
-
-    # Overrided, saves logs with our step number
-    # (otherwise every .fit() will start writing from 0th step)
-    def on_epoch_end(self, epoch, logs=None):
-        self.update_stats(**logs)
-
-    # Overrided
-    # We train for one batch only, no need to save anything at epoch end
-    def on_batch_end(self, batch, logs=None):
-        pass
-
-    # Overrided, so won't close writer
-    def on_train_end(self, _):
-        pass
-
-    # Custom method for saving own metrics
-    # Creates writer, writes custom metrics and closes writer
-    def update_stats(self, **stats):
-        self._write_logs(stats, self.step)
 
 
 # Agent class
-class DQNAgent:
-    def __init__(self):
-
-        # Main model
-        self.model = self.create_model()
-
-        # Target network
-        self.target_model = self.create_model()
-        self.target_model.set_weights(self.model.get_weights())
-
-        # An array with last n steps for training
-        self.replay_memory = deque(maxlen=REPLAY_MEMORY_SIZE)
-
-        # Custom tensorboard object
-        self.tensorboard = ModifiedTensorBoard(log_dir="logs/{}-{}".format(MODEL_NAME, int(time.time())))
-
-        # Used to count when to update target network with main network's weights
-        self.target_update_counter = 0
-
-    def create_model(self):
-        model = Sequential()
-
-        model.add(Conv2D(256, (3, 3), input_shape=(356,356,3))) 
-        model.add(Activation('relu'))
-        model.add(MaxPooling2D(pool_size=(2, 2)))
-        model.add(Dropout(0.2))
-
-        model.add(Conv2D(256, (3, 3)))
-        model.add(Activation('relu'))
-        model.add(MaxPooling2D(pool_size=(2, 2)))
-        model.add(Dropout(0.2))
-
-        model.add(Flatten())  # this converts our 3D feature maps to 1D feature vectors
-        model.add(Dense(64))
-
-        model.add(Dense(3, activation='linear'))  # ACTION_SPACE_SIZE = how many choices (9)
-        model.compile(loss="mse", optimizer=Adam(lr=0.001), metrics=['accuracy'])
-        return model
-
-    # Adds step's data to a memory replay array
-    # (observation space, action, reward, new observation space, done)
-    def update_replay_memory(self, transition):
-        self.replay_memory.append(transition)
-
-    # Trains main network every step during episode
-    def train(self, terminal_state, step):
-
-        # Start training only if certain number of samples is already saved
-        if len(self.replay_memory) < MIN_REPLAY_MEMORY_SIZE:
-            return
-
-        # Get a minibatch of random samples from memory replay table
-        minibatch = random.sample(self.replay_memory, MINIBATCH_SIZE)
-
-        # Get current states from minibatch, then query NN model for Q values
-        current_states = np.array([transition[0] for transition in minibatch])/255
-        current_qs_list = self.model.predict(current_states)
-
-        # Get future states from minibatch, then query NN model for Q values
-        # When using target network, query it, otherwise main network should be queried
-        new_current_states = np.array([transition[3] for transition in minibatch])/255
-        future_qs_list = self.target_model.predict(new_current_states)
-
-        X = []
-        y = []
-
-        # Now we need to enumerate our batches
-        for index, (current_state, action, reward, new_current_state, done) in enumerate(minibatch):
-
-            # If not a terminal state, get new q from future states, otherwise set it to 0
-            # almost like with Q Learning, but we use just part of equation here
-            if not done:
-                max_future_q = np.max(future_qs_list[index])
-                new_q = reward + DISCOUNT * max_future_q
-            else:
-                new_q = reward
-
-            # Update Q value for given state
-            current_qs = current_qs_list[index]
-            current_qs[action] = new_q
-
-            # And append to our training data
-            X.append(current_state)
-            y.append(current_qs)
-
-        # Fit on all samples as one batch, log only on terminal state
-        self.model.fit(np.array(X)/255, np.array(y), batch_size=MINIBATCH_SIZE, verbose=0, shuffle=False, callbacks=[self.tensorboard] if terminal_state else None)
-
-        # Update target network counter every episode
-        if terminal_state:
-            self.target_update_counter += 1
-
-        # If counter reaches set value, update target network with weights of main network
-        if self.target_update_counter > UPDATE_TARGET_EVERY:
-            self.target_model.set_weights(self.model.get_weights())
-            self.target_update_counter = 0
-
-    # Queries main network for Q values given current observation space (environment state)
-    def get_qs(self, state):
-        return self.model.predict(np.array(state).reshape(-1, *state.shape))[0]
-
-
-
+class Agent:
+    def __init__(self, gamma, epsilon, lr, input_dims, batch_size, n_actions,
+                 max_mem_size=100000, eps_end=0.01, eps_dec=5e-4):
+        self.gamma=gamma
+        self.epsilon=epsilon
+        self.lr=lr
+        self.input_dims=input_dims
+        self.eps_min=eps_end
+        self.eps_dec=eps_dec
         
+        # print(self.input_dims)
+        self.batch_size=batch_size
+        self.n_actions=n_actions
+        self.action_space=[i for i in range(self.n_actions)]
+        self.mem_size=max_mem_size
+        self.batch_size=batch_size
+        self.mem_cntr=0
+        
+        
+        
+        
+        self.Q_eval=DeepQNetwork(self.lr,input_dims=self.input_dims,fc1_dims=256,fc2_dims=256,n_actions=self.n_actions)
+        self.state_memory=np.zeros((self.mem_size,*input_dims),dtype=np.float32)
+        self.new_state_memory=np.zeros((self.mem_size,*input_dims),dtype=np.float32)
+        self.action_memory=np.zeros(self.mem_size,dtype=np.int32)
+        self.reward_memory=np.zeros(self.mem_size,dtype=np.float32)
+        self.terminal_memory=np.zeros(self.mem_size,dtype=np.bool)
+        
+        
+    def store_transition(self,state,action,reward,state_,done):
+        index=self.mem_cntr%self.mem_size
+        self.state_memory[index]=state
+        self.new_state_memory[index]=state_
+        self.reward_memory[index]=reward
+        self.action_memory[index]=action
+        self.terminal_memory[index]=done
+        
+        self.mem_cntr+=1
+        
+    def choose_action(self,observation,space):    
+        if np.random.random()>self.epsilon:
+            observation=np.array(observation,dtype=np.float32)
+            state=T.tensor([observation]).to(self.Q_eval.device)
+            actions=self.Q_eval.forward(state)
+            action=T.argmax(actions).item()
+        else:
+            action=np.random.choice(space)
+            
+        return action
+    
+    def learn(self):
+        if self.mem_cntr<self.batch_size:
+            return
+        
+        self.Q_eval.optimizer.zero_grad()
+        
+        max_mem=min(self.mem_cntr,self.mem_size)
+        
+        batch=np.random.choice(max_mem,self.batch_size,replace=False)
+        
+        batch_index=np.arange(self.batch_size,dtype=np.int32)
+        
+        state_batch=T.tensor(self.state_memory[batch]).to(self.Q_eval.device)
+        new_state_batch=T.tensor(self.new_state_memory[batch]).to(self.Q_eval.device)
+        reward_batch=T.tensor(self.reward_memory[batch]).to(self.Q_eval.device)
+        terminal_batch=T.tensor(self.terminal_memory[batch]).to(self.Q_eval.device)
+        
+        action_batch=self.action_memory[batch]
+        with T.cuda.amp.autocast():
+            q_eval=self.Q_eval.forward(state_batch)[batch_index,action_batch]
+            q_next=self.Q_eval.forward(new_state_batch)
+            q_next[terminal_batch]=0.0
+            
+            q_target=reward_batch+self.gamma*T.max(q_next,dim=1)[0]
+            
+            loss=self.Q_eval.loss(q_target,q_eval).to(self.Q_eval.device)
+        loss.backward()
+        self.Q_eval.optimizer.step()
+        
+        self.epsilon=self.epsilon-self.eps_dec if self.epsilon>self.eps_min else self.eps_min
+        
+        
+        
+
     

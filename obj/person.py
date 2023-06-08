@@ -35,7 +35,7 @@ class Person:
         
         
         self.label = str(Person.CONNECTION_LABEL)
-        Person.CONNECTION_LABEL += 1
+        # Person.CONNECTION_LABEL += 1
         self.sumo = None
       
         if LIBSUMO:

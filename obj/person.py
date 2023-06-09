@@ -65,7 +65,7 @@ class Person:
         self.sumo = traci.getConnection(self.label) 
         self.ppos=self.sumo.person.getPosition(self.person_id)
         self.ppos=translate(self.ppos[0],self.min,self.max,0,100),translate(self.ppos[1],self.min,self.max,0,100)
-        print(self.ppos)
+        # print(self.ppos)
         
         return self.ppos
         

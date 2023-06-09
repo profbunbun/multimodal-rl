@@ -8,13 +8,15 @@ EPISODES=1000
 SHOW_EVERY=100
 STEPS=8000
 DISCOUNT = 0.99
-epsilon = 1.0  # not a constant, going to be decayed
-EPSILON_DECAY = 0.99975
+epsilon = 1.0  
+EPSILON_DECAY = 1000 #new decay
 MIN_EPSILON = 0.01
+LEARNING_RATE=0.0001
+BATCH_SIZE=64
 
 
 env = Basic("nets/3x3/3x3.net.xml","nets/3x3/3x3.rou.xml")
-agent = Agent(gamma=0.99, epsilon=1.0, batch_size=64, n_actions=3, eps_end=0.01, input_dims=[4], lr=0.003)
+agent = Agent(gamma=DISCOUNT, epsilon=epsilon, batch_size=BATCH_SIZE, n_actions=3, eps_end=MIN_EPSILON, input_dims=[4], lr=LEARNING_RATE,eps_dec=EPSILON_DECAY)
 scores,eps_history=[],[]
 
 count=0

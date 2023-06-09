@@ -71,15 +71,18 @@ class Vehicle:
         conn.close()
         self.sumo = traci.getConnection(self.label)     
         self.min,self.max,self.diff=getMinMax(self._net)
-        self.new_lane=random.choice(list(self.index_dict.keys()))
-        # print("Start From: " + self.new_lane)
-        
-        self.sumo.vehicle.changeTarget("1",edgeID=self.new_lane)
-        self.sumo.vehicle.moveTo("1",self.new_lane+"_0",5)
+       
         
         
         
         pass
+    
+    def random_relocate(self):
+         self.new_lane=random.choice(list(self.index_dict.keys()))
+        #  print("Start From: " + self.new_lane)       
+         self.sumo.vehicle.changeTarget("1",edgeID=self.new_lane)
+         self.sumo.vehicle.moveTo("1",self.new_lane+"_0",5)
+         return
     
     def get_start_lane(self):
         return self.new_lane
@@ -95,7 +98,7 @@ class Vehicle:
         
     def set_destination(self,action):
         self.sumo = traci.getConnection(self.label) 
-        print("Action: "+str(action))
+        # print("Action: "+str(action))
         if action==0:
             action=LEFT
         elif action == 1:
@@ -103,35 +106,35 @@ class Vehicle:
         elif action == 2:
             action==RIGHT
             
-        print("Action: "+str(action))
+        # print("Action: "+str(action))
             
         if action != None:
             self.choice=action
             self.current_lane=self.sumo.vehicle.getLaneID("1")
             self.cur_loc=self.current_lane.partition("_")[0]
-            print("Current Lane: "+self.cur_loc)
+            # print("Current Lane: "+self.cur_loc)
             if self.cur_loc in self.out_dict:
                 self.choice_dic=self.out_dict[self.cur_loc]
                 self.flag=self.choice_dic.get(action)
-                print("Flag: "+str(self.flag))
+                # print("Flag: "+str(self.flag))
             if (self.choice == RIGHT)and(RIGHT in self.choice_dic) :
                     self.flag=self.choice_dic.get(self.choice)
                     self.make_choice=False
                     self.sumo.vehicle.changeTarget("1",self.flag)
-                    print("Right")
+                    # print("Right")
                     
                     
             elif (self.choice == STRAIGHT) and(STRAIGHT in self.choice_dic):
                     self.flag=self.choice_dic.get(self.choice)
                     self.make_choice=False
                     self.sumo.vehicle.changeTarget("1",self.flag)
-                    print("Straight")
+                    # print("Straight")
                     
             elif (self.choice == LEFT)and(LEFT in self.choice_dic):
                     self.flag=self.choice_dic.get(self.choice)
                     self.make_choice=False
                     self.sumo.vehicle.changeTarget("1",self.flag)
-                    print("Left")
+                    # print("Left")
         
         
         

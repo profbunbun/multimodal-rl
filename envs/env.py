@@ -127,10 +127,11 @@ class Basic(gym.Env):
         done=False
         self.no_choice=False
         # info={}
-        self.start_lane=self.vehicle.get_start_lane()
+        # self.start_lane=self.vehicle.get_start_lane()
+        self.lane=self.sumo.vehicle.getLaneID("1")
         self.out_dict =self.vehicle.get_out_dict()  
         
-        return state, self.no_choice, self.start_lane, self.out_dict
+        return state, self.no_choice,self.lane, self.out_dict
         
         
         
@@ -161,13 +162,15 @@ class Basic(gym.Env):
         state=np.array([])
         state=np.append(state,self.vloc)
         state=np.append(state,self.ploc)
-        reward=0
+        
         done=False
         self.no_choice=False
         info={}
         if self.vedge==self.pedge:
-            reward=1
+            reward=10
             done=True
+        else:
+            reward=0
         if oldvedge==self.vedge:
             
             self.no_choice=True

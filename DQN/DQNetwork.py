@@ -11,16 +11,12 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 
-env = gym.make("CartPole-v1")
 
-is_ipython = 'inline' in matplotlib.get_backend()
-if is_ipython:
-    from IPython import display
 
-plt.ion()
+
 
 # if GPU is to be used
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     
     

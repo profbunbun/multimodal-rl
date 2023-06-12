@@ -3,6 +3,10 @@ import torch as T
 import numpy as np
 from envs.env import Basic
 from core.utils import plotLearning
+import matplotlib.pyplot as plt
+import os
+import sys
+
 
 from DQN.Agent2 import Agent2
 
@@ -17,6 +21,29 @@ EPS_END = 0.05
 EPS_DECAY = 1000
 TAU = 0.005
 LR = 1e-4
+
+episode_durations = []
+
+
+def plot_durations(show_result=False):
+    plt.figure(1)
+    durations_t = T.tensor(episode_durations, dtype=T.float)
+    if show_result:
+        plt.title('Result')
+    else:
+        plt.clf()
+        plt.title('Training...')
+    plt.xlabel('Episode')
+    plt.ylabel('Duration')
+    plt.plot(durations_t.numpy())
+    # Take 100 episode averages and plot them too
+    if len(durations_t) >= 100:
+        means = durations_t.unfold(0, 100, 1).mean(1).view(-1)
+        means = T.cat((T.zeros(99), means))
+        plt.plot(means.numpy())
+
+    plt.pause(0.001)  # pause a bit so that plots are updated
+    
 
 
 env = Basic("nets/3x3/3x3.net.xml","nets/3x3/3x3.rou.xml")
@@ -82,17 +109,22 @@ for episode in range(EPISODES):
                 
        
     if not Failed:
-        print("Starting From: "+start_lane) 
-        print("success after "+str(step) +" steps")       
-    scores.append(score)
-    eps_history.append(agent.epsilon)
-    avg_score = np.mean(scores[-100:])
-    print('episode: ', episode,'score: %.2f' % score,
-            ' average score %.2f' % avg_score,
-            'epsilon %.2f' % agent.eps_threshold)
-    x = [i+1 for i in range(len(scores))]
-    filename = 'sumo-agent.png'
-    plotLearning(x, scores, eps_history, filename)
+        plot_durations(show_result=True)
+        plt.ioff()
+        plt.show()
+        plt.savefig('sumo-agent.png')
+    #     print("Starting From: "+start_lane) 
+    #     print("success after "+str(step) +" steps")       
+    # scores.append(score)
+    # eps_history.append(epsilon)
+    # avg_score = np.mean(scores[-100:])
+    # print('episode: ', episode,'score: %.2f' % score,
+    #         ' average score %.2f' % avg_score,
+    #         'epsilon %.2f' % epsilon)
+    # x = [i+1 for i in range(len(scores))]
+    # filename = 'sumo-agent.png'
+    # plotLearning(x, scores, eps_history, filename)
+    
     
     
         

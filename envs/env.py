@@ -153,7 +153,7 @@ class Basic(gym.Env):
         
         self.done=True
         self.use_gui=False
-        self.vloc=double(self.vehicle.location())
+        self.vloc=self.vehicle.location()
         
         self.ploc=self.person.location()
         

@@ -20,7 +20,7 @@ class DQN(nn.Module):
     # Called with either one element to determine next action, or a batch
     # during optimization. Returns tensor([[left0exp,right0exp]...]).
     def forward(self, x):
-        x = x.type(T.DoubleTensor)
+       
         
         x=x.to(self.device)
         
@@ -47,14 +47,16 @@ class Agent2:
         self.n_observations = n_observations
         self.n_actions = n_actions
         self.batch_size = batch_size
-        self.eps_threshold=epsilon
+        # self.eps_threshold=epsilon
         
         
         
         
         
         self.policy_net = DQN(self.n_observations, self.n_actions).to(self.device)
+        self.policy_net=self.policy_net.double()
         self.target_net = DQN(self.n_observations, self.n_actions).to(self.device)
+        self.target_net=self.target_net.double()
         self.target_net.load_state_dict(self.policy_net.state_dict())
         self.optimizer = optim.AdamW(self.policy_net.parameters(), lr=self.learning_rate, amsgrad=True)
         self.memory = ReplayMemory(10000)
@@ -70,7 +72,7 @@ class Agent2:
 
 
     def select_action(self,state,steps_done):
-        state = state.type(T.DoubleTensor)
+        state = state
         state=state.to(self.device)
         self.steps_done=steps_done
         sample = random.random()
@@ -82,7 +84,7 @@ class Agent2:
                 # t.max(1) will return the largest column value of each row.
                 # second column on max result is index of where max element was
                 # found, so we pick action with the larger expected reward.
-                return self.policy_net(state).max(1)[1].view(1, 1)
+                return self.policy_net(state).max(0)[1].view(1, 1)
         else:
             return T.tensor([[random.randint(0,2)]], device= self.device, dtype=T.long)
         

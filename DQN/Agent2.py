@@ -79,6 +79,7 @@ class Agent2:
         self.eps_threshold = self.eps_end + (self.eps_start - self.eps_end) * \
             math.exp(-1. * self.steps_done /self.eps_decay)
         # steps_done += 1
+        print("eps_threshold",self.eps_threshold)
         if sample > self.eps_threshold:
             with T.no_grad():
                 # t.max(1) will return the largest column value of each row.

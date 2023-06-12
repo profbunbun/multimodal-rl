@@ -1,6 +1,6 @@
 import sys
 import os
-
+import torch as T
 import numpy as np
 import gymnasium as gym
 from obj.vehicle import Vehicle
@@ -52,7 +52,7 @@ class Basic(gym.Env):
       self.vehicle=None
       self.no_choice=False
       self.min,self.max,self.diff=getMinMax(self._net)
-      low=np.array([self.min,self.min])
+      low=T.Tensor([self.min,self.min])
       high=np.array([self.max,self.max])
       self.observation_space=gym.spaces.Discrete(4)
     #   self.observation_space=gym.spaces.Box(low,high, dtype=np.float32)
@@ -121,6 +121,10 @@ class Basic(gym.Env):
         state=np.array([])
         state=np.append(state,self.vloc)
         state=np.append(state,self.ploc)
+        state = T.from_numpy(state)
+        state=state.type(T.DoubleTensor)
+        
+        
         self.vedge=self.sumo.vehicle.getRoadID("1")
         self.pedge=self.sumo.person.getRoadID("p_0")
         # reward=0
@@ -149,7 +153,8 @@ class Basic(gym.Env):
         
         self.done=True
         self.use_gui=False
-        self.vloc=self.vehicle.location()
+        self.vloc=double(self.vehicle.location())
+        
         self.ploc=self.person.location()
         
         self.vehicle.set_destination(action)
@@ -162,6 +167,8 @@ class Basic(gym.Env):
         state=np.array([])
         state=np.append(state,self.vloc)
         state=np.append(state,self.ploc)
+        state = T.from_numpy(state)
+        state=state.type(T.DoubleTensor)
         
         done=False
         self.no_choice=False

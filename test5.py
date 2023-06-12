@@ -63,7 +63,7 @@ for episode in range(EPISODES):
                 space=len(out_dict[lane])
                 score+=-0.01
                 # action = agent.choose_action(state,space)
-                action=agent.select_action(state,step)
+                action,epsilon=agent.select_action(state,step,episode)
                
                 new_state, reward, done, info, no_choice ,lane= env.step(action) 
                 score += reward  

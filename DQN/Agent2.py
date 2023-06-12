@@ -72,7 +72,7 @@ class Agent2:
 
 
     def select_action(self,state,steps_done,episode):
-        state = state
+        
         state=state.to(self.device)
         self.steps_done=steps_done
         sample = random.random()

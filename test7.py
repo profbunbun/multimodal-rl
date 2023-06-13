@@ -7,14 +7,14 @@ from core.utils import plotLearning
 from DQN.Agent2 import Agent2
 
 
-EPISODES=1000
+EPISODES=10000
 SHOW_EVERY=100
 STEPS=8000
-BATCH_SIZE = 128
+BATCH_SIZE = 64
 GAMMA = 0.99
 EPS_START = 1
 EPS_END = 0.05
-EPS_DECAY = 100
+EPS_DECAY = 1000
 TAU = 0.005
 LR = 1e-4
 
@@ -23,7 +23,7 @@ env = Basic("nets/3x3/3x3.net.xml","nets/3x3/3x3.rou.xml")
 agent = Agent2(2,3,GAMMA,EPS_START,EPS_END,EPS_DECAY,TAU,LR,BATCH_SIZE)
 
 
-
+# 7180 episodes
 
 # agent = Agent(gamma=DISCOUNT, epsilon=epsilon, batch_size=BATCH_SIZE, n_actions=3, eps_end=MIN_EPSILON, input_dims=[4], lr=LEARNING_RATE,eps_dec=EPSILON_DECAY)
 scores,eps_history=[],[]

@@ -54,7 +54,7 @@ class Basic(gym.Env):
       self.min,self.max,self.diff=getMinMax(self._net)
       low=T.Tensor([self.min,self.min])
       high=np.array([self.max,self.max])
-      self.observation_space=gym.spaces.Discrete(4)
+      self.observation_space=gym.spaces.Discrete(2)
     #   self.observation_space=gym.spaces.Box(low,high, dtype=np.float32)
       self.action_space=gym.spaces.Discrete(3)
       
@@ -118,15 +118,22 @@ class Basic(gym.Env):
         # self.vehicle.set_destination()
         # self.vehicle.pickup()
         # state=np.array([self.vloc,self.ploc])
+        self.vedge=self.sumo.vehicle.getRoadID("1")
+        self.pedge=self.sumo.person.getRoadID("p_0")
+        self.vehicle_lane_index=self.index_dict[self.vedge]
+        self.person_lane_index=self.index_dict[self.pedge]
+        # print(self.vehicle_lane_index)
+        # print(self.person_lane_index)
+        
         state=np.array([])
-        state=np.append(state,self.vloc)
-        state=np.append(state,self.ploc)
+        state=np.append(state,self.vehicle_lane_index)
+        state=np.append(state,self.person_lane_index)
         state = T.from_numpy(state)
         state=state.type(T.DoubleTensor)
         
         
-        self.vedge=self.sumo.vehicle.getRoadID("1")
-        self.pedge=self.sumo.person.getRoadID("p_0")
+        
+        
         # reward=0
         done=False
         self.no_choice=False
@@ -162,11 +169,26 @@ class Basic(gym.Env):
         # print(self.sumo.vehicle.getRoute("1"))
         # self.vehicle.pickup()
         # state=np.array([self.vloc,self.ploc])
+        # self.vedge=self.sumo.vehicle.getRoadID("1")
+        # self.pedge=self.sumo.person.getRoadID("p_0")
+        # state=np.array([])
+        # state=np.append(state,self.vloc)
+        # state=np.append(state,self.ploc)
+        # state = T.from_numpy(state)
+        # state=state.type(T.DoubleTensor)
         self.vedge=self.sumo.vehicle.getRoadID("1")
         self.pedge=self.sumo.person.getRoadID("p_0")
+        if ":" not in self.vedge:
+            self.vehicle_lane_index=self.index_dict[self.vedge]
+        else:
+            self.vehicle_lane_index=self.vehicle_lane_index
+        self.person_lane_index=self.index_dict[self.pedge]
+        # print(self.vehicle_lane_index)
+        # print(self.person_lane_index)
+        
         state=np.array([])
-        state=np.append(state,self.vloc)
-        state=np.append(state,self.ploc)
+        state=np.append(state,self.vehicle_lane_index)
+        state=np.append(state,self.person_lane_index)
         state = T.from_numpy(state)
         state=state.type(T.DoubleTensor)
         

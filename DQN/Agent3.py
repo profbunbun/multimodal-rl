@@ -29,7 +29,7 @@ class DQN(nn.Module):
         return self.layer3(x)
 
 
-class Agent2:
+class Agent3:
     
     def __init__(self,n_observations,n_actions,gamma,epsilon,eps_max,eps_end, 
                  eps_decay,tau,learning_rate,batch_size) -> None:
@@ -60,6 +60,8 @@ class Agent2:
         self.target_net.load_state_dict(self.policy_net.state_dict())
         self.optimizer = optim.AdamW(self.policy_net.parameters(), lr=self.learning_rate, amsgrad=True)
         self.memory = ReplayMemory(10000)
+        self.explore=0
+        self.exploit=0
         pass
     
     
@@ -79,16 +81,19 @@ class Agent2:
         state=state.to(self.device)
         self.steps_done=steps_done
         sample = random.random()
-        self.eps_threshold = self.eps_end + (self.eps_max - self.eps_end) * \
+        self.epsilon = self.eps_end + (self.eps_max - self.eps_end) * \
             math.exp(-1. * episode/self.eps_decay)
        
      
-        if sample > self.eps_threshold:
+        if sample > self.epsilon:
             with T.no_grad():
-                
-                return self.policy_net(state).max(0)[1].view(1, 1),self.eps_threshold
+                # print("policy: "+str(self.policy_net(state)))   
+                self.exploit+=1
+                return self.policy_net(state).max(0)[1].view(1, 1),self.epsilon,self.exploit,self.explore
+            
         else:
-            return T.tensor([[random.randint(0,2)]], device= self.device, dtype=T.long),self.eps_threshold
+            self.explore+=1
+            return T.tensor([[random.randint(0,2)]], device= self.device, dtype=T.long),self.epsilon,self.exploit,self.explore
         
         
         

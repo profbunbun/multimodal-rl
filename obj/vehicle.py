@@ -98,43 +98,61 @@ class Vehicle:
         
     def set_destination(self,action):
         self.sumo = traci.getConnection(self.label) 
-        # print("Action: "+str(action))
-        if action==0:
-            action=LEFT
-        elif action == 1:
-            action =STRAIGHT
-        elif action == 2:
-            action==RIGHT
-            
-        # print("Action: "+str(action))
-            
+        self.current_lane=self.sumo.vehicle.getLaneID("1")
+        self.cur_loc=self.current_lane.partition("_")[0]
         if action != None:
-            self.choice=action
-            self.current_lane=self.sumo.vehicle.getLaneID("1")
-            self.cur_loc=self.current_lane.partition("_")[0]
-            # print("Current Lane: "+self.cur_loc)
-            if self.cur_loc in self.out_dict:
-                self.choice_dic=self.out_dict[self.cur_loc]
-                self.flag=self.choice_dic.get(action)
-                # print("Flag: "+str(self.flag))
-            if (self.choice == RIGHT)and(RIGHT in self.choice_dic) :
-                    self.flag=self.choice_dic.get(self.choice)
-                    self.make_choice=False
-                    self.sumo.vehicle.changeTarget("1",self.flag)
-                    # print("Right")
+            choice_len=len(self.out_dict[self.cur_loc])
+            if (action + 1) <= choice_len:
+                outlist=list(self.out_dict[self.cur_loc].keys())
+                outlane=list(self.out_dict[self.cur_loc].values())
+                choice_is= outlist[action-1]
+                print(outlist[action-1])
+                print(outlane[action-1])
+                
+                self.sumo.vehicle.changeTarget("1",outlane[action-1])
+                self.make_choice=False
+        
+        return
+            
+        
+        
+        # print("Action: "+str(action))
+        # if action==0:
+        #     action=LEFT
+        # elif action == 1:
+        #     action =STRAIGHT
+        # elif action == 2:
+        #     action==RIGHT
+            
+        # # print("Action: "+str(action))
+            
+        # if action != None:
+        #     self.choice=action
+            # self.current_lane=self.sumo.vehicle.getLaneID("1")
+            # self.cur_loc=self.current_lane.partition("_")[0]
+        #     # print("Current Lane: "+self.cur_loc)
+        #     if self.cur_loc in self.out_dict:
+        #         self.choice_dic=self.out_dict[self.cur_loc]
+        #         self.flag=self.choice_dic.get(action)
+        #         # print("Flag: "+str(self.flag))
+        #     if (self.choice == RIGHT)and(RIGHT in self.choice_dic) :
+        #             self.flag=self.choice_dic.get(self.choice)
+        #             self.make_choice=False
+        #             self.sumo.vehicle.changeTarget("1",self.flag)
+        #             # print("Right")
                     
                     
-            elif (self.choice == STRAIGHT) and(STRAIGHT in self.choice_dic):
-                    self.flag=self.choice_dic.get(self.choice)
-                    self.make_choice=False
-                    self.sumo.vehicle.changeTarget("1",self.flag)
-                    # print("Straight")
+        #     elif (self.choice == STRAIGHT) and(STRAIGHT in self.choice_dic):
+        #             self.flag=self.choice_dic.get(self.choice)
+        #             self.make_choice=False
+        #             self.sumo.vehicle.changeTarget("1",self.flag)
+        #             # print("Straight")
                     
-            elif (self.choice == LEFT)and(LEFT in self.choice_dic):
-                    self.flag=self.choice_dic.get(self.choice)
-                    self.make_choice=False
-                    self.sumo.vehicle.changeTarget("1",self.flag)
-                    # print("Left")
+        #     elif (self.choice == LEFT)and(LEFT in self.choice_dic):
+        #             self.flag=self.choice_dic.get(self.choice)
+        #             self.make_choice=False
+        #             self.sumo.vehicle.changeTarget("1",self.flag)
+        #             # print("Left")
         
         
         

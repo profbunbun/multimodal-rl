@@ -5,15 +5,15 @@ from envs.env import Basic
 from core.utils import plotLearning
 
 from DQN.Agent3 import Agent3
-from torch.utils.tensorboard import SummaryWriter
+
 
 EPISODES=10000
 SHOW_EVERY=100
 STEPS=8000
 BATCH_SIZE = 64
 GAMMA = 0.99
-epsilon=1
-EPS_MAX = 1
+epsilon=0.9
+EPS_MAX = 0.9
 EPS_END = 0.05
 EPS_DECAY = 1000
 TAU = 0.005
@@ -22,7 +22,6 @@ LR = 1e-4
 
 env = Basic("nets/3x3/3x3.net.xml","nets/3x3/3x3.rou.xml")
 agent = Agent3(2,3,GAMMA,epsilon,EPS_MAX,EPS_END,EPS_DECAY,TAU,LR,BATCH_SIZE)
-
 
 # 7180 episodes
 
@@ -64,7 +63,7 @@ for episode in range(EPISODES):
                 space=len(out_dict[lane])
                 score+=-0.01
                 # action = agent.choose_action(state,space)
-                action,epsilon=agent.select_action(state,step,episode)
+                action,epsilon,explore_count,exploit_count=agent.select_action(state,step,episode)
                
                 new_state, reward, done, info, no_choice ,lane= env.step(action) 
                 score += reward  
@@ -94,7 +93,7 @@ for episode in range(EPISODES):
             'epsilon %.2f' % epsilon)
     x = [i+1 for i in range(len(scores))]
     filename = 'sumo-agent.png'
-    plotLearning(x, scores, eps_history, filename)
+    plotLearning(x, scores, eps_history, filename,explore_count,exploit_count)
     
     
         

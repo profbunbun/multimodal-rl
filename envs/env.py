@@ -37,7 +37,15 @@ class Basic(gym.Env):
         steps_per_episode: int = 1000,
         ) -> None:
         self.steps_per_episode = steps_per_episode
+        self.episode_count=0
         self.episode_step = 0
+        
+        
+        
+        self.done=False
+        self.no_choice=False
+        
+        
         self.length_dict = None
         self.out_dict = None
         self.index_dict = None
@@ -45,25 +53,20 @@ class Basic(gym.Env):
         self.network = network_map_data_structures.getNetInfo(net_file)
         [self.length_dict, self.out_dict, self.index_dict, self.edge_list] = network_map_data_structures.getEdgesInfo(self.network)
         self.__current_target_xml_file__ = ""
-        self.done=False
+        
+        
         self._net = net_file
         self._route = route_file
+        
         self.use_gui =use_gui
         self.speed=None
         self.render_mode=None
-        self.episode_count=0
-        self.episode_step = 0
+        
         self.vehicle=None
-        self.no_choice=False
-        self.min,self.max,self.diff=getMinMax(self._net)
-        low=T.Tensor([self.min,self.min])
-        high=np.array([self.max,self.max])
+    
         
-        self.reward = 0
         
-        self.observation_space=gym.spaces.Discrete(3)
-        #   self.observation_space=gym.spaces.Box(low,high, dtype=np.float32)
-        self.action_space=gym.spaces.Discrete(3)
+        
         
         self.label = str(Basic.CONNECTION_LABEL)
         Basic.CONNECTION_LABEL += 1

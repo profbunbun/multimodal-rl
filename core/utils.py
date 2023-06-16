@@ -79,5 +79,5 @@ def plotLearning(x, scores, epsilons, filename,exploit_count, explore_count,line
             plt.axvline(x=line)
 
     plt.savefig(filename)
-    plt.close(filename)
+    plt.close('all')
 

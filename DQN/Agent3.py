@@ -13,9 +13,9 @@ class DQN(nn.Module):
     def __init__(self, n_observations, n_actions):
         super(DQN, self).__init__()
         self.device = T.device("cuda" if T.cuda.is_available() else "cpu")
-        self.layer1 = nn.Linear(n_observations, 128)
-        self.layer2 = nn.Linear(128, 128)
-        self.layer3 = nn.Linear(128, n_actions)
+        self.layer1 = nn.Linear(n_observations, 64)
+        self.layer2 = nn.Linear(64, 64)
+        self.layer3 = nn.Linear(64, n_actions)
 
     # Called with either one element to determine next action, or a batch
     # during optimization. Returns tensor([[left0exp,right0exp]...]).
@@ -85,7 +85,7 @@ class Agent3:
         sample = random.random()
         self.epsilon = self.eps_end + (self.eps_max - self.eps_end) * \
             math.exp(-1. * episode/self.eps_decay)
-        print("epsilon: "+str(self.epsilon)+" sample: "+str(sample)+"exploit: "+str(self.exploit)+" explore: "+str(self.explore))
+        # print("epsilon: "+str(self.epsilon)+" sample: "+str(sample)+"exploit: "+str(self.exploit)+" explore: "+str(self.explore))
         
        
      

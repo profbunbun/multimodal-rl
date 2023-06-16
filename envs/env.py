@@ -159,7 +159,7 @@ class Basic(gym.Env):
     def step(self, action):
         
         
-        self.reward+=-0.01
+        self.reward+=-0.001
         self.steps+= 1
         oldvedge=self.vedge
         
@@ -205,10 +205,10 @@ class Basic(gym.Env):
         self.no_choice=False
         info={}
         if self.vedge==self.pedge:
-            self.reward+=10
+            self.reward+=1
             done=True
         if self.steps>self.steps_per_episode:
-            self.reward+=-10
+            self.reward+=-0.5
             done=True
             
         if oldvedge==self.vedge:

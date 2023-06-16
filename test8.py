@@ -11,7 +11,7 @@ from DQN.Agent3 import Agent3
 EPISODES=10000
 SHOW_EVERY=100
 STEPS=8000
-BATCH_SIZE = 64
+BATCH_SIZE = 32
 GAMMA = 0.99
 epsilon=0.9
 EPS_MAX = 0.9
@@ -79,16 +79,14 @@ for episode in range(EPISODES):
                  step += 1
                 
        
-    if not Failed:
-        print("Starting From: "+start_lane) 
-        print("success after "+str(step) +" steps")    
+   
     score = float(score)   
     scores.append(score)
     eps_history.append(epsilon)
     avg_score = np.mean(scores[-100:])
-    print('episode: ', episode,'score: %.2f' % score,
+    print('---------episode: ', episode,'score: %.2f' % score,
             ' average score %.2f' % avg_score,
-            'epsilon %.2f' % epsilon)
+            'epsilon %.2f' % epsilon,"----- step: ",step)
     x = [i+1 for i in range(len(scores))]
     filename = 'sumo-agent.png'
     plotLearning(x, scores, eps_history, filename,explore_count,exploit_count)

@@ -10,6 +10,9 @@ from core import network_map_data_structures
 
 
 
+
+
+
 if 'SUMO_HOME' in os.environ:
     tools = os.path.join(os.environ['SUMO_HOME'], 'tools')
     sys.path.append(tools)
@@ -31,60 +34,65 @@ class Basic(gym.Env):
     def __init__(self, net_file: str,
         route_file: str,
         use_gui: bool =False,
+        steps_per_episode: int = 1000,
         ) -> None:
+        self.steps_per_episode = steps_per_episode
+        self.episode_step = 0
+        self.length_dict = None
+        self.out_dict = None
+        self.index_dict = None
+        self.edge_list = None
+        self.network = network_map_data_structures.getNetInfo(net_file)
+        [self.length_dict, self.out_dict, self.index_dict, self.edge_list] = network_map_data_structures.getEdgesInfo(self.network)
+        self.__current_target_xml_file__ = ""
+        self.done=False
+        self._net = net_file
+        self._route = route_file
+        self.use_gui =use_gui
+        self.speed=None
+        self.render_mode=None
+        self.episode_count=0
+        self.episode_step = 0
+        self.vehicle=None
+        self.no_choice=False
+        self.min,self.max,self.diff=getMinMax(self._net)
+        low=T.Tensor([self.min,self.min])
+        high=np.array([self.max,self.max])
+        
+        self.reward = 0
+        
+        self.observation_space=gym.spaces.Discrete(3)
+        #   self.observation_space=gym.spaces.Box(low,high, dtype=np.float32)
+        self.action_space=gym.spaces.Discrete(3)
+        
+        self.label = str(Basic.CONNECTION_LABEL)
+        Basic.CONNECTION_LABEL += 1
+        self.sumo = None
+        
+        if LIBSUMO:
+                traci.start(
+                    [sumolib.checkBinary("sumo"), "-n", self._net]
+                )  
+                conn = traci
+        else:
+                traci.start(
+                    [sumolib.checkBinary("sumo"), "-n", self._net],
+                    label="init_connection" + self.label,
+                )
+                conn = traci.getConnection("init_connection" + self.label)
+            
         
     
-      self.length_dict = None
-      self.out_dict = None
-      self.index_dict = None
-      self.edge_list = None
-      self.network = network_map_data_structures.getNetInfo(net_file)
-      [self.length_dict, self.out_dict, self.index_dict, self.edge_list] = network_map_data_structures.getEdgesInfo(self.network)
-      self.__current_target_xml_file__ = ""
-      self.done=False
-      self._net = net_file
-      self._route = route_file
-      self.use_gui =use_gui
-      self.speed=None
-      self.render_mode=None
-      self.episode_count=0
-      self.episode_step = 0
-      self.vehicle=None
-      self.no_choice=False
-      self.min,self.max,self.diff=getMinMax(self._net)
-      low=T.Tensor([self.min,self.min])
-      high=np.array([self.max,self.max])
-      self.observation_space=gym.spaces.Discrete(2)
-    #   self.observation_space=gym.spaces.Box(low,high, dtype=np.float32)
-      self.action_space=gym.spaces.Discrete(3)
-      
-      self.label = str(Basic.CONNECTION_LABEL)
-      Basic.CONNECTION_LABEL += 1
-      self.sumo = None
-      
-      if LIBSUMO:
-            traci.start(
-                [sumolib.checkBinary("sumo"), "-n", self._net]
-            )  
-            conn = traci
-      else:
-            traci.start(
-                [sumolib.checkBinary("sumo"), "-n", self._net],
-                label="init_connection" + self.label,
-            )
-            conn = traci.getConnection("init_connection" + self.label)
-           
-      
-   
-            
-   
-      conn.close()
+                
+    
+        conn.close()
     
    
       
     
     def reset(self):
         
+        self.reward = 0
         self.episode_step += 1
         self.done=False
         if self.use_gui or self.render_mode is not None:
@@ -114,35 +122,35 @@ class Basic(gym.Env):
         self.ploc=self.person.location()
         self.ploc=translate(self.ploc[0],self.min,self.max,0,100),translate(self.ploc[1],self.min,self.max,0,100)
         
-        self.episode_step = 0
-        # self.vehicle.set_destination()
-        # self.vehicle.pickup()
-        # state=np.array([self.vloc,self.ploc])
+        self.steps = 0
+      
         self.vedge=self.sumo.vehicle.getRoadID("1")
         self.pedge=self.sumo.person.getRoadID("p_0")
         self.vehicle_lane_index=self.index_dict[self.vedge]
         self.person_lane_index=self.index_dict[self.pedge]
-        # print(self.vehicle_lane_index)
-        # print(self.person_lane_index)
+        
         
         state=np.array([])
         state=np.append(state,self.vehicle_lane_index)
         state=np.append(state,self.person_lane_index)
+        # state=np.append(state,self.reward)
         state = T.from_numpy(state)
-        state=state.type(T.DoubleTensor)
         
         
         
         
-        # reward=0
+        
+        
         done=False
         self.no_choice=False
-        # info={}
-        # self.start_lane=self.vehicle.get_start_lane()
+       
+      
         self.lane=self.sumo.vehicle.getLaneID("1")
         self.out_dict =self.vehicle.get_out_dict()  
         
-        return state, self.no_choice,self.lane, self.out_dict
+
+        
+        return state,self.reward, self.no_choice,self.lane, self.out_dict
         
         
         
@@ -150,6 +158,9 @@ class Basic(gym.Env):
         
     def step(self, action):
         
+        
+        self.reward+=-0.01
+        self.steps+= 1
         oldvedge=self.vedge
         
         
@@ -186,28 +197,36 @@ class Basic(gym.Env):
         # print(self.vehicle_lane_index)
         # print(self.person_lane_index)
         
-        state=np.array([])
-        state=np.append(state,self.vehicle_lane_index)
-        state=np.append(state,self.person_lane_index)
-        state = T.from_numpy(state)
-        state=state.type(T.DoubleTensor)
+       
+        # state=state.type(T.DoubleTensor)
+        
         
         done=False
         self.no_choice=False
         info={}
         if self.vedge==self.pedge:
-            reward=10
+            self.reward+=10
             done=True
-        else:
-            reward=0
+        if self.steps>self.steps_per_episode:
+            self.reward+=-10
+            done=True
+            
         if oldvedge==self.vedge:
             
             self.no_choice=True
             
         if ":" in self.lane:
             self.no_choice=True
-            
-          
+        
+        state=np.array([])
+        state=np.append(state,self.vehicle_lane_index)
+        state=np.append(state,self.person_lane_index)
+        # state=np.append(state,self.reward)
+        state = T.from_numpy(state)
+        reward=np.array([])
+        reward=np.append(reward,self.reward)    
+        reward=T.from_numpy(reward)
+        
         return state,reward,done,info,self.no_choice,self.lane
     
     

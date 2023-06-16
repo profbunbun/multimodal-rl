@@ -106,8 +106,8 @@ class Vehicle:
                 outlist=list(self.out_dict[self.cur_loc].keys())
                 outlane=list(self.out_dict[self.cur_loc].values())
                 choice_is= outlist[action-1]
-                print(outlist[action-1])
-                print(outlane[action-1])
+                # print(outlist[action-1])
+                # print(outlane[action-1])
                 
                 self.sumo.vehicle.changeTarget("1",outlane[action-1])
                 self.make_choice=False

@@ -7,15 +7,17 @@ import numpy as np
 from DQN.ReplayMemory import ReplayMemory, Transition
 import math 
 import random
-
+random.seed(0)
 class DQN(nn.Module):
 
     def __init__(self, n_observations, n_actions):
         super(DQN, self).__init__()
         self.device = T.device("cuda" if T.cuda.is_available() else "cpu")
-        self.layer1 = nn.Linear(n_observations, 64)
-        self.layer2 = nn.Linear(64, 64)
-        self.layer3 = nn.Linear(64, n_actions)
+        self.layer1 = nn.Linear(n_observations, 128)
+        self.layer2 = nn.Linear(128, 256)
+        self.layer3 = nn.Linear(256, 128)
+        self.layer4 = nn.Linear(128, 64)
+        self.layer5 = nn.Linear(64, n_actions)
 
     # Called with either one element to determine next action, or a batch
     # during optimization. Returns tensor([[left0exp,right0exp]...]).
@@ -26,10 +28,12 @@ class DQN(nn.Module):
         # x.reshape([2,64])
         x = F.relu(self.layer1(x))
         x = F.relu(self.layer2(x))
-        return self.layer3(x)
+        x = F.relu(self.layer3(x))
+        x=F.hardtanh(self.layer4(x))
+        return self.layer5(x)
 
 
-class Agent3:
+class Agent4:
     
     def __init__(self,n_observations,n_actions,gamma,epsilon,eps_max,eps_end, 
                  eps_decay,tau,learning_rate,batch_size) -> None:
@@ -51,15 +55,17 @@ class Agent3:
         self.epsilon=epsilon
         
         
-        
+        self.loss_avg=[]
         
         
         self.policy_net = DQN(self.n_observations, self.n_actions).to(self.device)
+      
         self.policy_net=self.policy_net.double()
         self.target_net = DQN(self.n_observations, self.n_actions).to(self.device)
+      
         self.target_net=self.target_net.double()
         self.target_net.load_state_dict(self.policy_net.state_dict())
-        self.optimizer = optim.AdamW(self.policy_net.parameters(), lr=self.learning_rate, amsgrad=True)
+        self.optimizer = optim.Adam(self.policy_net.parameters(), lr=self.learning_rate, amsgrad=True)
         self.memory = ReplayMemory(10000)
         self.explore=0
         self.exploit=0
@@ -105,7 +111,8 @@ class Agent3:
         
         
         
-        
+    
+    
     def optimize_model(self):
         if len(self.memory) < self.batch_size:
             return
@@ -144,13 +151,21 @@ class Agent3:
         # Compute Huber loss
         criterion = nn.SmoothL1Loss()
         loss = criterion(state_action_values, expected_state_action_values.unsqueeze(1))
-
+        # print("xxxxxxxxxxxxxxxxxxx loss: "+str(loss)+"xxxxxxxxx")
         # Optimize the model
         self.optimizer.zero_grad()
         loss.backward()
-        # In-place gradient clipping
-        T.nn.utils.clip_grad_value_(self.policy_net.parameters(), 100)
+        
+        
+        self.loss_avg=[]
+        self.loss_avg.append(loss.item())
+        self.loss_avg=np.mean(self.loss_avg)
+        # T.nn.utils.clip_grad_value_(self.policy_net.parameters(), 100)
         self.optimizer.step()
+        
+    def get_loss(self):
+        avg_loss = self.loss_avg
+        return avg_loss
     
 
 

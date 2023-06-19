@@ -28,13 +28,13 @@ LIBSUMO = "LIBSUMO_AS_TRACI" in os.environ
 
 
 
-class Basic(gym.Env):
+class Basic(gym.Env,):
     metadata = {'render.modes': ['human']}
     CONNECTION_LABEL = 0 
     def __init__(self, net_file: str,
         route_file: str,
         use_gui: bool =False,
-        steps_per_episode: int = 1000,
+        steps_per_episode: int = 8000,
         ) -> None:
         self.steps_per_episode = steps_per_episode
         self.episode_count=0
@@ -63,10 +63,6 @@ class Basic(gym.Env):
         self.render_mode=None
         
         self.vehicle=None
-    
-        
-        
-        
         
         self.label = str(Basic.CONNECTION_LABEL)
         Basic.CONNECTION_LABEL += 1
@@ -83,11 +79,6 @@ class Basic(gym.Env):
                     label="init_connection" + self.label,
                 )
                 conn = traci.getConnection("init_connection" + self.label)
-            
-        
-    
-                
-    
         conn.close()
     
    
@@ -106,7 +97,7 @@ class Basic(gym.Env):
     
         sumo_cmd = [
             self._sumo_binary,
-            "-d "+str(speed),
+            "-d "+"20",
             "-c",
              "nets/3x3/3x3.sumocfg","--start", "--quit-on-end","--no-step-log","--no-warnings","--no-duration-log",]
         if LIBSUMO:
@@ -117,18 +108,16 @@ class Basic(gym.Env):
             self.sumo = traci.getConnection(self.label)
         
         self.sumo.simulationStep()
+        self.steps = 0
+        # print (self.index_dict)
+        
         self.vehicle=Vehicle("1",self._net,self._route,self.out_dict, self.index_dict)
         self.person=Person("p_0",self._net,self._route)
-        self.vloc=self.vehicle.location()
-        self.vloc=translate(self.vloc[0],self.min,self.max,0,100),translate(self.vloc[1],self.min,self.max,0,100)
         
-        self.ploc=self.person.location()
-        self.ploc=translate(self.ploc[0],self.min,self.max,0,100),translate(self.ploc[1],self.min,self.max,0,100)
-        
-        self.steps = 0
       
         self.vedge=self.sumo.vehicle.getRoadID("1")
         self.pedge=self.sumo.person.getRoadID("p_0")
+        
         self.vehicle_lane_index=self.index_dict[self.vedge]
         self.person_lane_index=self.index_dict[self.pedge]
         
@@ -136,15 +125,9 @@ class Basic(gym.Env):
         state=np.array([])
         state=np.append(state,self.vehicle_lane_index)
         state=np.append(state,self.person_lane_index)
-        # state=np.append(state,self.reward)
         state = T.from_numpy(state)
         
-        
-        
-        
-        
-        
-        done=False
+        self.done=False
         self.no_choice=False
        
       
@@ -160,14 +143,10 @@ class Basic(gym.Env):
         
         
     def step(self, action):
-        
-        
         self.reward+=-0.001
         self.steps+= 1
         oldvedge=self.vedge
         
-        
-       
         self.sumo.simulationStep()
         self.vedge=self.sumo.vehicle.getRoadID("1")
         self.lane=self.sumo.vehicle.getLaneID("1")
@@ -180,38 +159,27 @@ class Basic(gym.Env):
         
         self.vehicle.set_destination(action)
         
-        # print(self.sumo.vehicle.getRoute("1"))
-        # self.vehicle.pickup()
-        # state=np.array([self.vloc,self.ploc])
-        # self.vedge=self.sumo.vehicle.getRoadID("1")
-        # self.pedge=self.sumo.person.getRoadID("p_0")
-        # state=np.array([])
-        # state=np.append(state,self.vloc)
-        # state=np.append(state,self.ploc)
-        # state = T.from_numpy(state)
-        # state=state.type(T.DoubleTensor)
+  
         self.vedge=self.sumo.vehicle.getRoadID("1")
         self.pedge=self.sumo.person.getRoadID("p_0")
+        
         if ":" not in self.vedge:
             self.vehicle_lane_index=self.index_dict[self.vedge]
         else:
             self.vehicle_lane_index=self.vehicle_lane_index
+            
         self.person_lane_index=self.index_dict[self.pedge]
-        # print(self.vehicle_lane_index)
-        # print(self.person_lane_index)
-        
        
-        # state=state.type(T.DoubleTensor)
-        
         
         done=False
         self.no_choice=False
         info={}
+        
         if self.vedge==self.pedge:
-            self.reward+=1
+            self.reward+=2.5
             done=True
         if self.steps>self.steps_per_episode:
-            self.reward+=-0.5
+            self.reward+=-1
             done=True
             
         if oldvedge==self.vedge:

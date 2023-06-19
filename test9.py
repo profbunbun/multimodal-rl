@@ -5,24 +5,24 @@ from envs.env import Basic
 
 from core.utils import plotLearning
 
-from DQN.Agent3 import Agent3
+from DQN.Agent4 import Agent4
 
 
-EPISODES=10000
+EPISODES=5000
 SHOW_EVERY=100
-STEPS=8000
-BATCH_SIZE = 32
-GAMMA = 0.99
-epsilon=0.9
-EPS_MAX = 0.9
-EPS_END = 0.05
-EPS_DECAY = 1000
+STEPS=5000
+BATCH_SIZE = 64
+GAMMA = 0.9997
+epsilon=0.999
+EPS_MAX = 0.999
+EPS_END = 0.1
+EPS_DECAY = 500 
 TAU = 0.005
-LR = 1e-4
+LR = 1e-3
 
 
 env = Basic("nets/3x3/3x3.net.xml","nets/3x3/3x3.rou.xml",STEPS)
-agent = Agent3(2,3,GAMMA,epsilon,EPS_MAX,EPS_END,EPS_DECAY,TAU,LR,BATCH_SIZE)
+agent = Agent4(2,3,GAMMA,epsilon,EPS_MAX,EPS_END,EPS_DECAY,TAU,LR,BATCH_SIZE)
 
 scores,eps_history=[],[]
 
@@ -34,8 +34,8 @@ for episode in range(EPISODES):
     
     done=False
     count+=1
-    if episode % SHOW_EVERY==0:
-        env.render()
+    # if episode % SHOW_EVERY==0:
+    #     env.render()
     state ,reward,no_choice,lane, out_dict= env.reset()
     agent.exploit_count=0
     agent.explore_count=0
@@ -84,9 +84,11 @@ for episode in range(EPISODES):
     scores.append(score)
     eps_history.append(epsilon)
     avg_score = np.mean(scores[-100:])
+  
+    
     print('---------episode: ', episode,'score: %.2f' % score,
             ' average score %.2f' % avg_score,
-            'epsilon %.2f' % epsilon,"----- step: ",step)
+            'epsilon %.2f' % epsilon," **** step: ",step)
     x = [i+1 for i in range(len(scores))]
     filename = 'sumo-agent.png'
     plotLearning(x, scores, eps_history, filename,explore_count,exploit_count)

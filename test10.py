@@ -8,7 +8,7 @@ from core.utils import plotLearning
 from DQN.Agent5 import Agent5
 
 
-EPISODES=1000
+EPISODES=10000
 SHOW_EVERY=100
 STEPS=5000
 BATCH_SIZE = 64

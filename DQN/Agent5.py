@@ -91,7 +91,9 @@ class Agent5:
         sample = random.random()
         # self.epsilon = self.eps_end + (self.eps_max - self.eps_end) * \
         #     math.exp(-1. * episode/self.eps_decay)
-        self.epsilon= self.epsilon+ -2**(10*episode-10000)
+        # if self.epsilon <.1:
+        #     self.epsilon=.99
+        self.epsilon= .99-1.01**(10*episode-100000)
         # print("epsilon: "+str(self.epsilon)+" sample: "+str(sample)+"exploit: "+str(self.exploit)+" explore: "+str(self.explore))
         
        

@@ -97,7 +97,7 @@ class Basic(gym.Env,):
     
         sumo_cmd = [
             self._sumo_binary,
-            "-d "+"20",
+            "-d "+"50",
             "-c",
              "nets/3x3/3x3.sumocfg","--start", "--quit-on-end","--no-step-log","--no-warnings","--no-duration-log",]
         if LIBSUMO:

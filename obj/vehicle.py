@@ -1,5 +1,6 @@
 import os
 import sys
+import numpy as np
 from core.util import getMinMax
 if 'SUMO_HOME' in os.environ:
     tools = os.path.join(os.environ['SUMO_HOME'], 'tools')
@@ -105,11 +106,16 @@ class Vehicle:
             if (action + 1) <= choice_len:
                 outlist=list(self.out_dict[self.cur_loc].keys())
                 outlane=list(self.out_dict[self.cur_loc].values())
+                outlist=np.array(outlist)
+                outlane=np.array(outlane)
                 choice_is= outlist[action-1]
-                # print(outlist[action-1])
+                # print(choice_is)
                 # print(outlane[action-1])
-                
-                self.sumo.vehicle.changeTarget("1",outlane[action-1])
+                target = outlane[action-1]
+                # print(target[0][0])
+                target = target[0][0]
+                # self.sumo.vehicle.changeTarget("1",outlane[action-1])
+                self.sumo.vehicle.changeTarget("1",target)
                 self.make_choice=False
         
         return

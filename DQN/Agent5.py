@@ -1,4 +1,5 @@
 import torch as T
+
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
@@ -83,17 +84,23 @@ class Agent5:
 
 
 
-    def select_action(self,state,steps_done,episode):
+    def select_action(self,state,steps_done,episode,ep_max):
         
-        state=state.to(self.device)
+        # state=state.to(self.device)
         # print("state: "+str(state.shape))
         self.steps_done=steps_done
         sample = random.random()
-        # self.epsilon = self.eps_end + (self.eps_max - self.eps_end) * \
-        #     math.exp(-1. * episode/self.eps_decay)
-        # if self.epsilon <.1:
-        #     self.epsilon=.99
-        self.epsilon= .99-1.01**(10*episode-100000)
+        if (episode >= (9/10 * ep_max) )or (self.epsilon <=2/10 * self.eps_max):
+            #  self.epsilon = self.eps_end + (self.new_eps_max - self.eps_end) * \
+            # math.exp(-1. * episode/self.eps_decay)
+             self.epsilon = self.new_eps_max**self.eps_decay
+          
+        else:
+            self.epsilon= self.eps_max-1.01**(10*episode-((9/10 * ep_max)*10))
+            self.new_eps_max=.20 * self.eps_max
+       
+        
+        
         # print("epsilon: "+str(self.epsilon)+" sample: "+str(sample)+"exploit: "+str(self.exploit)+" explore: "+str(self.explore))
         
        
@@ -144,7 +151,7 @@ class Agent5:
         state_batch_reshaped=state_batch.reshape([self.batch_size,self.n_observations])
         state_batch=state_batch_reshaped
         action_int=action_batch.type(T.int64)
-        action_int=action_int.unsqueeze(0)
+        action_int=action_int.unsqueeze(1)
         # action_int=action_int.permute(64,1)
         # 
         # 

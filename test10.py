@@ -8,13 +8,13 @@ from core.utils import plotLearning
 from DQN.Agent5 import Agent5
 
 
-EPISODES=10000
+EPISODES=5000
 SHOW_EVERY=100
 STEPS=5000
 BATCH_SIZE = 64
 GAMMA = 0.9997
-epsilon=0.999
-EPS_MAX = 0.999
+epsilon=0.98
+EPS_MAX = 0.98
 EPS_END = 0.1
 EPS_DECAY = 500 
 TAU = 0.005
@@ -57,7 +57,7 @@ for episode in range(EPISODES):
              if not no_choice and  lane in out_dict.keys(): 
                 
                 # action = agent.choose_action(state,space)
-                action,epsilon,explore_count,exploit_count=agent.select_action(state,step,episode)
+                action,epsilon,explore_count,exploit_count=agent.select_action(state,step,episode,EPISODES)
                 previous_action=action.detach().cpu().numpy()
                 action=action.detach().cpu().numpy()
                 new_state,reward, done, info, no_choice ,lane= env.step(action) 

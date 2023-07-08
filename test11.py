@@ -8,7 +8,7 @@ from Util.utils import plotLearning
 from Agent.Agent5 import Agent5
 
 
-EPISODES=5000
+EPISODES=1000
 SHOW_EVERY=100
 STEPS=5000
 BATCH_SIZE = 64

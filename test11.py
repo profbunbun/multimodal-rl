@@ -1,11 +1,11 @@
 import gymnasium as gym
 import torch as T
 import numpy as np
-from envs.env import Basic
+from Env.env import Basic
 
-from core.utils import plotLearning
+from Util.utils import plotLearning
 
-from DQN.Agent5 import Agent5
+from Agent.Agent5 import Agent5
 
 
 EPISODES=5000
@@ -21,7 +21,7 @@ TAU = 0.005
 LR = 1e-3
 
 
-env = Basic("nets/3x3/3x3.net.xml","nets/3x3/3x3.rou.xml",STEPS)
+env = Basic("Nets/3x3.net.xml","Nets/S3x3.rou.xml",STEPS)
 agent = Agent5(4,3,GAMMA,epsilon,EPS_MAX,EPS_END,EPS_DECAY,TAU,LR,BATCH_SIZE)
 
 scores,eps_history=[],[]
@@ -37,6 +37,7 @@ for episode in range(EPISODES):
     # if episode % SHOW_EVERY==0:
     #     env.render()
     state ,reward,no_choice,lane, out_dict= env.reset()
+    print(state,reward)
     previous_action=0
     agent.exploit_count=0
     agent.explore_count=0
@@ -99,7 +100,7 @@ for episode in range(EPISODES):
             ' average score %.2f' % avg_score,
             'epsilon %.2f' % epsilon," **** step: ",step)
     x = [i+1 for i in range(len(scores))]
-    filename = 'sumo-agent.png'
+    filename = 'Graphs/sumo-agent.png'
     plotLearning(x, scores, eps_history, filename,explore_count,exploit_count)
     
     

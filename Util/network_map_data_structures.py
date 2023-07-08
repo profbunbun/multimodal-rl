@@ -81,4 +81,4 @@ def getEdgesInfo(net):
                 dir_now = conn.getDirection()
                 out_dict[current_edge_id][dir_now] = current_out_edge.getID()
 
-    return [length_dict, out_dict, index_dict, edge_list]
+    return [ out_dict, index_dict, edge_list]

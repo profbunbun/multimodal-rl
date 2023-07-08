@@ -1,6 +1,6 @@
 import os
 import sys
-from core.util import getMinMax
+from Util.util import getMinMax
 if 'SUMO_HOME' in os.environ:
     tools = os.path.join(os.environ['SUMO_HOME'], 'tools')
     sys.path.append(tools)
@@ -11,14 +11,9 @@ from sumolib import net
 import traci
 LIBSUMO = "LIBSUMO_AS_TRACI" in os.environ
 def translate(value, leftMin, leftMax, rightMin, rightMax):
-    # Figure out how 'wide' each range is
         leftSpan = leftMax - leftMin
         rightSpan = rightMax - rightMin
-
-    # Convert the left range into a 0-1 range (float)
         valueScaled = float(value - leftMin) / float(leftSpan)
-
-    # Convert the 0-1 range into a value in the right range.
         return int(round((rightMin + (valueScaled * rightSpan)),0))
     
 class Person:
@@ -32,10 +27,7 @@ class Person:
         self.min=0
         self.max=0
         self.diff=0
-        
-        
         self.label = str(Person.CONNECTION_LABEL)
-        # Person.CONNECTION_LABEL += 1
         self.sumo = None
       
         if LIBSUMO:
@@ -64,7 +56,7 @@ class Person:
     def location(self):
         self.sumo = traci.getConnection(self.label) 
         self.ppos=self.sumo.person.getPosition(self.person_id)
-        self.ppos=translate(self.ppos[0],self.min,self.max,0,100),translate(self.ppos[1],self.min,self.max,0,100)
+        # self.ppos=translate(self.ppos[0],self.min,self.max,0,100),translate(self.ppos[1],self.min,self.max,0,100)
         # print(self.ppos)
         
         return self.ppos

@@ -74,9 +74,9 @@ def plotLearning(x, scores, epsilons, filename,exploit_count, explore_count,line
     
     
 
-    if lines is not None:
-        for line in lines:
-            plt.axvline(x=line)
+    # if lines is not None:
+    #     for line in lines:
+    #         plt.axvline(x=line)
 
     plt.savefig(filename)
     plt.close('all')

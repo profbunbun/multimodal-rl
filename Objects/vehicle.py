@@ -85,22 +85,22 @@ class Vehicle:
         self.sumo = traci.getConnection(self.label) 
         self.current_lane=self.sumo.vehicle.getLaneID("1")
         self.cur_loc=self.current_lane.partition("_")[0]
-        if action != None:
-            choice_len=len(self.out_dict[self.cur_loc])
-            if (action + 1) <= choice_len:
-                outlist=list(self.out_dict[self.cur_loc].keys())
-                outlane=list(self.out_dict[self.cur_loc].values())
-                outlist=np.array(outlist)
-                outlane=np.array(outlane)
-                choice_is= outlist[action-1]
-                # print(choice_is)
-                # print(outlane[action-1])
-                target = outlane[action-1]
-                # print(target[0][0])
-                target = target[0][0]
-                # self.sumo.vehicle.changeTarget("1",outlane[action-1])
-                self.sumo.vehicle.changeTarget("1",target)
-                self.make_choice=False
+        
+        choice_len=len(self.out_dict[self.cur_loc])
+        if (action + 1) <= choice_len:
+            outlist=list(self.out_dict[self.cur_loc].keys())
+            outlane=list(self.out_dict[self.cur_loc].values())
+            outlist=np.array(outlist)
+            outlane=np.array(outlane)
+            choice_is= outlist[action-1]
+            # print(choice_is)
+            # print(outlane[action-1])
+            target = outlane[action-1]
+            # print(target[0][0])
+            target = target[0][0]
+            # self.sumo.vehicle.changeTarget("1",outlane[action-1])
+            self.sumo.vehicle.changeTarget("1",target)
+            self.make_choice=False
         
         return
     pass

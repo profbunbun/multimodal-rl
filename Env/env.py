@@ -147,144 +147,66 @@ class Basic():
         
     def step(self, action):
         self.old_distance=self.new_distance
-        
-        if action != None:
-            
-            # print(action)
-            self.reward+=-0.005
-            self.steps+= 1
-            oldvedge=self.vedge
-            self.action=action
-            # print(self.action)
-            self.sumo.simulationStep()
-            self.vedge=self.sumo.vehicle.getRoadID("1")
-            self.lane=self.sumo.vehicle.getLaneID("1")
-            
-            self.done=True
-            self.use_gui=False
-            self.vloc=self.vehicle.location()
-            self.ploc=self.person.location()
-            self.new_distance= (math.dist(self.vloc,self.ploc))
-            if self.new_distance > self.old_distance:
+        self.reward+=-0.005
+        self.steps+= 1
+        oldvedge=self.vedge
+        self.action=action
+        self.sumo.simulationStep()
+        self.vedge=self.sumo.vehicle.getRoadID("1")
+        self.lane=self.sumo.vehicle.getLaneID("1")
+        self.done=True
+        self.use_gui=False
+        self.vloc=self.vehicle.location()
+        self.ploc=self.person.location()
+        self.new_distance= (math.dist(self.vloc,self.ploc))
+        if self.new_distance > self.old_distance:
                 self.reward+=-.05
-            if self.new_distance < self.old_distance:
+        if self.new_distance < self.old_distance:
                 self.reward+=-.01
-            self.vehicle.set_destination(action)
+        self.vehicle.set_destination(action)
+        self.vedge=self.sumo.vehicle.getRoadID("1")
+        self.pedge=self.sumo.person.getRoadID("p_0")
             
-            
-    
-            self.vedge=self.sumo.vehicle.getRoadID("1")
-            self.pedge=self.sumo.person.getRoadID("p_0")
-            
-            if ":" not in self.vedge:
+        if ":" not in self.vedge:
                 self.vehicle_lane_index=self.index_dict[self.vedge]
-            else:
+        else:
                 self.vehicle_lane_index=self.vehicle_lane_index
                 
-            self.person_lane_index=self.index_dict[self.pedge]
+        self.person_lane_index=self.index_dict[self.pedge]
         
             
-            done=False
-            self.no_choice=False
-            info={}
+        done=False
+    
+       
             
-            if self.vedge==self.pedge:
+        if self.vedge==self.pedge:
                 self.reward+=2.5
                 done=True
-            if self.steps>self.steps_per_episode:
+        if self.steps>self.steps_per_episode:
                 self.reward+=-2
                 done=True
                 
-            if oldvedge==self.vedge:
-                
-                self.no_choice=True
-                
-            if ":" in self.lane:
-                self.no_choice=True
-            
-            state=np.array([])
-            state=np.append(state,self.vehicle_lane_index)
-            state=np.append(state,self.person_lane_index)
-            state=np.append(state,self.steps)
-            state=np.append(state,self.new_distance)
-            state = T.from_numpy(state)
-            reward=np.array([])
-            reward=np.append(reward,self.reward)    
-            reward=T.from_numpy(reward)
-        else:
-            # print(action)
-            self.reward+=-0.005
-            self.steps+= 1
-            oldvedge=self.vedge
-            self.action=-1
-            # print(self.action)
-            self.sumo.simulationStep()
-            self.vedge=self.sumo.vehicle.getRoadID("1")
-            self.lane=self.sumo.vehicle.getLaneID("1")
-            
-            self.done=True
-            self.use_gui=False
-            self.vloc=self.vehicle.location()
-            
-            self.ploc=self.person.location()
-            
-            # self.vehicle.set_destination(action)
-            
-            
-    
-            self.vedge=self.sumo.vehicle.getRoadID("1")
-            self.pedge=self.sumo.person.getRoadID("p_0")
-            
-            if ":" not in self.vedge:
-                self.vehicle_lane_index=self.index_dict[self.vedge]
-            else:
-                self.vehicle_lane_index=self.vehicle_lane_index
-                
-            self.person_lane_index=self.index_dict[self.pedge]
         
             
-            done=False
-            self.no_choice=False
-            info={}
-            
-            if self.vedge==self.pedge:
-                self.reward+=3
-                done=True
-            if self.steps>self.steps_per_episode:
-                self.reward+=-1
-                done=True
-                
-            if oldvedge==self.vedge:
-                
-                self.no_choice=True
-                
-            if ":" in self.lane:
-                self.no_choice=True
-            
-            state=np.array([])
-            state=np.append(state,self.vehicle_lane_index)
-            state=np.append(state,self.person_lane_index)
-            state=np.append(state,self.steps)
-            state=np.append(state,self.reward)
-            state = T.from_numpy(state)
-            reward=np.array([])
-            reward=np.append(reward,self.reward)    
-            reward=T.from_numpy(reward)
-        
-        return state,reward,done,info,self.no_choice,self.lane
-    
+        state=np.array([])
+        state=np.append(state,self.vehicle_lane_index)
+        state=np.append(state,self.person_lane_index)
+        state=np.append(state,self.steps)
+        state=np.append(state,self.new_distance)
+        state = T.from_numpy(state)
+        reward=np.array([])
+        reward=np.append(reward,self.reward)    
+        reward=T.from_numpy(reward)
+        return state,reward,done
     
     
     def render(self, mode='human'):
         self.speed = 5
         self.use_gui=True
-        # print('render')
         return
     
     def close(self):
         self.sumo.close()
-        
-        # print('close')
         return
 
 

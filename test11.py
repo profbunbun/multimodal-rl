@@ -5,106 +5,26 @@ from Env.env import Basic
 
 from Util.utils import plotLearning
 
-from Agent.Agent5 import Agent5
+from Agent.agent6 import Agent6
 
 
 EPISODES=100
-SHOW_EVERY=100
 STEPS=5000
-BATCH_SIZE = 64
-GAMMA = 0.9997
-epsilon=0.98
-EPS_MAX = 0.98
-EPS_END = 0.1
-EPS_DECAY = 500 
-TAU = 0.005
-LR = 1e-3
-
-
+batch_size=32
 env = Basic("Nets/3x3.net.xml","Nets/S3x3.rou.xml",STEPS)
-agent = Agent5(4,3,GAMMA,epsilon,EPS_MAX,EPS_END,EPS_DECAY,TAU,LR,BATCH_SIZE)
+agent = Agent6(4,3)
 
-scores,eps_history=[],[]
-
-count=0
-Failed=False
 for episode in range(EPISODES):
-    score=0
-    episode_reward = 0
-    
     done=False
-    count+=1
-    # if episode % SHOW_EVERY==0:
-    #     env.render()
     state ,reward,no_choice,lane, out_dict= env.reset()
-    print(state,reward)
-    previous_action=0
-    agent.exploit_count=0
-    agent.explore_count=0
-    
-    start_lane=lane
-    step=0
-    
-    
-    
     
     while not done:
-         
-            
              
-        
-             Failed = False
-             lane=lane.partition('_')[0]
-             if not no_choice and  lane in out_dict.keys(): 
-                
-                # action = agent.choose_action(state,space)
-                action,epsilon,explore_count,exploit_count=agent.select_action(state,step,episode,EPISODES)
-                previous_action=action.detach().cpu().numpy()
-                action=action.detach().cpu().numpy()
-                new_state,reward, done, info, no_choice ,lane= env.step(action) 
-                # reward=new_state[2]
-                # print(reward)
-                score = reward
-                state = new_state
-                # print(action)
-                action=action[0][0]
-                this_action=np.array([])
-                this_action=np.append(this_action,action)
-                this_action=T.from_numpy(this_action)
-                
-                agent.memory.push(state, this_action,  new_state,reward)
-                agent.optimize_model()
-                # print(state)
-                step += 1
-                
-             else:
-                 
-                 action = None
-                #  action=action.detach().cpu().numpy()
-                 new_state,reward, done, info, no_choice ,lane= env.step(action)    
-                #  reward=new_state[2]
-                #  print(reward) 
-                 score = reward
-                 state = new_state
-                 step += 1
-                
-       
-   
-    score = float(score)   
-    scores.append(score)
-    eps_history.append(epsilon)
-    avg_score = np.mean(scores[-100:])
-  
-    
-    print('---------episode: ', episode,'score: %.2f' % score,
-            ' average score %.2f' % avg_score,
-            'epsilon %.2f' % epsilon," **** step: ",step)
-    x = [i+1 for i in range(len(scores))]
-    filename = 'Graphs/sumo-agent.png'
-    plotLearning(x, scores, eps_history, filename,explore_count,exploit_count)
-    
-    
-        
-        
-        
+             action=agent.act(state)
+             next_state,reward, done = env.step(action) 
+             agent.remember(state,action,reward,next_state,done)
+             
+    if len(agent.memory)> batch_size:
+                 agent.replay(batch_size)
+                  
     env.close()

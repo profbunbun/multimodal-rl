@@ -2,11 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import gymnasium as gym 
 
-def plotLearning(x, scores, epsilons, filename,exploit_count, explore_count,lines=None):
-    count_labels=["exploit","explore"]  
-    counts=[exploit_count,explore_count]
-  
- 
+def plotLearning(x, scores, epsilons, filename,lines=None):
+    
     N = len(scores)
     running_avg = np.empty(N)
     for t in range(N):

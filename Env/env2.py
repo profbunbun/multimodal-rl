@@ -92,7 +92,7 @@ class Basic():
     
         sumo_cmd = [
             self._sumo_binary,
-            # "-d "+"5",
+            "-d "+"5",
             "-c",
              "Nets/3x3.sumocfg","--start", "--quit-on-end","--no-step-log","--no-warnings","--no-duration-log",]
         if LIBSUMO:
@@ -147,13 +147,16 @@ class Basic():
         
     def step(self, action=None):
         self.old_distance=self.new_distance
+        # move to only when action is chosen
         self.reward+=-0.01
+        
         self.steps+= 1
         self.action=action
         self.old_edge=self.vedge
         self.sumo.simulationStep()
         self.vedge=self.sumo.vehicle.getRoadID("1")
         self.no_choice=False
+       
         if self.old_edge == self.vedge:
             self.no_choice=True
             
@@ -167,6 +170,7 @@ class Basic():
         if self.new_distance > self.old_distance:
                 self.reward+=-.05
         if self.new_distance < self.old_distance:
+            # increase reward --.5 .85?
                 self.reward+=.01
                 
         if not self.no_choice:

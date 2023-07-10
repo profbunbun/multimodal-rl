@@ -126,9 +126,10 @@ class Basic():
         state=np.array([])
         state=np.append(state,self.vehicle_lane_index)
         state=np.append(state,self.person_lane_index)
-        # state=np.append(state,self.action)
+        state=np.append(state,self.steps)
         state=np.append(state,self.new_distance)
         state = T.from_numpy(state)
+        state=state.double()
         
         self.done=False
         self.no_choice=False
@@ -149,21 +150,30 @@ class Basic():
         self.old_distance=self.new_distance
         self.reward+=-0.005
         self.steps+= 1
-        oldvedge=self.vedge
         self.action=action
+        self.old_edge=self.vedge
         self.sumo.simulationStep()
         self.vedge=self.sumo.vehicle.getRoadID("1")
+        
+        if self.old_edge == self.vedge:
+            self.no_choice=True
+            
         self.lane=self.sumo.vehicle.getLaneID("1")
         self.done=True
         self.use_gui=False
         self.vloc=self.vehicle.location()
         self.ploc=self.person.location()
         self.new_distance= (math.dist(self.vloc,self.ploc))
+        
         if self.new_distance > self.old_distance:
                 self.reward+=-.05
         if self.new_distance < self.old_distance:
                 self.reward+=-.01
-        self.vehicle.set_destination(action)
+                
+        if not self.no_choice:
+            self.vehicle.set_destination(np.max(action))
+        if self.no_choice and action !=-1:
+            self.reward+=-.02
         self.vedge=self.sumo.vehicle.getRoadID("1")
         self.pedge=self.sumo.person.getRoadID("p_0")
             
@@ -194,9 +204,11 @@ class Basic():
         state=np.append(state,self.steps)
         state=np.append(state,self.new_distance)
         state = T.from_numpy(state)
+        state=state.double()
         reward=np.array([])
         reward=np.append(reward,self.reward)    
         reward=T.from_numpy(reward)
+        reward=reward.double()
         return state,reward,done
     
     

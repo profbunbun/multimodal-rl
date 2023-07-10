@@ -82,28 +82,22 @@ class Vehicle:
         return [self.ppos[0],self.ppos[1]] 
         
     def set_destination(self,action):
+        # print(action)
         self.sumo = traci.getConnection(self.label) 
         self.current_lane=self.sumo.vehicle.getLaneID("1")
         self.cur_loc=self.current_lane.partition("_")[0]
         
-        choice_len=len(self.out_dict[self.cur_loc])
-        if (action + 1) <= choice_len:
+        if ':' not in self.cur_loc:
+            
             outlist=list(self.out_dict[self.cur_loc].keys())
             outlane=list(self.out_dict[self.cur_loc].values())
-            outlist=np.array(outlist)
-            outlane=np.array(outlane)
-            choice_is= outlist[action-1]
-            # print(choice_is)
-            # print(outlane[action-1])
-            target = outlane[action-1]
-            # print(target[0][0])
-            target = target[0][0]
-            # self.sumo.vehicle.changeTarget("1",outlane[action-1])
-            self.sumo.vehicle.changeTarget("1",target)
-            self.make_choice=False
-        
+            if action <= len(outlist): 
+                outlist=np.array(outlist)
+                outlane=np.array(outlane)
+                target = outlane[action-1]
+                # print(target)
+                self.sumo.vehicle.changeTarget("1",target)
         return
-    pass
 
     def get_out_dict(self):
         return self.out_dict

@@ -4,21 +4,26 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 import numpy as np
-
+import random
+random.seed(0)
 
 class DQN(nn.Module):
 
     def __init__(self, state_size,action_size):
         super(DQN, self).__init__()
+        self.device = T.device("cuda" if T.cuda.is_available() else "cpu")
         self.layer1 = nn.Linear(state_size, 128)
         self.layer2 = nn.Linear(128, 128)
         self.layer3 = nn.Linear(128, action_size)
 
     
     def forward(self, x):
-      x = F.relu(self.layer1(x))
-      x = F.relu(self.layer2(x))
-      return self.layer3(x)
+        x=x.float()
+        x=x.to(self.device)
+        
+        x = F.relu(self.layer1(x))
+        x = F.relu(self.layer2(x))
+        return self.layer3(x)
 
 
 
@@ -37,6 +42,7 @@ class Agent6:
         self.learning_rate=0.001
         self.device = T.device("cuda" if T.cuda.is_available() else "cpu")
         self.policy_net = DQN(self.state_size,self.action_size).to(self.device)
+        self.target_net = DQN(self.state_size,self.action_size).to(self.device)
         
              
     def remember(self,state,action,reward,next_state,done):
@@ -45,25 +51,38 @@ class Agent6:
     def act(self,state):
         
         if  np.random.rand() < self.epsilon:
-            return np.random.randint(1,size=self.action_size)
+            # print(self.epsilon)
+            return np.random.randint(0,high=self.action_size)
         act_values = self.policy_net(state)
+        act_values = act_values.detach().cpu().numpy()
         return np.argmax(act_values[0])
 
     def replay(self,batch_size):
-        
-        minibatch=np.random.sample(self.memory,batch_size)
+        T.cuda.empty_cache()
+        minibatch=random.sample(self.memory,batch_size)
         
         for state,action,reward,next_state,done in minibatch:
             target = reward
             if not done:
-                target= (reward+self.gamma *np.amax(self.policy_net(next_state)[0]))
-            target_f=self.policy_net(state)
-            target_f[0][action]=target
-            criterion = nn.SmoothL1Loss()
-            loss = criterion(target_f,target)
+                target_net=self.target_net(next_state).detach().cpu().numpy()
+                target= (reward + self.gamma * np.amax(target_net))
+            policy=self.policy_net(state)
+            # policy=self.policy_net(state).detach().cpu().numpy()
+            target_f=policy
+            t=T.tensor(target)
+            t=t.float()
+            t=t.to(self.device)
+        
+            tf=target_f[action-1]
+            self.loss =  nn.MSELoss()
+            self.optimizer=optim.Adam(self.policy_net.parameters(),lr=self.learning_rate)
+            output=self.loss(tf,t)
             self.optimizer.zero_grad()
-            loss.backward()
+            output.backward()
             self.optimizer.step()
+            target_f[action-1]=target
+            T.cuda.empty_cache()
             
         if self.epsilon > self.epsilon_min:
-            self.epsilon *= self.epsilon_decay
+            self.epsilon *= self.decay
+    

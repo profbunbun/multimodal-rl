@@ -20,11 +20,20 @@ for episode in range(EPISODES):
     
     while not done:
              
-             action=agent.act(state)
-             next_state,reward, done = env.step(action) 
-             agent.remember(state,action,reward,next_state,done)
+             if env.no_choice:
+                 action=-1
+             else:
+                 action=agent.act(state)
+            #  print(state)
+            #  print(action)
              
-    if len(agent.memory)> batch_size:
-                 agent.replay(batch_size)
+             next_state,new_reward, done = env.step(action) 
+            #  print(next_state)
+             agent.remember(state,action,reward,next_state,done)
+             state=next_state
+             if len(agent.memory)> batch_size:
+                        agent.replay(batch_size)
+             
+            
                   
     env.close()

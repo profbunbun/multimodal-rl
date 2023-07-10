@@ -69,21 +69,19 @@ class Agent7:
             reward= reward.float()
             reward=reward.to(self.device)
             target = reward
+            
             if not done:
-                # target_net=self.target_net(next_state).detach().cpu().numpy()
                 target_net=self.target_net(next_state).to(self.device)
                 target= (reward + self.gamma * T.argmax(target_net))
+            
             policy=self.policy_net(state)
-            # policy=self.policy_net(state).detach().cpu().numpy()
             target_f=policy
-            # target_f[action-1]=target.clone().detach().requires_grad_(True)
             t=target
-            # t=target.clone().detach().requires_grad_(True)
             t=t.float()
-            # t=t.to(self.device)
             t=t.squeeze(-1)
         
             tf=target_f[action-1]
+            
             self.loss =  nn.MSELoss()
             self.optimizer=optim.Adam(self.policy_net.parameters(),lr=self.learning_rate)
             output=self.loss(tf,t)

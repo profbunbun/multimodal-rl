@@ -20,27 +20,29 @@ for episode in range(EPISODES):
     step=0
     while not done:
              
-             if env.no_choice:
-                 action=-1
+             if not env.no_choice:
+                action=agent.act(state)
              else:
-                 action=agent.act(state)
+                 action=-1   
             #  print(state)
             #  print(action)
              
              next_state,new_reward, done = env.step(action) 
              step+=1
             #  print(next_state)
-             agent.remember(state,action,reward,next_state,done)
+             agent.remember(state,action,new_reward,next_state,done)
              state=next_state
              if len(agent.memory)> batch_size:
                         agent.replay(batch_size)
-             
-    r = float(reward)   
+    
+    
+    agent.epsilon_decay()         
+    r = float(new_reward)   
     rewards.append(r)
     eps_history.append(agent.epsilon)
-    avg_score = np.mean(rewards[-100:])         
-    print('---------episode: ', episode,'score: %.2f' % r,
-            ' average score %.2f' % avg_score,
+    avg_reward = np.mean(rewards[-100:])         
+    print('---------episode: ', episode,'reward: %.2f' % r,
+            ' average reward %.2f' % avg_reward  ,
             'epsilon %.2f' % agent.epsilon," **** step: ",step)
     x = [i+1 for i in range(len(rewards))]
     filename = 'sumo-agent.png'

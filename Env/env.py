@@ -154,7 +154,7 @@ class Basic():
         self.old_edge=self.vedge
         self.sumo.simulationStep()
         self.vedge=self.sumo.vehicle.getRoadID("1")
-        
+        self.no_choice=False
         if self.old_edge == self.vedge:
             self.no_choice=True
             
@@ -168,12 +168,11 @@ class Basic():
         if self.new_distance > self.old_distance:
                 self.reward+=-.05
         if self.new_distance < self.old_distance:
-                self.reward+=-.01
+                self.reward+=.01
                 
         if not self.no_choice:
             self.vehicle.set_destination(np.max(action))
-        if self.no_choice and action !=-1:
-            self.reward+=-.02
+        
         self.vedge=self.sumo.vehicle.getRoadID("1")
         self.pedge=self.sumo.person.getRoadID("p_0")
             

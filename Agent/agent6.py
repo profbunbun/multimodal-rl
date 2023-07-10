@@ -33,7 +33,7 @@ class Agent6:
         self.state_size = state_size
         self.action_size = action_size
         
-        self.memory= deque(maxlen=20000)
+        self.memory= deque(maxlen=10000)
         
         self.gamma = 0.95
         self.epsilon = 1.0
@@ -49,13 +49,15 @@ class Agent6:
         self.memory.append((state,action,reward,next_state,done))
 
     def act(self,state):
-        
-        if  np.random.rand() < self.epsilon:
+        rando=np.random.rand()
+        if  rando < self.epsilon:
             # print(self.epsilon)
-            return np.random.randint(0,high=self.action_size)
+            act=np.random.randint(0,high=self.action_size-1)
+            return act
         act_values = self.policy_net(state)
         act_values = act_values.detach().cpu().numpy()
-        return np.argmax(act_values[0])
+        act=np.argmax(act_values)
+        return act
 
     def replay(self,batch_size):
         T.cuda.empty_cache()
@@ -69,9 +71,11 @@ class Agent6:
             policy=self.policy_net(state)
             # policy=self.policy_net(state).detach().cpu().numpy()
             target_f=policy
-            t=T.tensor(target)
+            target_f[action-1]=target.clone().detach().requires_grad_(True)
+            t=target.clone().detach().requires_grad_(True)
             t=t.float()
             t=t.to(self.device)
+            t=t.squeeze(-1)
         
             tf=target_f[action-1]
             self.loss =  nn.MSELoss()
@@ -80,9 +84,11 @@ class Agent6:
             self.optimizer.zero_grad()
             output.backward()
             self.optimizer.step()
-            target_f[action-1]=target
-            T.cuda.empty_cache()
             
+            T.cuda.empty_cache()
+    
+    def epsilon_decay(self):   
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.decay
+        pass
     

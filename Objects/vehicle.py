@@ -91,10 +91,10 @@ class Vehicle:
             
             outlist=list(self.out_dict[self.cur_loc].keys())
             outlane=list(self.out_dict[self.cur_loc].values())
-            if action <= len(outlist): 
+            if action < len(outlist) and action != -1 : 
                 outlist=np.array(outlist)
                 outlane=np.array(outlane)
-                target = outlane[action-1]
+                target = outlane[action]
                 # print(target)
                 self.sumo.vehicle.changeTarget("1",target)
         return

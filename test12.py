@@ -44,14 +44,14 @@ for episode in range(EPISODES):
                         agent.replay(batch_size)
     
     
-    agent.epsilon_decay()         
+    agent.epsilon_decay_2(episode,EPISODES)         
     r = float(new_reward)   
     rewards.append(r)
     eps_history.append(agent.epsilon)
     avg_reward = np.mean(rewards[-100:])         
-    print('---------episode: ', episode,'reward: %.2f' % r,
-            ' average reward %.2f' % avg_reward  ,
-            'epsilon %.2f' % agent.epsilon," **** step: ",step)
+    print('---------episode: ', episode,'reward: %.3f' % r,
+            ' average reward %.3f' % avg_reward  ,
+            'epsilon %.3f' % agent.epsilon," **** step: ",step)
     x = [i+1 for i in range(len(rewards))]
     filename = 'sumo-agent.png'
     plotLearning(x, rewards, eps_history, filename)              

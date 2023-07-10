@@ -38,6 +38,7 @@ class Agent7:
         
         self.gamma = 0.95
         self.epsilon = 1.0
+        self.epsilon_max = 1.0
         self.decay = 0.995
         self.epsilon_min=0.01
         self.learning_rate=0.001
@@ -104,7 +105,7 @@ class Agent7:
                 self.epsilon *= self.decay
             
             else:
-                self.epsilon= self.eps_max-1.01**(10*episode-((9.1/10 * episodes)*10))
-                self.new_eps_max=.20 * self.eps_max
+                self.epsilon= self.epsilon_max-1.01**(10*episode-((9.1/10 * episodes)*10))
+                self.new_eps_max=.20 * self.epsilon_max
         pass
     

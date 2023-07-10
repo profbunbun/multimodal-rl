@@ -147,7 +147,7 @@ class Basic():
         
     def step(self, action=None):
         self.old_distance=self.new_distance
-        self.reward+=-0.005
+        self.reward+=-0.01
         self.steps+= 1
         self.action=action
         self.old_edge=self.vedge
@@ -167,7 +167,7 @@ class Basic():
         if self.new_distance > self.old_distance:
                 self.reward+=-.05
         if self.new_distance < self.old_distance:
-                self.reward+=-.01
+                self.reward+=.01
                 
         if not self.no_choice:
             self.vehicle.set_destination(action)
@@ -191,7 +191,7 @@ class Basic():
                 self.reward+=5
                 done=True
         if self.steps>self.steps_per_episode:
-                self.reward+=-2
+                self.reward+=-10
                 done=True
                 
         

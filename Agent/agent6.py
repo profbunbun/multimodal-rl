@@ -71,7 +71,7 @@ class Agent6:
             policy=self.policy_net(state)
             # policy=self.policy_net(state).detach().cpu().numpy()
             target_f=policy
-            target_f[action-1]=target.clone().detach().requires_grad_(True)
+            # target_f[action-1]=target.clone().detach().requires_grad_(True)
             t=target.clone().detach().requires_grad_(True)
             t=t.float()
             t=t.to(self.device)

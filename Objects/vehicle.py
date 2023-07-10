@@ -74,12 +74,10 @@ class Vehicle:
     
     def location(self):
         self.sumo = traci.getConnection(self.label) 
-        self.ppos=self.sumo.vehicle.getPosition(self.vehicle_id)
-        # self.ppos=translate(self.ppos[0],self.min,self.max,0,100),translate(self.ppos[1],self.min,self.max,0,100)
+        self.vpos=self.sumo.vehicle.getPosition(self.vehicle_id)
         
-        # print(self.ppos)
         
-        return [self.ppos[0],self.ppos[1]] 
+        return [self.vpos[0],self.vpos[1]] 
         
     def set_destination(self,action):
         # print(action)
@@ -91,11 +89,11 @@ class Vehicle:
             
             outlist=list(self.out_dict[self.cur_loc].keys())
             outlane=list(self.out_dict[self.cur_loc].values())
-            if action < len(outlist) and action != -1 : 
+            if action < len(outlist) : 
                 outlist=np.array(outlist)
                 outlane=np.array(outlane)
                 target = outlane[action]
-                # print(target)
+                
                 self.sumo.vehicle.changeTarget("1",target)
         return
 

@@ -1,38 +1,46 @@
 import gymnasium as gym
 import torch as T
 import numpy as np
-from Env.env import Basic
+from Env.env2 import Basic
 
 from Util.utils import plotLearning
 
-from Agent.agent6 import Agent6
+from Agent.agent7 import Agent7
 
 
 EPISODES=1000
 STEPS=5000
 batch_size=32
 env = Basic("Nets/3x3.net.xml","Nets/S3x3.rou.xml",STEPS)
-agent = Agent6(4,3)
+agent = Agent7(4,3)
 rewards,eps_history=[],[]   
 for episode in range(EPISODES):
     done=False
     state ,reward,no_choice,lane, out_dict= env.reset()
+    state=T.from_numpy(state)
     step=0
     while not done:
              
              if not env.no_choice:
                 action=agent.act(state)
+                next_state,new_reward, done = env.step(action) 
+                next_state,new_reward=T.from_numpy(next_state),T.from_numpy(new_reward)
+                step+=1
+                agent.remember(state,action,new_reward,next_state,done)
              else:
-                 action=-1   
+            #      action=-1   
             #  print(state)
             #  print(action)
              
-             next_state,new_reward, done = env.step(action) 
-             step+=1
+                next_state,new_reward, done = env.step(action) 
+                next_state,new_reward=T.from_numpy(next_state),T.from_numpy(new_reward)
+                step+=1
             #  print(next_state)
-             agent.remember(state,action,new_reward,next_state,done)
+            #  agent.remember(state,action,new_reward,next_state,done)
              state=next_state
-             if len(agent.memory)> batch_size:
+            #  if len(agent.memory)> batch_size:
+            #             agent.replay(batch_size)
+             if (len(agent.memory)> batch_size) and (step % batch_size == 0):
                         agent.replay(batch_size)
     
     

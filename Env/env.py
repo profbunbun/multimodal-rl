@@ -168,7 +168,7 @@ class Basic():
         if self.new_distance > self.old_distance:
                 self.reward+=-.05
         if self.new_distance < self.old_distance:
-                self.reward+=.01
+                self.reward+=-.01
                 
         if not self.no_choice:
             self.vehicle.set_destination(np.max(action))
@@ -189,7 +189,7 @@ class Basic():
        
             
         if self.vedge==self.pedge:
-                self.reward+=2.5
+                self.reward+=5
                 done=True
         if self.steps>self.steps_per_episode:
                 self.reward+=-2

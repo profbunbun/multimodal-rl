@@ -37,8 +37,8 @@ class Agent7:
         self.memory= deque(maxlen=10000)
         
         self.gamma = 0.95
-        self.epsilon = 1.0
-        self.epsilon_max = 1.0
+        self.epsilon = .9999
+        self.epsilon_max = .9999
         self.decay = 0.995
         self.epsilon_min=0.01
         self.learning_rate=0.001

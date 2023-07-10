@@ -51,7 +51,7 @@ for episode in range(EPISODES):
     avg_reward = np.mean(rewards[-100:])         
     print('---------episode: ', episode,'reward: %.3f' % r,
             ' average reward %.3f' % avg_reward  ,
-            'epsilon %.3f' % agent.epsilon," **** step: ",step)
+            'epsilon %.5f' % agent.epsilon," **** step: ",step)
     x = [i+1 for i in range(len(rewards))]
     filename = 'sumo-agent.png'
     plotLearning(x, rewards, eps_history, filename)              

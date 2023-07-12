@@ -72,27 +72,46 @@ class Agent7:
         minibatch=random.sample(self.memory,batch_size)
         
         for state,action,reward,next_state,done in minibatch:
-            # update targets to same vector size
-            reward= reward.float()
-            reward=reward.to(self.device)
-            target = reward
+          
             
             if not done:
-                target_net=self.target_net(next_state).to(self.device)
-                target= (reward + self.gamma * T.argmax(target_net))
+                # estimated_target_DQN=self.policy_net(next_state).to(self.device)
+                # estimated_target= (reward + self.gamma * T.argmax(estimated_target_DQN))
+                reward= reward.float()
+                reward=reward.to(self.device)
+                
             
-            policy=self.policy_net(state)
-            target_f = policy
-            t=target
-            t=t.float()
-            t=t.squeeze(-1)
-        
-            tf=target_f[action-1]
+                est=self.policy_net(next_state).to(self.device)
+                estimated_target= (reward + self.gamma * T.argmax(est))
+                est[action]=estimated_target
+                
+                est=est.float()
+                
+                policy=self.policy_net(state).to(self.device)
+                target=policy
+                target[action]=estimated_target
+                t=target
+                t=t.float()
+                
+            else:
+                est=self.policy_net(next_state).to(self.device)
+                
+                est=est.float()
+                reward= reward.float()
+                reward=reward.to(self.device)
+                policy=self.policy_net(state).to(self.device)
+                target=policy
+                target[action]=reward
+                t=target
+                t=t.float()
+               
+            
+            
             # confirm this is how to train in pytorch
             self.loss =  nn.MSELoss()
             self.optimizer=optim.Adam(self.policy_net.parameters(),lr=self.learning_rate)
             
-            output=self.loss(tf,t)
+            output=self.loss(est,t)
             
             self.optimizer.zero_grad()
             output.backward()

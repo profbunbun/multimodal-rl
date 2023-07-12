@@ -143,12 +143,21 @@ class Basic():
         
         
         
+    def nullstep(self):
+        self.old_edge=self.vedge
+        self.sumo.simulationStep()
+        self.vedge=self.sumo.vehicle.getRoadID("1")
+        self.no_choice=False
         
+        
+        if self.old_edge == self.vedge:
+            self.no_choice=True
+        pass    
         
     def step(self, action=None):
         self.old_distance=self.new_distance
         # move to only when action is chosen
-        self.reward+=-0.01
+        # self.reward+=-0.01
         
         self.steps+= 1
         self.action=action
@@ -171,10 +180,11 @@ class Basic():
                 self.reward+=-.05
         if self.new_distance < self.old_distance:
             # increase reward --.5 .85?
-                self.reward+=.01
+                self.reward+=.3
                 
         if not self.no_choice:
             self.vehicle.set_destination(action)
+            self.reward+=-0.5
         
         self.vedge=self.sumo.vehicle.getRoadID("1")
         self.pedge=self.sumo.person.getRoadID("p_0")

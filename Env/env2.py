@@ -35,7 +35,7 @@ class Basic():
     def __init__(self, net_file: str,
         route_file: str,
         use_gui: bool =False,
-        steps_per_episode: int = 8000,
+        steps_per_episode: int = 2000,
         ) -> None:
         self.steps_per_episode = steps_per_episode
         self.episode_count=0
@@ -107,6 +107,7 @@ class Basic():
         self.episode_step += 1
         self.done=False
         self.steps = 0
+        self.agent_step=0
         # print (self.index_dict)
         
         self.vehicle=Vehicle("1",self._net,self._route,self.out_dict, self.index_dict)
@@ -126,7 +127,7 @@ class Basic():
         state=np.array([])
         state=np.append(state,self.vehicle_lane_index)
         state=np.append(state,self.person_lane_index)
-        state=np.append(state,self.steps)
+        state=np.append(state,self.agent_step)
         state=np.append(state,self.new_distance)
        
         
@@ -160,6 +161,7 @@ class Basic():
         # self.reward+=-0.01
         
         self.steps+= 1
+        
         self.action=action
         self.old_edge=self.vedge
         self.sumo.simulationStep()
@@ -177,14 +179,15 @@ class Basic():
         self.new_distance= (math.dist(self.vloc,self.ploc))
         
         if self.new_distance > self.old_distance:
-                self.reward+=-.05
+                self.reward+=-.5
         if self.new_distance < self.old_distance:
             # increase reward --.5 .85?
-                self.reward+=.3
+                self.reward+=.6
                 
         if not self.no_choice:
             self.vehicle.set_destination(action)
-            self.reward+=-0.5
+            self.reward+=-0.85
+            self.agent_step+=1
         
         self.vedge=self.sumo.vehicle.getRoadID("1")
         self.pedge=self.sumo.person.getRoadID("p_0")
@@ -213,7 +216,7 @@ class Basic():
         state=np.array([])
         state=np.append(state,self.vehicle_lane_index)
         state=np.append(state,self.person_lane_index)
-        state=np.append(state,self.steps)
+        state=np.append(state,self.agent_step)
         state=np.append(state,self.new_distance)
       
         reward=np.array([])

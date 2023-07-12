@@ -5,14 +5,14 @@ from Env.env2 import Basic
 
 from Util.utils import plotLearning
 
-from Agent.agent7 import Agent7
+from Agent.agent8 import Agent8
 
 
 EPISODES=1000
 STEPS=5000
 batch_size=32
 env = Basic("Nets/3x3.net.xml","Nets/S3x3.rou.xml",STEPS)
-agent = Agent7(4,3)
+agent = Agent8(4,3)
 rewards,eps_history=[],[]   
 for episode in range(EPISODES):
     done=False

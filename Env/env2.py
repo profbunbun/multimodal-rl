@@ -35,7 +35,7 @@ class Basic():
     def __init__(self, net_file: str,
         route_file: str,
         use_gui: bool =False,
-        steps_per_episode: int = 2000,
+        steps_per_episode: int = 5000,
         ) -> None:
         self.steps_per_episode = steps_per_episode
         self.episode_count=0

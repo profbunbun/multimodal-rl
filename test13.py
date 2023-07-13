@@ -8,10 +8,10 @@ from Util.utils import plotLearning
 from Agent.agent8 import Agent8
 
 
-EPISODES=1000
-STEPS=5000
+EPISODES=10000
+STEPS=3000
 batch_size=32
-env = Basic("Nets/3x3.net.xml","Nets/S3x3.rou.xml",STEPS)
+env = Basic("Nets/3x3.net.xml","Nets/S3x3.rou.xml",False,STEPS)
 agent = Agent8(4,3)
 rewards,eps_history=[],[]   
 for episode in range(EPISODES):

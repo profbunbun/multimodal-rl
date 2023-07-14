@@ -32,20 +32,21 @@ class DQN(nn.Module):
         # x = F.softmax(self.layer4(x))
         # add softmax for output
         return self.layer4(x)
+        # return x
 
 
 
  
-class Agent8:
+class Agent9:
     def __init__(self,state_size,action_size) -> None:
         self.state_size = state_size
         self.action_size = action_size
         
-        self.memory= deque(maxlen=10000)
+        self.memory= deque(maxlen=2000)
         
         self.gamma = 0.95
-        self.epsilon = .9999
-        self.epsilon_max = .9999
+        self.epsilon = .998
+        self.epsilon_max = .998
         self.decay = 0.995
         self.epsilon_min=0.01
         self.learning_rate=0.001
@@ -85,36 +86,44 @@ class Agent8:
                 reward=reward.to(self.device)
                 
                 #get estimated rewards for next step
-                est=self.policy_net(new_state).to(self.device)
+                est=self.policy_net(new_state).to(self.device)#rename these
                 # replace estimated reward for action with reward plus gamma version of the estimate
-                estimated_target= (reward + self.gamma * T.argmax(est))
+                adjusted_reward = (reward + self.gamma * T.argmax(est))# max not argmax
                 # update estimated actin reward 
-                est[action]=estimated_target
+                est[action]=adjusted_reward
                 
                 est=est.float()
-                
+                # get the current policy ----- use label 
                 policy=self.policy_net(state).to(self.device)
-                target=policy
-                target[action]=estimated_target
-                t=target
+                # update with actual
+                policy[action]=adjusted_reward
+                t=policy
                 t=t.float()
                 
             else:
+                # if its done, ther is no prediction
                 est=self.policy_net(new_state).to(self.device)
                 
                 est=est.float()
                 reward= reward.float()
                 reward=reward.to(self.device)
                 policy=self.policy_net(state).to(self.device)
-                target=policy
-                target[action]=reward
-                t=target
+                # so update the policy with the actual reward
+                policy[action]=reward
+                t=policy
                 t=t.float()
                
             
             
             # confirm this is how to train in pytorch
-            self.loss =  nn.MSELoss()
+            # self.loss =  nn.MSELoss()
+            # self.loss = nn.CrossEntropyLoss()
+            # self.loss = nn.BCEWithLogitsLoss()
+            self.loss = nn.MSELoss()
+            # self.loss = nn.L1Loss()
+            # self.loss = nn.BCELoss()
+            
+            
             self.optimizer=optim.Adam(self.policy_net.parameters(),lr=self.learning_rate)
             
             output=self.loss(est,t)

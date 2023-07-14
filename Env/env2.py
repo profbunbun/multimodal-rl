@@ -35,7 +35,7 @@ class Basic():
     def __init__(self, net_file: str,
         route_file: str,
         use_gui: bool =False,
-        steps_per_episode: int = 5000,
+        steps_per_episode: int = 100,
         ) -> None:
         self.steps_per_episode = steps_per_episode
         self.episode_count=0
@@ -177,7 +177,7 @@ class Basic():
         self.vloc=self.vehicle.location()
         self.ploc=self.person.location()
         self.new_distance= (math.dist(self.vloc,self.ploc))
-        
+        #  consider a non accumilated reward
         if self.new_distance > self.old_distance:
                 self.reward+=-.5
         if self.new_distance < self.old_distance:
@@ -205,7 +205,7 @@ class Basic():
        
             
         if self.vedge==self.pedge:
-                self.reward+=5
+                self.reward+=10
                 done=True
         if self.steps>self.steps_per_episode:
                 self.reward+=-10

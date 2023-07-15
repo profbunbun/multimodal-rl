@@ -6,8 +6,8 @@ import numpy as np
 import gymnasium as gym
 from Objects.vehicle import Vehicle
 from Objects.person import Person
-from Util.util import getMinMax,translate
-from Util import network_map_data_structures
+from Util.utility import Utility
+
 
 
 
@@ -20,10 +20,11 @@ if 'SUMO_HOME' in os.environ:
 else:
     sys.exit("No environment variable SUMO_HOME!")
 import sumolib
+
 import traci
 
 
-
+util=Utility()
 
 LIBSUMO = "LIBSUMO_AS_TRACI" in os.environ
 
@@ -35,7 +36,7 @@ class Basic():
     def __init__(self, net_file: str,
         route_file: str,
         use_gui: bool =False,
-        steps_per_episode: int = 8000,
+        steps_per_episode: int = 5000,
         ) -> None:
         self.steps_per_episode = steps_per_episode
         self.episode_count=0
@@ -49,8 +50,8 @@ class Basic():
         self.out_dict = None
         self.index_dict = None
         self.edge_list = None
-        self.network = network_map_data_structures.getNetInfo(net_file)
-        [self.out_dict, self.index_dict, self.edge_list] = network_map_data_structures.getEdgesInfo(self.network)
+        self.network = util.getNetInfo(net_file)
+        [self.out_dict, self.index_dict, self.edge_list] = util.getEdgesInfo(self.network)
         
         self._net = net_file
         self._route = route_file
@@ -88,6 +89,7 @@ class Basic():
             self._sumo_binary = sumolib.checkBinary("sumo-gui")
         else:
             self._sumo_binary = sumolib.checkBinary("sumo")
+            
         speed=self.speed
     
         sumo_cmd = [
@@ -95,6 +97,7 @@ class Basic():
             "-d "+"5",
             "-c",
              "Nets/3x3.sumocfg","--start", "--quit-on-end","--no-step-log","--no-warnings","--no-duration-log",]
+        
         if LIBSUMO:
             traci.start(sumo_cmd)
             self.sumo = traci
@@ -104,13 +107,15 @@ class Basic():
         
         self.sumo.simulationStep()
         self.reward = 0
+        
         self.episode_step += 1
         self.done=False
         self.steps = 0
+        self.agent_step=0
         # print (self.index_dict)
         
-        self.vehicle=Vehicle("1",self._net,self._route,self.out_dict, self.index_dict)
-        self.person=Person("p_0",self._net,self._route)
+        self.vehicle=Vehicle("1",self._net,self._route,self.out_dict, self.index_dict,self.sumo)
+        self.person=Person("p_0",self._net,self._route,self.sumo)
         
       
         self.vedge=self.sumo.vehicle.getRoadID("1")
@@ -126,10 +131,9 @@ class Basic():
         state=np.array([])
         state=np.append(state,self.vehicle_lane_index)
         state=np.append(state,self.person_lane_index)
-        state=np.append(state,self.steps)
+        state=np.append(state,self.agent_step)
         state=np.append(state,self.new_distance)
-        state = T.from_numpy(state)
-        state=state.double()
+       
         
         self.done=False
         self.no_choice=False
@@ -144,17 +148,31 @@ class Basic():
         
         
         
+    def nullstep(self):
+        
+        self.old_edge=self.vedge
+        self.sumo.simulationStep()
+        self.vedge=self.sumo.vehicle.getRoadID("1")
+        self.no_choice=False
         
         
-    def step(self, action):
+        if self.old_edge == self.vedge:
+            self.no_choice=True
+        pass    
+        
+    def step(self, action=None):
+        self.reward = 0
         self.old_distance=self.new_distance
-        self.reward+=-0.005
+      
+        
         self.steps+= 1
+        
         self.action=action
         self.old_edge=self.vedge
         self.sumo.simulationStep()
         self.vedge=self.sumo.vehicle.getRoadID("1")
         self.no_choice=False
+       
         if self.old_edge == self.vedge:
             self.no_choice=True
             
@@ -164,14 +182,17 @@ class Basic():
         self.vloc=self.vehicle.location()
         self.ploc=self.person.location()
         self.new_distance= (math.dist(self.vloc,self.ploc))
-        
-        if self.new_distance > self.old_distance:
-                self.reward+=-.05
+       
+        if self.new_distance >= self.old_distance:
+                self.reward+= -.5
         if self.new_distance < self.old_distance:
-                self.reward+=-.01
+            
+                self.reward+= .6
                 
-        if not self.no_choice:
-            self.vehicle.set_destination(np.max(action))
+        
+        self.vehicle.set_destination(action)
+        self.reward+= -.7
+        self.agent_step+=1
         
         self.vedge=self.sumo.vehicle.getRoadID("1")
         self.pedge=self.sumo.person.getRoadID("p_0")
@@ -189,10 +210,10 @@ class Basic():
        
             
         if self.vedge==self.pedge:
-                self.reward+=5
+                self.reward+=10
                 done=True
         if self.steps>self.steps_per_episode:
-                self.reward+=-2
+                self.reward+=-10
                 done=True
                 
         
@@ -200,14 +221,12 @@ class Basic():
         state=np.array([])
         state=np.append(state,self.vehicle_lane_index)
         state=np.append(state,self.person_lane_index)
-        state=np.append(state,self.steps)
+        state=np.append(state,self.agent_step)
         state=np.append(state,self.new_distance)
-        state = T.from_numpy(state)
-        state=state.double()
+      
         reward=np.array([])
         reward=np.append(reward,self.reward)    
-        reward=T.from_numpy(reward)
-        reward=reward.double()
+        
         return state,reward,done
     
     
@@ -217,6 +236,8 @@ class Basic():
         return
     
     def close(self):
+        # self.vehicle.close()
+        # self.person.close()
         self.sumo.close()
         return
 

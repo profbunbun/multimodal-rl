@@ -3,16 +3,18 @@ import torch as T
 import numpy as np
 from Env.env import Basic
 
-from Util.utils import plotLearning
+from Util.utility import Utility
 
-from Agent.agent7 import Agent7
+from Agent.agent import Agent
 
 
 EPISODES=1000
-STEPS=5000
+STEPS=3000
 batch_size=32
-env = Basic("Nets/3x3.net.xml","Nets/S3x3.rou.xml",STEPS)
-agent = Agent7(4,3)
+env = Basic("Nets/3x3.net.xml","Nets/S3x3.rou.xml",False,STEPS)
+agent = Agent(4,3)
+util=Utility()
+
 rewards,eps_history=[],[]   
 for episode in range(EPISODES):
     done=False
@@ -20,6 +22,7 @@ for episode in range(EPISODES):
     state=T.from_numpy(state)
     step=0
     agent_step=0
+    episode_reward=0
     while not done:
              
              if not env.no_choice:
@@ -29,15 +32,18 @@ for episode in range(EPISODES):
                 agent_step+=1
                 agent.remember(state,action,new_reward,next_state,done)
                 state=next_state
+                episode_reward+=new_reward
              else:
                  env.nullstep()
             
              if (len(agent.memory)> batch_size) and (step % batch_size == 0):
                         agent.replay(batch_size)
              step+=1
+             
+             
     
     agent.epsilon_decay_2(episode,EPISODES)         
-    r = float(new_reward)   
+    r = float(episode_reward)   
     rewards.append(r)
     eps_history.append(agent.epsilon)
     avg_reward = np.mean(rewards[-100:])         
@@ -46,5 +52,6 @@ for episode in range(EPISODES):
             'epsilon %.5f' % agent.epsilon," **** step: ",step,"*** Agent steps: ", agent_step)
     x = [i+1 for i in range(len(rewards))]
     filename = 'sumo-agent.png'
-    plotLearning(x, rewards, eps_history, filename)              
+    
+    util.plotLearning(x, rewards, eps_history, filename)              
     env.close()

@@ -1,18 +1,18 @@
 import gymnasium as gym
 import torch as T
 import numpy as np
-from Env.env2 import Basic
+from Env.env import Basic
 
-from Util.utils import plotLearning
-
-from Agent.agent9 import Agent9
+from Util.utility import Utility
+from Agent.agent import Agent
 
 
 EPISODES=1000
 STEPS=3000
 batch_size=32
 env = Basic("Nets/3x3.net.xml","Nets/S3x3.rou.xml",False,STEPS)
-agent = Agent9(4,3)
+agent = Agent(4,3)
+util=Utility()
 
 rewards,eps_history=[],[]   
 for episode in range(EPISODES):
@@ -51,5 +51,6 @@ for episode in range(EPISODES):
             'epsilon %.5f' % agent.epsilon," **** step: ",step,"*** Agent steps: ", agent_step)
     x = [i+1 for i in range(len(rewards))]
     filename = 'sumo-agent.png'
-    plotLearning(x, rewards, eps_history, filename)              
+    
+    util.plotLearning(x, rewards, eps_history, filename)              
     env.close()

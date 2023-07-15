@@ -1,7 +1,7 @@
 import os
 import sys
 import numpy as np
-from Util.util import getMinMax
+from Util.utility import Utility
 if 'SUMO_HOME' in os.environ:
     tools = os.path.join(os.environ['SUMO_HOME'], 'tools')
     sys.path.append(tools)
@@ -13,22 +13,13 @@ import traci
 
 import random
 LIBSUMO = "LIBSUMO_AS_TRACI" in os.environ
+util=Utility()
 
 
-def translate(value, leftMin, leftMax, rightMin, rightMax):
-    # Figure out how 'wide' each range is
-        leftSpan = leftMax - leftMin
-        rightSpan = rightMax - rightMin
-
-    # Convert the left range into a 0-1 range (float)
-        valueScaled = float(value - leftMin) / float(leftSpan)
-
-    # Convert the 0-1 range into a value in the right range.
-        return int(round((rightMin + (valueScaled * rightSpan)),0))
 
 class Vehicle:
     CONNECTION_LABEL = 0 
-    def __init__(self,vehicle_id,net_file,route_file,out_dict,index_dict) -> None:
+    def __init__(self,vehicle_id,net_file,route_file,out_dict,index_dict,sumo) -> None:
         
         self.vehicle_id =vehicle_id
         self.destination = None
@@ -43,23 +34,11 @@ class Vehicle:
         self.flag=None
         self.choice_dic=None
         self.make_choice=True
-        self.label = str(Vehicle.CONNECTION_LABEL)
-        # Vehicle.CONNECTION_LABEL += 1
-        self.sumo = None
-        if LIBSUMO:
-            traci.start(
-                [sumolib.checkBinary("sumo"), "-n", self._net]
-            )  
-            conn = traci
-        else:
-            traci.start(
-                [sumolib.checkBinary("sumo"), "-n", self._net],
-                label="init_connection" + self.label,
-            )
-            conn = traci.getConnection("init_connection" + self.label) 
-        conn.close()
-        self.sumo = traci.getConnection(self.label)     
-        self.min,self.max,self.diff=getMinMax(self._net)
+        
+        
+        self.sumo = sumo
+         
+        self.min,self.max,self.diff=util.getMinMax(self._net)
         pass
     
     def random_relocate(self):
@@ -120,6 +99,10 @@ class Vehicle:
         # self.sumo.vehicle.dispatchTaxi("1","0")
         # print(reservation_id)
         pass
+    def close(self):
+        self.sumo.close()
+        return
+    
     
     
     

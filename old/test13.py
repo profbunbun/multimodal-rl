@@ -1,7 +1,7 @@
 import gymnasium as gym
 import torch as T
 import numpy as np
-from Env.env2 import Basic
+from Env.env import Basic
 
 from Util.utils import plotLearning
 

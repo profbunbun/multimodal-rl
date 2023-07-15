@@ -1,6 +1,6 @@
 import os
 import sys
-from Util.util import getMinMax
+from Util.utility import Utility
 if 'SUMO_HOME' in os.environ:
     tools = os.path.join(os.environ['SUMO_HOME'], 'tools')
     sys.path.append(tools)
@@ -9,16 +9,13 @@ else:
 import sumolib
 from sumolib import net
 import traci
+util=Utility()
 LIBSUMO = "LIBSUMO_AS_TRACI" in os.environ
-def translate(value, leftMin, leftMax, rightMin, rightMax):
-        leftSpan = leftMax - leftMin
-        rightSpan = rightMax - rightMin
-        valueScaled = float(value - leftMin) / float(leftSpan)
-        return int(round((rightMin + (valueScaled * rightSpan)),0))
+
     
 class Person:
     CONNECTION_LABEL = 0 
-    def __init__(self,person_id,net_file,route_file) -> None:
+    def __init__(self,person_id,net_file,route_file,sumo) -> None:
         
         self.person_id =person_id
         self.destination = None
@@ -27,49 +24,32 @@ class Person:
         self.min=0
         self.max=0
         self.diff=0
-        self.label = str(Person.CONNECTION_LABEL)
-        self.sumo = None
-      
-        if LIBSUMO:
-            traci.start(
-                [sumolib.checkBinary("sumo"), "-n", self._net]
-            )  
-            conn = traci
-        else:
-            traci.start(
-                [sumolib.checkBinary("sumo"), "-n", self._net],
-                label="init_connection" + self.label,
-            )
-            conn = traci.getConnection("init_connection" + self.label)
-           
-      
-   
-            
-        self.min,self.max,self.diff=getMinMax(self._net)
-        conn.close()
         
+        self.sumo = sumo
+      
         
+        self.min,self.max,self.diff=util.getMinMax(self._net)
+       
         pass
     
     
     
     def location(self):
-        self.sumo = traci.getConnection(self.label) 
+        
         self.ppos=self.sumo.person.getPosition(self.person_id)
-        # self.ppos=translate(self.ppos[0],self.min,self.max,0,100),translate(self.ppos[1],self.min,self.max,0,100)
-        # print(self.ppos)
         
         return self.ppos
         
     def set_destination(self):
-        
-  
-        
         pass
+    
     def set_pickup(self):
         pass
+    
     def pickup(self):
-   
         pass
+    def close(self):
+        self.sumo.close()
+        return
     
     

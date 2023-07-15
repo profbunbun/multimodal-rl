@@ -5,7 +5,8 @@
     "python.analysis.extraPaths": [
         "/usr/share/sumo/bin",
         "/usr/share/sumo/tools"
-    ]
+    ],
+    "python.analysis.typeCheckingMode": "off"
     
     
 }

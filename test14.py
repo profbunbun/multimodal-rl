@@ -8,11 +8,12 @@ from Util.utils import plotLearning
 from Agent.agent9 import Agent9
 
 
-EPISODES=10000
+EPISODES=1000
 STEPS=3000
 batch_size=32
 env = Basic("Nets/3x3.net.xml","Nets/S3x3.rou.xml",False,STEPS)
 agent = Agent9(4,3)
+
 rewards,eps_history=[],[]   
 for episode in range(EPISODES):
     done=False
@@ -20,6 +21,7 @@ for episode in range(EPISODES):
     state=T.from_numpy(state)
     step=0
     agent_step=0
+    episode_reward=0
     while not done:
              
              if not env.no_choice:
@@ -29,15 +31,18 @@ for episode in range(EPISODES):
                 agent_step+=1
                 agent.remember(state,action,new_reward,next_state,done)
                 state=next_state
+                episode_reward+=new_reward
              else:
                  env.nullstep()
             
              if (len(agent.memory)> batch_size) and (step % batch_size == 0):
                         agent.replay(batch_size)
              step+=1
+             
+             
     
     agent.epsilon_decay_2(episode,EPISODES)         
-    r = float(new_reward)   
+    r = float(episode_reward)   
     rewards.append(r)
     eps_history.append(agent.epsilon)
     avg_reward = np.mean(rewards[-100:])         

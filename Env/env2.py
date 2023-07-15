@@ -35,7 +35,7 @@ class Basic():
     def __init__(self, net_file: str,
         route_file: str,
         use_gui: bool =False,
-        steps_per_episode: int = 100,
+        steps_per_episode: int = 5000,
         ) -> None:
         self.steps_per_episode = steps_per_episode
         self.episode_count=0
@@ -104,6 +104,7 @@ class Basic():
         
         self.sumo.simulationStep()
         self.reward = 0
+        
         self.episode_step += 1
         self.done=False
         self.steps = 0
@@ -145,6 +146,7 @@ class Basic():
         
         
     def nullstep(self):
+        
         self.old_edge=self.vedge
         self.sumo.simulationStep()
         self.vedge=self.sumo.vehicle.getRoadID("1")
@@ -156,9 +158,9 @@ class Basic():
         pass    
         
     def step(self, action=None):
+        self.reward = 0
         self.old_distance=self.new_distance
-        # move to only when action is chosen
-        # self.reward+=-0.01
+      
         
         self.steps+= 1
         
@@ -177,17 +179,17 @@ class Basic():
         self.vloc=self.vehicle.location()
         self.ploc=self.person.location()
         self.new_distance= (math.dist(self.vloc,self.ploc))
-        #  consider a non accumilated reward
-        if self.new_distance > self.old_distance:
-                self.reward+=-.5
+       
+        if self.new_distance >= self.old_distance:
+                self.reward+= -.5
         if self.new_distance < self.old_distance:
-            # increase reward --.5 .85?
-                self.reward+=.6
+            
+                self.reward+= .6
                 
-        if not self.no_choice:
-            self.vehicle.set_destination(action)
-            self.reward+=-0.85
-            self.agent_step+=1
+        
+        self.vehicle.set_destination(action)
+        self.reward+= -.7
+        self.agent_step+=1
         
         self.vedge=self.sumo.vehicle.getRoadID("1")
         self.pedge=self.sumo.person.getRoadID("p_0")

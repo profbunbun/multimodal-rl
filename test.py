@@ -22,6 +22,7 @@ for episode in range(EPISODES):
     step=0
     agent_step=0
     episode_reward=0
+    env.render()
     while not done:
              
              if not env.no_choice:

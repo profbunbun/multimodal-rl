@@ -6,7 +6,11 @@
         "/usr/share/sumo/bin",
         "/usr/share/sumo/tools"
     ],
-    "python.analysis.typeCheckingMode": "off"
+    "python.analysis.typeCheckingMode": "off",
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.autopep8"
+    },
+    "python.formatting.provider": "none"
     
     
 }

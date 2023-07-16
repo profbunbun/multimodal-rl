@@ -52,7 +52,7 @@ class Vehicle:
         return self.new_lane
     
     def location(self):
-        self.sumo = traci.getConnection(self.label) 
+        
         self.vpos=self.sumo.vehicle.getPosition(self.vehicle_id)
         
         
@@ -60,7 +60,7 @@ class Vehicle:
         
     def set_destination(self,action):
         # print(action)
-        self.sumo = traci.getConnection(self.label) 
+        
         self.current_lane=self.sumo.vehicle.getLaneID("1")
         self.cur_loc=self.current_lane.partition("_")[0]
         
@@ -80,13 +80,13 @@ class Vehicle:
         return self.out_dict
     
     def links(self):
-        self.sumo = traci.getConnection(self.label) 
+        
         current_lane=self.sumo.vehicle.getLaneID("1")
         choices=len(self.sumo.lane.getLinks(current_lane))
         return choices
     
     def get_lane(self):
-        self.sumo = traci.getConnection(self.label) 
+        
         current_lane=self.sumo.vehicle.getLaneID("1")
         return current_lane
     

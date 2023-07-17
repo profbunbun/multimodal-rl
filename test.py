@@ -7,10 +7,10 @@ from Util.utility import Utility
 from Agent.agent import Agent
 
 
-EPISODES=1000
+EPISODES=5000
 STEPS=3000
 batch_size=32
-env = Basic("Nets/3x3.net.xml","Nets/S3x3.rou.xml",False,STEPS)
+env = Basic("Nets/3x3.net.xml","Nets/S3x3.rou.xml",True)
 agent = Agent(4,3)
 util=Utility()
 
@@ -22,7 +22,9 @@ for episode in range(EPISODES):
     step=0
     agent_step=0
     episode_reward=0
-    env.render()
+    
+    # fix render
+    # env.render('human')
     while not done:
              
              if not env.no_choice:
@@ -33,22 +35,29 @@ for episode in range(EPISODES):
                 agent.remember(state,action,new_reward,next_state,done)
                 state=next_state
                 episode_reward+=new_reward
+                if (len(agent.memory)> batch_size) and (agent_step % batch_size == 0):
+                        agent.replay(batch_size)
+                
              else:
                  env.nullstep()
             
-             if (len(agent.memory)> batch_size) and (step % batch_size == 0):
-                        agent.replay(batch_size)
+             
              step+=1
              
-             
+    # if (len(agent.memory)> batch_size) :
+    #                     agent.replay(batch_size)         
     
-    agent.epsilon_decay_2(episode,EPISODES)         
+    agent.epsilon_decay_2(episode,EPISODES)   
+    
+          
     r = float(episode_reward)   
     rewards.append(r)
     eps_history.append(agent.epsilon)
-    avg_reward = np.mean(rewards[-100:])         
-    print('---------episode: ', episode,'reward: %.3f' % r,
-            ' average reward %.3f' % avg_reward  ,
+    # avg_reward = np.mean(rewards[-100:])
+    avg_reward = np.mean(rewards)   
+          
+    print('EP: ', episode,'Reward: %.3f' % r,
+            ' Average Reward %.3f' % avg_reward  ,
             'epsilon %.5f' % agent.epsilon," **** step: ",step,"*** Agent steps: ", agent_step)
     x = [i+1 for i in range(len(rewards))]
     filename = 'sumo-agent.png'

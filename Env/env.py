@@ -28,11 +28,9 @@ class Basic():
     CONNECTION_LABEL = 0
 
     def __init__(self, net_file: str,
-                 route_file: str,
-                 use_gui: bool = False,
-                 steps_per_episode: int = 5000,
+                 route_file: str,gui
                  ) -> None:
-        self.steps_per_episode = steps_per_episode
+        self.steps_per_episode = 2000
         self.episode_count = 0
         self.episode_step = 0
         self.action = 0
@@ -50,7 +48,7 @@ class Basic():
         self._net = net_file
         self._route = route_file
 
-        self.use_gui = use_gui
+        self.use_gui = gui
         self.speed = None
         self.render_mode = None
 
@@ -62,19 +60,22 @@ class Basic():
 
     def reset(self):
 
-        if self.use_gui or self.render_mode is not None:
+        if self.use_gui :
             self._sumo_binary = sumolib.checkBinary("sumo-gui")
             sumo_cmd = [
             "sumo-gui",
             "-d "+"5",
+            
             "-c",
+            
             "Nets/3x3.sumocfg", "--start", "--quit-on-end", "--no-step-log", "--no-warnings", "--no-duration-log",]
 
         else:
             self._sumo_binary = sumolib.checkBinary("sumo")
             sumo_cmd = [
-            "sumo-gui",
-            "-d "+"5",
+            "sumo",
+            # "-d "+"5",
+            
             "-c",
             "Nets/3x3.sumocfg", "--start", "--quit-on-end", "--no-step-log", "--no-warnings", "--no-duration-log",]
 
@@ -161,7 +162,7 @@ class Basic():
             self.reward += -.5
         if self.new_distance < self.old_distance:
 
-            self.reward += .6
+            self.reward += .85
 
         self.vehicle.set_destination(action)
         self.reward += -.7
@@ -182,9 +183,11 @@ class Basic():
         if self.vedge == self.pedge:
             self.reward += 10
             done = True
-        if self.steps > self.steps_per_episode:
-            self.reward += -10
-            done = True
+        # if self.steps > self.steps_per_episode:
+        #     self.reward += -10
+        #     done = True
+        #     self.sumo.close()
+            
 
         state = np.array([])
         state = np.append(state, self.vehicle_lane_index)

@@ -160,14 +160,14 @@ class Basic():
         self.ploc = self.person.location()
         self.new_distance = (math.dist(self.vloc, self.ploc))
 
-        if self.new_distance >= self.old_distance:
-            self.reward += -.5
+        if self.new_distance > self.old_distance:
+            self.reward += -.3
         if self.new_distance < self.old_distance:
 
-            self.reward += .85
+            self.reward += .2
 
         self.vehicle.set_destination(action)
-        self.reward += -.7
+        self.reward += -.1
         self.agent_step += 1
 
         self.vedge = self.sumo.vehicle.getRoadID("1")

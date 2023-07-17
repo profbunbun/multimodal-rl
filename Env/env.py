@@ -114,7 +114,7 @@ class Basic():
         state = np.array([])
         state = np.append(state, self.vehicle_lane_index)
         state = np.append(state, self.person_lane_index)
-        state = np.append(state, self.agent_step)
+        # state = np.append(state, self.agent_step)
         state = np.append(state, self.new_distance)
 
         self.done = False
@@ -130,10 +130,11 @@ class Basic():
         self.old_edge = self.vedge
         self.sumo.simulationStep()
         self.vedge = self.sumo.vehicle.getRoadID("1")
-        self.no_choice = False
 
         if self.old_edge == self.vedge:
             self.no_choice = True
+        else:
+            self.no_choice = False  
         pass
 
     def step(self, action=None):
@@ -146,10 +147,11 @@ class Basic():
         self.old_edge = self.vedge
         self.sumo.simulationStep()
         self.vedge = self.sumo.vehicle.getRoadID("1")
-        self.no_choice = False
 
-        if self.old_edge == self.vedge:
+        if self.old_edge == self.vedge and ':' not in self.vedge:
             self.no_choice = True
+        else:
+            self.no_choice = False
 
         self.lane = self.sumo.vehicle.getLaneID("1")
         self.done = True
@@ -192,7 +194,7 @@ class Basic():
         state = np.array([])
         state = np.append(state, self.vehicle_lane_index)
         state = np.append(state, self.person_lane_index)
-        state = np.append(state, self.agent_step)
+        # state = np.append(state, self.agent_step)
         state = np.append(state, self.new_distance)
 
         reward = np.array([])

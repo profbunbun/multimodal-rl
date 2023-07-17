@@ -30,7 +30,7 @@ class Agent:
     def __init__(self,state_size,action_size) -> None:
         self.state_size = state_size
         self.action_size = action_size
-        self.memory= deque(maxlen=20000)
+        self.memory= deque(maxlen=10000)
         self.gamma = 0.95
         self.epsilon = .997
         self.epsilon_max = .997
@@ -51,6 +51,7 @@ class Agent:
             return act
         else:
             act_values = self.policy_net(state)
+            # q-val
             act=T.argmax(act_values)
             return act
 
@@ -69,14 +70,14 @@ class Agent:
                 reward=reward.to(self.device)
                 
                 #get estimated rewards for next step
-                est=self.policy_net(new_state).to(self.device)#rename these
+                output=self.policy_net(new_state).to(self.device)#rename these
                 # replace estimated reward for action with reward plus gamma version of the estimate
-                adjusted_reward = (reward + self.gamma * T.max(est))# max not argmax
+                adjusted_reward = (reward + self.gamma * T.max(output))
                 # update estimated act in reward 
-                adjusted_est=est.detach().clone()
-                adjusted_est[action]=adjusted_reward
+                adjusted_output=output.detach().clone()
+                adjusted_output[action]=adjusted_reward
                 
-                adjusted_est=adjusted_est.float()
+                adjusted_output=adjusted_output.float()
                 # get the current policy ----- use label 
                 policy=self.policy_net(state).to(self.device)
                 # update with actual
@@ -87,9 +88,9 @@ class Agent:
                 
             else:
                 # if its done, ther is no prediction
-                est=self.policy_net(new_state).to(self.device)
+                output=self.policy_net(new_state).to(self.device)
                 
-                est=est.float()
+                output=output.float()
                 reward= reward.float()
                 reward=reward.to(self.device)
                 policy=self.policy_net(state).to(self.device)
@@ -102,17 +103,17 @@ class Agent:
              
             
             
-            # self.loss =  nn.MSELoss()
+            self.loss =  nn.MSELoss()
             # self.loss = nn.CrossEntropyLoss()
             # self.loss = nn.BCEWithLogitsLoss()
-            self.loss = nn.MSELoss()
+            # self.loss = nn.MSELoss()
             # self.loss = nn.L1Loss()
             # self.loss = nn.BCELoss()
             
             
             self.optimizer=optim.Adam(self.policy_net.parameters(),lr=self.learning_rate)
             
-            output=self.loss(est,t)
+            output=self.loss(output,t)
             
             self.optimizer.zero_grad()
             output.backward(retain_graph=True)

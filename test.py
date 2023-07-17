@@ -7,11 +7,11 @@ from Util.utility import Utility
 from Agent.agent import Agent
 
 
-EPISODES=5000
+EPISODES=1000
 STEPS=3000
 batch_size=32
-env = Basic("Nets/3x3.net.xml","Nets/S3x3.rou.xml",True)
-agent = Agent(4,3)
+env = Basic("Nets/3x3.net.xml","Nets/S3x3.rou.xml",False)
+agent = Agent(3,3)
 util=Utility()
 
 rewards,eps_history=[],[]   
@@ -35,8 +35,9 @@ for episode in range(EPISODES):
                 agent.remember(state,action,new_reward,next_state,done)
                 state=next_state
                 episode_reward+=new_reward
-                if (len(agent.memory)> batch_size) and (agent_step % batch_size == 0):
-                        agent.replay(batch_size)
+                # if (len(agent.memory)> 1000) :
+                #         agent.replay(batch_size)
+                
                 
              else:
                  env.nullstep()
@@ -44,8 +45,8 @@ for episode in range(EPISODES):
              
              step+=1
              
-    # if (len(agent.memory)> batch_size) :
-    #                     agent.replay(batch_size)         
+    if (len(agent.memory)> batch_size) :
+                        agent.replay(batch_size)         
     
     agent.epsilon_decay_2(episode,EPISODES)   
     

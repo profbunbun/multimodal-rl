@@ -5,6 +5,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 import numpy as np
 import random
+import math
 random.seed(0)
 T.autograd.set_detect_anomaly(True)
 class DQN(nn.Module):
@@ -30,20 +31,23 @@ class Agent:
     def __init__(self,state_size,action_size) -> None:
         self.state_size = state_size
         self.action_size = action_size
+        
         self.memory= deque(maxlen=20000)
-        self.gamma = 0.995
+        self.gamma = 0.99
         self.epsilon = 1
         self.epsilon_max = 1
-        self.decay = 0.99969
+        self.decay = 0.999
         self.epsilon_min=0.05
-        self.learning_rate=0.001
+        self.learning_rate=0.0001
         
         self.device = T.device("cuda" if T.cuda.is_available() else "cpu")
         self.policy_net = DQN(self.state_size,self.action_size).to(self.device)
-            
+    #  rember function for training data
     def remember(self,state,action,reward,next_state,done):
         self.memory.append((state,action,reward,next_state,done))
-
+        
+        
+# make choice function
     def act(self,state):
         rando=np.random.rand()
         if  rando < self.epsilon:
@@ -55,7 +59,7 @@ class Agent:
             act=T.argmax(act_values)
             return act
 
-
+# Train the model
     def replay(self,batch_size):
         # T.cuda.empty_cache()
         minibatch=random.sample(self.memory,batch_size)
@@ -74,54 +78,52 @@ class Agent:
                 # replace estimated reward for action with reward plus gamma version of the estimate
                 adjusted_reward = (reward + self.gamma * T.max(output))
                 # update estimated act in reward 
-                adjusted_output=output.detach().clone()
-                adjusted_output[action]=adjusted_reward
+                output=output.detach().clone()
+                output[action]=adjusted_reward
                 
-                adjusted_output=adjusted_output.float()
+                output=output.float()
                 # get the current policy ----- use label 
                 policy=self.policy_net(state).to(self.device)
                 # update with actual
                 updated_policy=policy.detach().clone()
                 updated_policy[action]=adjusted_reward
-                t=updated_policy
-                t=t.float()
+                target=updated_policy
+                target=target.float()
                 
-            else:
+            else: 
+                
                 # if its done, ther is no prediction
-                output=self.policy_net(new_state).to(self.device)
-                
-                output=output.float()
+                # so update the policy with the actual reward
+                # output=self.policy_net(new_state).to(self.device)
+                # output=output.float()
                 reward= reward.float()
                 reward=reward.to(self.device)
-                policy=self.policy_net(state).to(self.device)
-                # so update the policy with the actual reward
+                output=self.policy_net(state).to(self.device)
                 updated_policy=policy.detach().clone()
                 updated_policy[action]=reward
-                t=updated_policy
-                t=t.float()
+                target=updated_policy
+                target=target.float()
                
-             
+               
             
-            
+            # loss function
             self.loss =  nn.MSELoss()
-            # self.loss = nn.CrossEntropyLoss()
-            # self.loss = nn.BCEWithLogitsLoss()
-            # self.loss = nn.MSELoss()
+            
             # self.loss = nn.L1Loss()
-            # self.loss = nn.BCELoss()
             
             
+            # optimize parameters
             self.optimizer=optim.Adam(self.policy_net.parameters(),lr=self.learning_rate)
-            
-            output=self.loss(output,t)
-            
+            output=self.loss(output,target)
             self.optimizer.zero_grad()
             output.backward(retain_graph=True)
             self.optimizer.step()
-            
             # T.cuda.empty_cache()
     
     
+    
+    
+    # trying differnt epsilon decay
     def epsilon_decay(self):   
         if self.epsilon > self.epsilon_min:
             
@@ -135,6 +137,15 @@ class Agent:
             
             else:
                 self.epsilon= self.epsilon_max-1.01**(10*episode-((4.4/10 * episodes)*10))
+        else:
+            self.epsilon=self.epsilon       
+        pass
+    def epsilon_decay_3(self,episode,episodes):   
+        if self.epsilon > self.epsilon_min:
+            episode+=1
+            
+            self.epsilon= (1/9.5)*math.log(((-episode)+episodes+1))
+            # self.epsilon_max-1.01**(10*episode-((4.4/10 * episodes)*10))
         else:
             self.epsilon=self.epsilon       
         pass

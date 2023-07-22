@@ -114,7 +114,7 @@ class Basic():
         state = np.array([])
         state = np.append(state, self.vehicle_lane_index)
         state = np.append(state, self.person_lane_index)
-        # state = np.append(state, self.agent_step)
+        state = np.append(state, self.agent_step)
         state = np.append(state, self.new_distance)
 
         self.done = False
@@ -126,6 +126,7 @@ class Basic():
         return state, self.reward, self.no_choice, self.lane, self.out_dict
 
     def nullstep(self):
+        self.reward = 0
 
         self.old_edge = self.vedge
         self.sumo.simulationStep()
@@ -154,8 +155,8 @@ class Basic():
             self.no_choice = False
 
         self.lane = self.sumo.vehicle.getLaneID("1")
-        self.done = True
-        self.use_gui = False
+        # self.done = True
+        # self.use_gui = False
         self.vloc = self.vehicle.location()
         self.ploc = self.person.location()
         self.new_distance = (math.dist(self.vloc, self.ploc))
@@ -164,7 +165,7 @@ class Basic():
             self.reward += -.3
         if self.new_distance < self.old_distance:
 
-            self.reward += .2
+            self.reward += .31
 
         self.vehicle.set_destination(action)
         self.reward += -.1
@@ -194,7 +195,7 @@ class Basic():
         state = np.array([])
         state = np.append(state, self.vehicle_lane_index)
         state = np.append(state, self.person_lane_index)
-        # state = np.append(state, self.agent_step)
+        state = np.append(state, self.agent_step)
         state = np.append(state, self.new_distance)
 
         reward = np.array([])

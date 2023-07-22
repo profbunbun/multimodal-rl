@@ -58,7 +58,7 @@ class Agent:
             # q-val
             act=T.argmax(act_values)
             return act
-
+ 
 # Train the model
     def replay(self,batch_size):
         # T.cuda.empty_cache()

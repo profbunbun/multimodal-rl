@@ -162,10 +162,10 @@ class Basic():
         self.new_distance = (math.dist(self.vloc, self.ploc))
 
         if self.new_distance > self.old_distance:
-            self.reward += -.3
+            self.reward += -.35
         if self.new_distance < self.old_distance:
 
-            self.reward += .31
+            self.reward += .41
 
         self.vehicle.set_destination(action)
         self.reward += -.1

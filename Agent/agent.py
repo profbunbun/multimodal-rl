@@ -118,6 +118,8 @@ class Agent:
             out.backward(retain_graph=True)
             self.optimizer.step()
             T.cuda.empty_cache()
+            out=out.detach().clone()
+        return out
     
     
     

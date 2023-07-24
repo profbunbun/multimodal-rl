@@ -7,7 +7,7 @@ from Util.utility import Utility
 from Agent.agent import Agent
 
 
-EPISODES=1000
+EPISODES=100
 STEPS=3000
 batch_size=32
 env = Basic("Nets/3x3.net.xml","Nets/S3x3.rou.xml",False)

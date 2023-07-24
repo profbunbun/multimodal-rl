@@ -34,8 +34,8 @@ class Agent:
         
         self.memory= deque(maxlen=10000)
         self.gamma = 0.95
-        self.epsilon = 9999
-        self.epsilon_max = 9999
+        self.epsilon = .9999
+        self.epsilon_max = .9999
         self.decay = 0.995
         self.epsilon_min=0.01
         self.learning_rate=0.001
@@ -111,10 +111,11 @@ class Agent:
             
             # optimize parameters
             self.optimizer=optim.Adam(self.policy_net.parameters(),lr=self.learning_rate)
-            
-            output=self.loss(output,target)
+            # ----i think i have these backwards
+            out=self.loss(target,output)
+            # out=self.loss(output,target)
             self.optimizer.zero_grad()
-            output.backward(retain_graph=True)
+            out.backward(retain_graph=True)
             self.optimizer.step()
             T.cuda.empty_cache()
     

@@ -108,7 +108,7 @@ class Basic():
         return state, self.reward, self.no_choice, self.lane, self.out_dict
 
     def nullstep(self):
-        # self.reward = 0
+        self.reward = 0
 
         self.old_edge = self.vedge
         self.sumo.simulationStep()
@@ -121,7 +121,7 @@ class Basic():
         pass
 
     def step(self, action=None):
-        # self.reward = 0
+        self.reward = 0
         self.old_distance = self.new_distance
 
         self.steps += 1

@@ -7,14 +7,14 @@ from Util.utility import Utility
 from Agent.agent import Agent
 
 
-EPISODES=100
+EPISODES=1000
 STEPS=3000
 batch_size=32
 env = Basic("Nets/3x3.net.xml","Nets/S3x3.rou.xml",False)
 agent = Agent(4,3)
 util=Utility()
 
-rewards,eps_history,episode_loss=[],[],[]   
+rewards,eps_history=[],[]
 for episode in range(EPISODES):
     done=False
     state ,reward,no_choice,lane, out_dict= env.reset()
@@ -43,8 +43,8 @@ for episode in range(EPISODES):
                  env.nullstep()
             
              if (len(agent.memory)> batch_size) and (step % batch_size == 0):
-                        loss = agent.replay(batch_size)
-                        episode_loss.append(loss.cpu().numpy())
+                        agent.replay(batch_size)
+                        
              step+=1
              
     # if (len(agent.memory)> batch_size) :
@@ -53,17 +53,17 @@ for episode in range(EPISODES):
     agent.epsilon_decay_2(episode,EPISODES)   
     
           
-    # r = float(episode_reward)  
-    r = float(new_reward)   
+    r = float(episode_reward)  
+    # r = float(new_reward)   
     rewards.append(r)
     
     eps_history.append(agent.epsilon)
     avg_reward = np.mean(rewards[-100:])
     # avg_reward = np.mean(rewards)   
-    avg_loss= np.mean(episode_loss[-100:])      
+       
     print('EP: ', episode,'Reward: %.3f' % r,
             ' Average Reward %.3f' % avg_reward  ,
-            'epsilon %.5f' % agent.epsilon," **** step: ",step,"*** Agent steps: ", agent_step, " Average Loss: ",avg_loss)
+            'epsilon %.5f' % agent.epsilon," **** step: ",step,"*** Agent steps: ", agent_step)
     x = [i+1 for i in range(len(rewards))]
     filename = 'sumo-agent.png'
     

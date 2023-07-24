@@ -8,6 +8,8 @@ import random
 import math
 random.seed(0)
 T.autograd.set_detect_anomaly(True)
+
+PATH="model"
 class DQN(nn.Module):
 
     def __init__(self, state_size,action_size):
@@ -41,7 +43,11 @@ class Agent:
         self.learning_rate=0.001
         
         self.device = T.device("cuda" if T.cuda.is_available() else "cpu")
-        self.policy_net = DQN(self.state_size,self.action_size).to(self.device)
+        if PATH:
+            self.policy_net=T.load(PATH)
+            self.policy_net.eval()
+        else:
+            self.policy_net = DQN(self.state_size,self.action_size).to(self.device)
     #  rember function for training data
     def remember(self,state,action,reward,next_state,done):
         self.memory.append((state,action,reward,next_state,done))
@@ -70,38 +76,29 @@ class Agent:
             reward=reward.to(self.device)
             
             if not done:
-                # estimated_target_DQN=self.policy_net(next_state).to(self.device)
-                # estimated_target= (reward + self.gamma * T.argmax(estimated_target_DQN))
+               
+                new_state_policy=self.policy_net(new_state).to(self.device)
                 
-                #get estimated rewards for next step
-                output=self.policy_net(new_state).to(self.device)#rename these
-                # replace estimated reward for action with reward plus gamma version of the estimate
-                adjusted_reward = (reward + self.gamma * T.max(output))
-                # update estimated act in reward 
+                adjusted_reward = (reward + self.gamma * T.max(new_state_policy))
+               
+                output=self.policy_net(state).to(self.device)
                 output=output.detach().clone()
-                output[action]=adjusted_reward
-                
                 output=output.float()
-                # get the current policy ----- use label 
-                policy=self.policy_net(state).to(self.device)
-                # update with actual
-                updated_policy=policy.detach().clone()
+                
+                updated_policy=output.detach().clone()
                 updated_policy[action]=adjusted_reward
                 target=updated_policy
                 target=target.float()
                 
             else: 
                 
-                # if its done, ther is no prediction
-                # so update the policy with the actual reward
-                # output=self.policy_net(new_state).to(self.device)
-                # output=output.float()
-               
+                
                 output=self.policy_net(state).to(self.device)
                 updated_policy=output.detach().clone()
                 updated_policy[action]=reward
                 target=updated_policy
                 target=target.float()
+            
                
                
             
@@ -112,14 +109,16 @@ class Agent:
             # optimize parameters
             self.optimizer=optim.Adam(self.policy_net.parameters(),lr=self.learning_rate)
             # ----i think i have these backwards
-            out=self.loss(target,output)
+            out=self.loss(output,target)
             # out=self.loss(output,target)
             self.optimizer.zero_grad()
-            out.backward(retain_graph=True)
+            out.backward()
+            # out.backward(retain_graph=True)
             self.optimizer.step()
             T.cuda.empty_cache()
-            out=out.detach().clone()
-        return out
+            
+            T.save(self.policy_net,PATH)
+        
     
     
     

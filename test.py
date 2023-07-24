@@ -7,9 +7,9 @@ from Util.utility import Utility
 from Agent.agent import Agent
 
 
-EPISODES=10000
+EPISODES=1000
 STEPS=3000
-batch_size=64
+batch_size=32
 env = Basic("Nets/3x3.net.xml","Nets/S3x3.rou.xml",False)
 agent = Agent(4,3)
 util=Utility()
@@ -49,11 +49,11 @@ for episode in range(EPISODES):
     # if (len(agent.memory)> batch_size) :
     #                     agent.replay(batch_size)         
     
-    agent.epsilon_decay_3(episode,EPISODES)   
+    agent.epsilon_decay_2(episode,EPISODES)   
     
           
-    r = float(episode_reward)  
-    # r = float(new_reward)   
+    # r = float(episode_reward)  
+    r = float(new_reward)   
     rewards.append(r)
     eps_history.append(agent.epsilon)
     avg_reward = np.mean(rewards[-100:])

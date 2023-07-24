@@ -32,13 +32,13 @@ class Agent:
         self.state_size = state_size
         self.action_size = action_size
         
-        self.memory= deque(maxlen=20000)
-        self.gamma = 0.99
-        self.epsilon = 1
-        self.epsilon_max = 1
-        self.decay = 0.999
-        self.epsilon_min=0.05
-        self.learning_rate=0.0001
+        self.memory= deque(maxlen=10000)
+        self.gamma = 0.95
+        self.epsilon = 9999
+        self.epsilon_max = 9999
+        self.decay = 0.995
+        self.epsilon_min=0.01
+        self.learning_rate=0.001
         
         self.device = T.device("cuda" if T.cuda.is_available() else "cpu")
         self.policy_net = DQN(self.state_size,self.action_size).to(self.device)
@@ -61,17 +61,17 @@ class Agent:
  
 # Train the model
     def replay(self,batch_size):
-        # T.cuda.empty_cache()
+        T.cuda.empty_cache()
         minibatch=random.sample(self.memory,batch_size)
         
         for state,action,reward,new_state,done in minibatch:
           
+            reward= reward.float()
+            reward=reward.to(self.device)
             
             if not done:
                 # estimated_target_DQN=self.policy_net(next_state).to(self.device)
                 # estimated_target= (reward + self.gamma * T.argmax(estimated_target_DQN))
-                reward= reward.float()
-                reward=reward.to(self.device)
                 
                 #get estimated rewards for next step
                 output=self.policy_net(new_state).to(self.device)#rename these
@@ -96,10 +96,9 @@ class Agent:
                 # so update the policy with the actual reward
                 # output=self.policy_net(new_state).to(self.device)
                 # output=output.float()
-                reward= reward.float()
-                reward=reward.to(self.device)
+               
                 output=self.policy_net(state).to(self.device)
-                updated_policy=policy.detach().clone()
+                updated_policy=output.detach().clone()
                 updated_policy[action]=reward
                 target=updated_policy
                 target=target.float()
@@ -108,17 +107,16 @@ class Agent:
             
             # loss function
             self.loss =  nn.MSELoss()
-            
             # self.loss = nn.L1Loss()
-            
             
             # optimize parameters
             self.optimizer=optim.Adam(self.policy_net.parameters(),lr=self.learning_rate)
+            
             output=self.loss(output,target)
             self.optimizer.zero_grad()
             output.backward(retain_graph=True)
             self.optimizer.step()
-            # T.cuda.empty_cache()
+            T.cuda.empty_cache()
     
     
     
@@ -132,11 +130,11 @@ class Agent:
     def epsilon_decay_2(self,episode,episodes):   
         if self.epsilon > self.epsilon_min:
             
-            if (episode > (4/10 * episodes) ):           
+            if (episode > (5/10 * episodes) ):           
                 self.epsilon *= self.decay
             
             else:
-                self.epsilon= self.epsilon_max-1.01**(10*episode-((4.4/10 * episodes)*10))
+                self.epsilon= self.epsilon_max-1.01**(10*episode-((5.4/10 * episodes)*10))
         else:
             self.epsilon=self.epsilon       
         pass

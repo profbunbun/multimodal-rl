@@ -67,14 +67,9 @@ class Basic():
         "Nets/3x3.sumocfg", "--start", "--quit-on-end", "--no-step-log", "--no-warnings", "--no-duration-log",]
 
 
-        speed = self.speed
-
-        if LIBSUMO:
-            traci.start(sumo_cmd)
-            self.sumo = traci
-        else:
-            traci.start(sumo_cmd, label=self.label)
-            self.sumo = traci
+        
+        traci.start(sumo_cmd, label=self.label)
+        self.sumo = traci
 
         self.sumo.simulationStep()
         self.reward = 0
@@ -113,7 +108,7 @@ class Basic():
         return state, self.reward, self.no_choice, self.lane, self.out_dict
 
     def nullstep(self):
-        self.reward = 0
+        # self.reward = 0
 
         self.old_edge = self.vedge
         self.sumo.simulationStep()
@@ -126,7 +121,7 @@ class Basic():
         pass
 
     def step(self, action=None):
-        self.reward = 0
+        # self.reward = 0
         self.old_distance = self.new_distance
 
         self.steps += 1
@@ -149,14 +144,14 @@ class Basic():
         self.new_distance = (math.dist(self.vloc, self.ploc))
 
         if self.new_distance > self.old_distance:
-            self.reward += -.35
+            self.reward += -.5
         if self.new_distance < self.old_distance:
 
-            self.reward += .41
-
-        self.vehicle.set_destination(action)
-        self.reward += -.1
-        self.agent_step += 1
+            self.reward += .6
+        if not self.no_choice:
+            self.vehicle.set_destination(action)
+            self.reward += -.8
+            self.agent_step += 1
 
         self.vedge = self.sumo.vehicle.getRoadID("1")
         self.pedge = self.sumo.person.getRoadID("p_0")
@@ -171,12 +166,12 @@ class Basic():
         done = False
 
         if self.vedge == self.pedge:
-            self.reward += 10
+            self.reward += 5
             done = True
-        # if self.steps > self.steps_per_episode:
-        #     self.reward += -10
-        #     done = True
-        #     self.sumo.close()
+        if self.steps > self.steps_per_episode:
+            self.reward += -10
+            done = True
+            # self.sumo.close()
             
 
         state = np.array([])

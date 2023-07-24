@@ -6,7 +6,7 @@ from Env.env import Basic
 from Util.utility import Utility
 from Agent.agent import Agent
 
-
+ 
 EPISODES=100
 STEPS=3000
 batch_size=32

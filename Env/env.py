@@ -60,24 +60,11 @@ class Basic():
 
     def reset(self):
 
-        if self.use_gui :
-            self._sumo_binary = sumolib.checkBinary("sumo-gui")
-            sumo_cmd = [
-            "sumo-gui",
-            "-d "+"5",
-            
-            "-c",
-            
-            "Nets/3x3.sumocfg", "--start", "--quit-on-end", "--no-step-log", "--no-warnings", "--no-duration-log",]
-
-        else:
-            self._sumo_binary = sumolib.checkBinary("sumo")
-            sumo_cmd = [
-            "sumo",
-            # "-d "+"5",
-            
-            "-c",
-            "Nets/3x3.sumocfg", "--start", "--quit-on-end", "--no-step-log", "--no-warnings", "--no-duration-log",]
+        sumo_cmd = [
+        "sumo",
+        
+        "-c",
+        "Nets/3x3.sumocfg", "--start", "--quit-on-end", "--no-step-log", "--no-warnings", "--no-duration-log",]
 
 
         speed = self.speed

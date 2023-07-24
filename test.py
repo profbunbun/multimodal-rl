@@ -43,7 +43,7 @@ for episode in range(EPISODES):
                  env.nullstep()
             
              if (len(agent.memory)> batch_size) and (step % batch_size == 0):
-                        agent.replay(batch_size)
+                         agent.replay(batch_size)
                         
              step+=1
              
@@ -59,6 +59,7 @@ for episode in range(EPISODES):
     
     eps_history.append(agent.epsilon)
     avg_reward = np.mean(rewards[-100:])
+    
     # avg_reward = np.mean(rewards)   
        
     print('EP: ', episode,'Reward: %.3f' % r,

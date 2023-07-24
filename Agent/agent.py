@@ -1,4 +1,5 @@
 from collections import deque
+import os
 import torch as T
 import torch.nn as nn
 import torch.nn.functional as F
@@ -9,7 +10,7 @@ import math
 random.seed(0)
 T.autograd.set_detect_anomaly(True)
 
-PATH="model"
+PATH="Models/model.pt"
 class DQN(nn.Module):
 
     def __init__(self, state_size,action_size):
@@ -36,18 +37,20 @@ class Agent:
         
         self.memory= deque(maxlen=10000)
         self.gamma = 0.95
-        self.epsilon = .9999
-        self.epsilon_max = .9999
+        self.epsilon = .9997
+        self.epsilon_max = .9997
         self.decay = 0.995
         self.epsilon_min=0.01
         self.learning_rate=0.001
         
         self.device = T.device("cuda" if T.cuda.is_available() else "cpu")
-        if PATH:
-            self.policy_net=T.load(PATH)
+        if os.path.exists(PATH):
+            self.policy_net = DQN(self.state_size,self.action_size).to(self.device)
+            self.policy_net.load_state_dict(T.load(PATH))
             self.policy_net.eval()
         else:
             self.policy_net = DQN(self.state_size,self.action_size).to(self.device)
+        # self.policy_net = DQN(self.state_size,self.action_size).to(self.device)
     #  rember function for training data
     def remember(self,state,action,reward,next_state,done):
         self.memory.append((state,action,reward,next_state,done))
@@ -80,7 +83,7 @@ class Agent:
                 new_state_policy=self.policy_net(new_state).to(self.device)
                 
                 adjusted_reward = (reward + self.gamma * T.max(new_state_policy))
-               
+                
                 output=self.policy_net(state).to(self.device)
                 output=output.detach().clone()
                 output=output.float()
@@ -90,35 +93,37 @@ class Agent:
                 target=updated_policy
                 target=target.float()
                 
-            else: 
+            # else: 
                 
                 
-                output=self.policy_net(state).to(self.device)
-                updated_policy=output.detach().clone()
-                updated_policy[action]=reward
-                target=updated_policy
-                target=target.float()
+            #     output=self.policy_net(state).to(self.device)
+            #     updated_policy=output.detach().clone()
+            #     updated_policy[action]=reward
+            #     target=updated_policy
+            #     target=target.float()
             
                
                
             
-            # loss function
-            self.loss =  nn.MSELoss()
-            # self.loss = nn.L1Loss()
+                # loss function
+                loss =  nn.MSELoss()
+                # loss = nn.L1Loss()
+                
+                # optimize parameters
+                optimizer=optim.Adam(self.policy_net.parameters(),lr=self.learning_rate)
+                # ----i think i have these backwards
+                out=loss(output,target)
+                
+                # out=self.loss(output,target)
+                optimizer.zero_grad()
+                # out.backward()
+                out.backward(retain_graph=True)
+                optimizer.step()
+                T.cuda.empty_cache()
+                
+                T.save(self.policy_net.state_dict(),PATH)
+                # return loss.item()
             
-            # optimize parameters
-            self.optimizer=optim.Adam(self.policy_net.parameters(),lr=self.learning_rate)
-            # ----i think i have these backwards
-            out=self.loss(output,target)
-            # out=self.loss(output,target)
-            self.optimizer.zero_grad()
-            out.backward()
-            # out.backward(retain_graph=True)
-            self.optimizer.step()
-            T.cuda.empty_cache()
-            
-            T.save(self.policy_net,PATH)
-        
     
     
     

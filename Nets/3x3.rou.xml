@@ -5,22 +5,23 @@
         <param key="has.vehroute.device" value="true"/>
        
         
-        <device.taxi.stands-rerouter="rr0"/>
+        
     </vType>
     <!-- Routes -->
     <route id="r_0" edges="9e"/>
 
-    <rerouter id="rr0" edges="1w">
+    <rerouter id="rr0" edges="EO">
       <interval begin="0" end="2000">
-         <parkingAreaReroute id="pa1w"/>
+         <parkingAreaReroute id="pa_1"/>
        
       </interval>
    </rerouter>
    
     
     <!-- Vehicles, persons and containers (sorted by depart) -->
-    <vehicle id="taxi" type="taxi" depart="0.00" route="r_0" >
-     <parm key ="device.taxi.idle-algorithm" value="random Circling"/>
+    <vehicle id="taxi" type="taxi" depart="0.00" route="r_0" stands-rerouter="rr0" >
+     <!-- <param key="device.taxi.stands-rerouter" value="rr0"/> -->
+     <!-- <parm key ="device.taxi.idle-algorithm" value="taxistand"/> -->
     
     </vehicle>
     <person id="p_0" depart="0.00">

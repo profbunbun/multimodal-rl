@@ -1,9 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- generated on 2023-04-24 10:41:09 by Eclipse SUMO netedit Version 1.16.0
+<!-- generated on 2023-07-25 10:51:49 by Eclipse SUMO netedit Version 1.18.0
 -->
 
 <additional xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/additional_file.xsd">
     <!-- StoppingPlaces -->
- 
+    <parkingArea id="pa_0" name="parking" lane="E0_0" startPos="20.70" endPos="30.70" friendlyPos="true" roadsideCapacity="1"/>
+    <parkingArea id="pa_1" name="parking" lane="E0_0" startPos="0.40" endPos="10.40" friendlyPos="true" roadsideCapacity="2"/>
+    <rerouter id="rr0" edges="E0">
+      <interval begin="0" end="2000">
+         <parkingAreaReroute id="pa_1"/>
+       
+      </interval>
+    </rerouter>
 </additional>

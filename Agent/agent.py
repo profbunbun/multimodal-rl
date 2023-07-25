@@ -16,9 +16,9 @@ class DQN(nn.Module):
     def __init__(self, state_size,action_size):
         super(DQN, self).__init__()
         self.device = T.device("cuda" if T.cuda.is_available() else "cpu")
-        self.layer1 = nn.Linear(state_size, 32)
-        self.layer2 = nn.Linear(32, 64)
-        self.layer3 = nn.Linear(64, 16)
+        self.layer1 = nn.Linear(state_size, 16)
+        self.layer2 = nn.Linear(16, 32)
+        self.layer3 = nn.Linear(32, 16)
         self.layer4 = nn.Linear(16, action_size)
 
     def forward(self, x):
@@ -39,7 +39,7 @@ class Agent:
         self.gamma = 0.95
         self.epsilon = .9997
         self.epsilon_max = .9997
-        self.decay = 0.995
+        self.decay = 0.99
         self.epsilon_min=0.01
         self.learning_rate=0.001
         
@@ -70,7 +70,7 @@ class Agent:
  
 # Train the model
     def replay(self,batch_size):
-        T.cuda.empty_cache()
+        # T.cuda.empty_cache()
         minibatch=random.sample(self.memory,batch_size)
         
         for state,action,reward,new_state,done in minibatch:
@@ -85,22 +85,22 @@ class Agent:
                 adjusted_reward = (reward + self.gamma * T.max(new_state_policy))
                 
                 output=self.policy_net(state).to(self.device)
-                output=output.detach().clone()
-                output=output.float()
+                # output=output.detach().clone()
+                # output=output.float()
                 
-                updated_policy=output.detach().clone()
-                updated_policy[action]=adjusted_reward
-                target=updated_policy
-                target=target.float()
+                target=output.detach().clone()
+                target[action]=adjusted_reward
+                target=target.to(self.device)
+                # target=target.float()
                 
-            # else: 
+            else: 
                 
                 
-            #     output=self.policy_net(state).to(self.device)
-            #     updated_policy=output.detach().clone()
-            #     updated_policy[action]=reward
-            #     target=updated_policy
-            #     target=target.float()
+                output=self.policy_net(state).to(self.device)
+                target=output.detach().clone()
+                target[action]=reward
+                target=target.to(self.device)
+                # target=target.float()
             
                
                
@@ -119,7 +119,7 @@ class Agent:
                 # out.backward()
                 out.backward(retain_graph=True)
                 optimizer.step()
-                T.cuda.empty_cache()
+                # T.cuda.empty_cache()
                 
                 T.save(self.policy_net.state_dict(),PATH)
                 # return loss.item()

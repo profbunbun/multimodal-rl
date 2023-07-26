@@ -20,43 +20,45 @@ util=Utility()
 class Vehicle:
     CONNECTION_LABEL = 0 
     def __init__(self,vehicle_id,net_file,route_file,out_dict,index_dict,sumo) -> None:
-        
         self.vehicle_id =vehicle_id
-        self.destination = None
         self._net = net_file
         self._route = route_file
-        self.min=0
-        self.max=0
-        self.diff=0
         self.out_dict=out_dict
         self.index_dict=index_dict
-        self.choice=None
-        self.flag=None
-        self.choice_dic=None
-        self.make_choice=True
-        
-        
         self.sumo = sumo
-         
-        self.min,self.max,self.diff=util.getMinMax(self._net)
         pass
     
-    def random_relocate(self):
-         self.new_lane=random.choice(list(self.index_dict.keys()))      
-         self.sumo.vehicle.changeTarget("1",edgeID=self.new_lane)
-         self.sumo.vehicle.moveTo("1",self.new_lane+"_0",5)
-         return
-     
-     
-    def get_start_lane(self):
-        return self.new_lane
+    def get_lane(self):        
+        current_lane=self.sumo.vehicle.getLaneID("1")
+        return current_lane
+    
     
     def location(self):
-        
         self.vpos=self.sumo.vehicle.getPosition(self.vehicle_id)
-        
-        
         return [self.vpos[0],self.vpos[1]] 
+    
+    def is_indexed_lane(self):
+        current_lane=self.get_lane()
+        if current_lane == '':
+            return False
+        
+        if ':' not in current_lane :
+            return True
+        else:
+            return False
+    
+    def get_stats(self):
+        current_lane=self.get_lane()
+        current_location=current_lane.partition("_")[0]            
+        out_choices=list(self.out_dict[current_location].keys())
+        out_lanes=list(self.out_dict[current_location].values())
+        return current_lane,out_choices,out_lanes
+            
+     
+    def get_out_dict(self):
+        return self.out_dict
+    
+    
         
     def set_destination(self,action):
         # print(action)
@@ -76,19 +78,10 @@ class Vehicle:
                 self.sumo.vehicle.changeTarget("1",target)
         return
 
-    def get_out_dict(self):
-        return self.out_dict
     
-    def links(self):
-        
-        current_lane=self.sumo.vehicle.getLaneID("1")
-        choices=len(self.sumo.lane.getLinks(current_lane))
-        return choices
     
-    def get_lane(self):
-        
-        current_lane=self.sumo.vehicle.getLaneID("1")
-        return current_lane
+   
+    
     
     def set_pickup(self):
         pass
@@ -103,6 +96,11 @@ class Vehicle:
         self.sumo.close()
         return
     
+    def random_relocate(self):
+         self.new_lane=random.choice(list(self.index_dict.keys()))      
+         self.sumo.vehicle.changeTarget("1",edgeID=self.new_lane)
+         self.sumo.vehicle.moveTo("1",self.new_lane+"_0",5)
+         return
     
     
     

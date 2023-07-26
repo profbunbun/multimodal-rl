@@ -18,7 +18,7 @@
    
     <!-- Vehicles, persons and containers (sorted by depart) -->
     <vehicle id="1" type="taxi" depart="0.00" >
-        <route edges="E0"/>
+        <route edges="9e"/>
     </vehicle>
     <person id="p_0" depart="0.00">
         <ride from="2e" to="24w" lines="taxi"/>

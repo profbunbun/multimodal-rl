@@ -39,6 +39,13 @@ class Vehicle:
         self.sumo = sumo
          
         self.min,self.max,self.diff=util.getMinMax(self._net)
+        self.current_lane=self.sumo.vehicle.getLaneID("1")
+        self.cur_loc=self.current_lane.partition("_")[0]
+        if ':' not in self.cur_loc:
+            
+            self.outlist=list(self.out_dict[self.cur_loc].keys())
+            self.outlane=list(self.out_dict[self.cur_loc].values())
+        
         pass
     
     def random_relocate(self):
@@ -66,8 +73,8 @@ class Vehicle:
         
         if ':' not in self.cur_loc:
             
-            outlist=list(self.out_dict[self.cur_loc].keys())
-            outlane=list(self.out_dict[self.cur_loc].values())
+            self.outlist=list(self.out_dict[self.cur_loc].keys())
+            self.outlane=list(self.out_dict[self.cur_loc].values())
             if action < len(outlist) : 
                 outlist=np.array(outlist)
                 outlane=np.array(outlane)
@@ -75,6 +82,14 @@ class Vehicle:
                 
                 self.sumo.vehicle.changeTarget("1",target)
         return
+    def get_lists(self):
+        if ':' not in self.cur_loc:
+            
+            self.outlist=list(self.out_dict[self.cur_loc].keys())
+            self.outlane=list(self.out_dict[self.cur_loc].values())
+        
+        
+        return self.outlist,self.outlane
 
     def get_out_dict(self):
         return self.out_dict
@@ -82,7 +97,8 @@ class Vehicle:
     def links(self):
         
         current_lane=self.sumo.vehicle.getLaneID("1")
-        choices=len(self.sumo.lane.getLinks(current_lane))
+        choices=self.sumo.lane.getLinks(current_lane)
+        
         return choices
     
     def get_lane(self):

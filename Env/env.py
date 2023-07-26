@@ -87,6 +87,8 @@ class Basic():
         self.pedge = self.sumo.person.getRoadID("p_0")
 
         self.vehicle_lane_index = self.index_dict[self.vedge]
+        
+        
         self.person_lane_index = self.index_dict[self.pedge]
 
         self.vloc = self.vehicle.location()
@@ -129,6 +131,8 @@ class Basic():
         self.action = action
         self.old_edge = self.vedge
         self.sumo.simulationStep()
+        self.v_outc_hoice,self.v_outlanes=self.vehicle.get_lists()
+        print(self.v_outc_hoice,self.v_outlanes)
         self.vedge = self.sumo.vehicle.getRoadID("1")
 
         if self.old_edge == self.vedge and ':' not in self.vedge:

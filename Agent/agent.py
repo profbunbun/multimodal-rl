@@ -66,6 +66,7 @@ class Agent:
         
 # make choice function
     def act(self,state):
+        
         rando=np.random.rand()
         if  rando < self.epsilon:
             act=np.random.randint(0,high=self.action_size-1)
@@ -75,6 +76,18 @@ class Agent:
             # q-val
             act=T.argmax(act_values)
             return act
+        
+        # def act(self,state):
+        # actions=['r','s','l']
+        # rando=np.random.rand()
+        # if  rando < self.epsilon:
+        #     act=np.random.randint(0,high=self.action_size-1)
+        #     return act
+        # else:
+        #     act_values = self.policy_net(state)
+        #     # q-val
+        #     act=T.argmax(act_values)
+        #     return actions[act]
  
 # Train the model
     def replay(self,batch_size):
@@ -133,7 +146,9 @@ class Agent:
                 # return loss.item()
             
     
-    
+    def available_action_filter(self,output):
+        
+        pass
     
     
     # trying differnt epsilon decay

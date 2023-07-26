@@ -147,9 +147,10 @@ class Basic():
         self.sumo.simulationStep()
         
         self.vedge = self.sumo.vehicle.getRoadID("1")
+        
         if self.vehicle.is_indexed_lane():
             current_lane,out_choices,out_lanes= self.vehicle.get_stats()
-            print(current_lane,out_choices,out_lanes)
+            # print(current_lane,out_choices,out_lanes)
 
         if self.old_edge == self.vedge and ':' not in self.vedge:
             self.no_choice = True
@@ -169,6 +170,7 @@ class Basic():
 
             self.reward += .6
         if not self.no_choice:
+            
             self.vehicle.set_destination(action)
             self.reward += -.8
             self.agent_step += 1

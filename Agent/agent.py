@@ -63,6 +63,13 @@ class Agent:
     def remember(self,state,action,reward,next_state,done):
         self.memory.append((state,action,reward,next_state,done))
         
+    def set_legal_actions_filter(self,legal_actons):
+        
+        return
+    
+    def filter_legalactions(self):
+        
+        return    
         
 # make choice function
     def act(self,state):

@@ -63,8 +63,13 @@ class Basic():
         sumo_cmd = [
         "sumo",
         
-        "-c",
-        "Nets/3x3.sumocfg", "--start", "--quit-on-end", "--no-step-log", "--no-warnings", "--no-duration-log",]
+        
+        "-c","Nets/3x3.sumocfg",
+        "--start",
+        "--quit-on-end", 
+        "--no-step-log",
+        "--no-warnings",
+        "--no-duration-log",]
 
 
         
@@ -106,15 +111,26 @@ class Basic():
 
         self.lane = self.sumo.vehicle.getLaneID("1")
         self.out_dict = self.vehicle.get_out_dict()
+        
+        
+        if self.vehicle.is_indexed_lane():
+            current_lane,out_choices,out_lanes= self.vehicle.get_stats()
+            # print(current_lane,out_choices,out_lanes)
+            
+        
 
         return state, self.reward, self.no_choice, self.lane, self.out_dict
 
     def nullstep(self):
         self.reward = 0
+        
 
         self.old_edge = self.vedge
         self.sumo.simulationStep()
         self.vedge = self.sumo.vehicle.getRoadID("1")
+        # if self.vehicle.is_indexed_lane():
+        #     current_lane,out_choices,out_lanes= self.vehicle.get_stats()
+        #     print(current_lane,out_choices,out_lanes)
 
         if self.old_edge == self.vedge:
             self.no_choice = True
@@ -131,9 +147,14 @@ class Basic():
         self.action = action
         self.old_edge = self.vedge
         self.sumo.simulationStep()
+        
         self.v_outc_hoice,self.v_outlanes=self.vehicle.get_lists()
         print(self.v_outc_hoice,self.v_outlanes)
         self.vedge = self.sumo.vehicle.getRoadID("1")
+        
+        if self.vehicle.is_indexed_lane():
+            current_lane,out_choices,out_lanes= self.vehicle.get_stats()
+            # print(current_lane,out_choices,out_lanes)
 
         if self.old_edge == self.vedge and ':' not in self.vedge:
             self.no_choice = True
@@ -153,6 +174,7 @@ class Basic():
 
             self.reward += .6
         if not self.no_choice:
+            
             self.vehicle.set_destination(action)
             self.reward += -.8
             self.agent_step += 1

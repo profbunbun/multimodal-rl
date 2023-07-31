@@ -75,8 +75,8 @@ class Vehicle:
         
         if ':' not in self.cur_loc:
             
-            self.outlist=list(self.out_dict[self.cur_loc].keys())
-            self.outlane=list(self.out_dict[self.cur_loc].values())
+            outlist=list(self.out_dict[self.cur_loc].keys())
+            outlane=list(self.out_dict[self.cur_loc].values())
             if action < len(outlist) : 
                 outlist=np.array(outlist)
                 outlane=np.array(outlane)

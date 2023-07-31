@@ -14,10 +14,7 @@
     <taxi_device>
         <device.taxi.dispatch-algorithm value="traci"/>
         <device.taxi.idle-algorithm value="randomCircling"/>
-<<<<<<< HEAD
         <!-- <device.taxi.idle-algorithm value="taxistand"/> -->
-=======
->>>>>>> 79fb22627e4df6c4978c45dc8d06acee4e77879a
     </taxi_device>
 
 </configuration>

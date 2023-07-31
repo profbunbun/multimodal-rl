@@ -148,8 +148,8 @@ class Basic():
         self.old_edge = self.vedge
         self.sumo.simulationStep()
         
-        self.v_outc_hoice,self.v_outlanes=self.vehicle.get_lists()
-        print(self.v_outc_hoice,self.v_outlanes)
+       
+       
         self.vedge = self.sumo.vehicle.getRoadID("1")
         
         if self.vehicle.is_indexed_lane():

@@ -1,4 +1,3 @@
-import gymnasium as gym
 import torch as T
 import numpy as np
 from Env.env import Basic

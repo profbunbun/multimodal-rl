@@ -9,10 +9,17 @@ import random
 util=Utility()
 
 
+STRAIGHT = "s"
+TURN_AROUND = "t"
+LEFT = "l"
+RIGHT = "r"
+SLIGHT_LEFT = "L"
+SLIGHT_RIGHT = "R"
 
 class Vehicle:
     
     def __init__(self,vehicle_id,net_file,route_file,out_dict,index_dict,sumo) -> None:
+        self.direction_choices = [STRAIGHT, TURN_AROUND,  SLIGHT_RIGHT, RIGHT, SLIGHT_LEFT, LEFT]
         self.vehicle_id =vehicle_id
         self._net = net_file
         self._route = route_file

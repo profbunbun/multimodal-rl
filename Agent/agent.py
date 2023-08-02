@@ -1,12 +1,12 @@
 from collections import deque
 import os
+import random
+import math
 import torch as T
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 import numpy as np
-import random
-import math
 random.seed(0)
 T.autograd.set_detect_anomaly(True)
 

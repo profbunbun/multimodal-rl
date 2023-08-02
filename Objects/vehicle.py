@@ -2,23 +2,16 @@ import os
 import sys
 import numpy as np
 from Util.utility import Utility
-if 'SUMO_HOME' in os.environ:
-    tools = os.path.join(os.environ['SUMO_HOME'], 'tools')
-    sys.path.append(tools)
-else:
-    sys.exit("No environment variable SUMO_HOME!")
-import sumolib
-from sumolib import net
-import traci
+
 
 import random
-LIBSUMO = "LIBSUMO_AS_TRACI" in os.environ
+
 util=Utility()
 
 
 
 class Vehicle:
-    CONNECTION_LABEL = 0 
+    
     def __init__(self,vehicle_id,net_file,route_file,out_dict,index_dict,sumo) -> None:
         self.vehicle_id =vehicle_id
         self._net = net_file

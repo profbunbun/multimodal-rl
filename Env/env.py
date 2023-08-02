@@ -1,9 +1,7 @@
 import sys
 import os
 import math
-import torch as T
 import numpy as np
-import gymnasium as gym
 from Objects.vehicle import Vehicle
 from Objects.person import Person
 from Util.utility import Utility
@@ -15,7 +13,7 @@ if 'SUMO_HOME' in os.environ:
 else:
     sys.exit("No environment variable SUMO_HOME!")
     
-import sumolib
+
 import libsumo as traci
 
 util = Utility()
@@ -24,7 +22,6 @@ LIBSUMO = "LIBSUMO_AS_TRACI" in os.environ
 
 
 class Basic():
-    metadata = {'render.modes': ['human']}
     CONNECTION_LABEL = 0
 
     def __init__(self, net_file: str,

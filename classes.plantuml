@@ -1,0 +1,6 @@
+digraph "classes" {
+rankdir=BT
+charset="utf-8"
+"agent.Agent" [color="black", fontcolor="black", label="{Agent|action_size\ldecay : float\ldevice\lepsilon : float\lepsilon_max : float\lepsilon_min : float\lgamma : float\llearning_rate : float\lmemory : deque\lpolicy_net : NoneType\lstate_size\l|act(state)\lavailable_action_filter(output)\lepsilon_decay()\lepsilon_decay_2(episode, episodes)\lepsilon_decay_3(episode, episodes)\lfilter_legalactions()\lremember(state, action, reward, next_state, done)\lreplay(batch_size)\lset_legal_actions_filter(legal_actons)\l}", shape="record", style="solid"];
+"agent.DQN" [color="black", fontcolor="black", label="{DQN|device\llayer1 : Linear\llayer2 : Linear\llayer3 : Linear\llayer4 : Linear\l|forward(x)\l}", shape="record", style="solid"];
+}

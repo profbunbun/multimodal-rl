@@ -1,20 +1,13 @@
 import os
 import sys
 from Util.utility import Utility
-if 'SUMO_HOME' in os.environ:
-    tools = os.path.join(os.environ['SUMO_HOME'], 'tools')
-    sys.path.append(tools)
-else:
-    sys.exit("No environment variable SUMO_HOME!")
-import sumolib
-from sumolib import net
-import traci
+
 util=Utility()
-LIBSUMO = "LIBSUMO_AS_TRACI" in os.environ
+
 
     
 class Person:
-    CONNECTION_LABEL = 0 
+    
     def __init__(self,person_id,net_file,route_file,sumo) -> None:
         
         self.person_id =person_id

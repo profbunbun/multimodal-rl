@@ -8,51 +8,51 @@ from Agent.agent import Agent
 
 EPISODES=1000
 STEPS=3000
-batch_size=32
+BATCH_SIZE=32
 env = Basic("Nets/3x3b.net.xml","Nets/3x3_2.rou.xml",False)
 agent = Agent(4,3)
 util=Utility()
 
 rewards,eps_history=[],[]
 for episode in range(EPISODES):
-    done=False
+    DONE=False
     state ,reward,no_choice,lane, out_dict= env.reset()
     state=T.from_numpy(state)
-    step=0
-    agent_step=0
-    episode_reward=0
+    STEP=0
+    AGENT_STEP=0
+    EPISODE_REWARD=0
     
     # fix render
     # env.render('human')
-    while not done:
+    while not DONE:
              
-             if not env.no_choice:
-                action=agent.act(state)
-                next_state,new_reward, done = env.step(action) 
-                next_state,new_reward=T.from_numpy(next_state),T.from_numpy(new_reward)
-                agent_step+=1
-                agent.remember(state,action,new_reward,next_state,done)
-                state=next_state
-                episode_reward+=new_reward
-                # if (len(agent.memory)> 1000) :
-                #         agent.replay(batch_size)
+        if not env.no_choice:
+            action=agent.act(state)
+            next_state,new_reward, DONE = env.step(action) 
+            next_state,new_reward=T.from_numpy(next_state),T.from_numpy(new_reward)
+            AGENT_STEP+=1
+            agent.remember(state,action,new_reward,next_state,DONE)
+            state=next_state
+            EPISODE_REWARD+=new_reward
+        # if (len(agent.memory)> 1000) :
+        #         agent.replay(BATCH_SIZE)
+        
+        
+        else:
+            env.nullstep()
+    
+        if (len(agent.memory)> BATCH_SIZE) and (STEP % BATCH_SIZE == 0):
+                    agent.replay(BATCH_SIZE)
                 
-                
-             else:
-                 env.nullstep()
-            
-             if (len(agent.memory)> batch_size) and (step % batch_size == 0):
-                         agent.replay(batch_size)
-                        
-             step+=1
+        STEP+=1
              
-    # if (len(agent.memory)> batch_size) :
-    #                     agent.replay(batch_size)         
+    # if (len(agent.memory)> BATCH_SIZE) :
+    #                     agent.replay(BATCH_SIZE)         
     
     agent.epsilon_decay_2(episode,EPISODES)   
     
           
-    r = float(episode_reward)  
+    r = float(EPISODE_REWARD)  
     # r = float(new_reward)   
     rewards.append(r)
     
@@ -63,7 +63,7 @@ for episode in range(EPISODES):
        
     print('EP: ', episode,'Reward: %.3f' % r,
             ' Average Reward %.3f' % avg_reward  ,
-            'epsilon %.5f' % agent.epsilon," **** step: ",step,"*** Agent steps: ", agent_step)
+            'epsilon %.5f' % agent.epsilon," **** STEP: ",STEP,"*** Agent STEPs: ", AGENT_STEP)
     x = [i+1 for i in range(len(rewards))]
     filename = 'sumo-agent.png'
     

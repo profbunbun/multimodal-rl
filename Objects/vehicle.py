@@ -17,18 +17,17 @@ SLIGHT_RIGHT = "R"
 
 class Vehicle:
     
-    def __init__(self,vehicle_id,net_file,route_file,out_dict,index_dict,sumo) -> None:
+    def __init__(self,vehicle_id,out_dict,index_dict,sumo) -> None:
+        
         self.direction_choices = [STRAIGHT, TURN_AROUND,  SLIGHT_RIGHT, RIGHT, SLIGHT_LEFT, LEFT]
         self.vehicle_id =vehicle_id
-        self._net = net_file
-        self._route = route_file
         self.out_dict=out_dict
         self.index_dict=index_dict
         self.sumo = sumo
         self.current_lane=self.sumo.vehicle.getLaneID("1")
         self.cur_loc=self.current_lane.partition("_")[0]
+        
         if ':' not in self.cur_loc:
-            
             self.outlist=list(self.out_dict[self.cur_loc].keys())
             self.outlane=list(self.out_dict[self.cur_loc].values())
         

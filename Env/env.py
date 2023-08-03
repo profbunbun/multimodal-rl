@@ -6,9 +6,9 @@ from Connector.connect import SUMOConnection
 
 class Basic():
 
-    def __init__(self,sumocon:str, net_file: str, route_file: str,gui) -> None:
+    def __init__(self,sumocon:str) -> None:
         
-        self.sumo_con=SUMOConnection(sumocon,False)
+        self.sumo_con=SUMOConnection(sumocon)
         self.out_dict, self.index_dict,self.edge_list = self.sumo_con.getEdgesInfo()
         
         
@@ -20,41 +20,26 @@ class Basic():
         self.done = False
         self.no_choice = False
 
-
-        self.net_ = net_file
-        self.route_ = route_file
-
-        self.use_gui = gui
-        self.speed = None
-        self.render_mode = None
-
         self.vehicle = None
 
        
         
 
     def reset(self):
-
-        self.sumo = self.sumo_con.connect_libsumo_no_gui()
-
         self.sumo.simulationStep()
         self.reward = 0
-
         self.episode_step += 1
         self.done = False
         self.steps = 0
         self.agent_step = 0
 
-        self.vehicle = Vehicle("1", self.net_, self.route_,
-                               self.out_dict, self.index_dict, self.sumo)
-        self.person = Person("p_0", self.net_, self.route_, self.sumo)
+        self.vehicle = Vehicle("1", self.out_dict, self.index_dict, self.sumo)
+        self.person = Person("p_0",  self.sumo)
 
         self.vedge = self.sumo.vehicle.getRoadID("1")
         self.pedge = self.sumo.person.getRoadID("p_0")
 
         self.vehicle_lane_index = self.index_dict[self.vedge]
-        
-        
         self.person_lane_index = self.index_dict[self.pedge]
 
         self.vloc = self.vehicle.location()
@@ -76,10 +61,7 @@ class Basic():
         
         if self.vehicle.is_indexed_lane():
             current_lane,out_choices,out_lanes= self.vehicle.get_stats()
-            # print(current_lane,out_choices,out_lanes)
             
-        
-
         return state, self.reward, self.no_choice, self.lane, self.out_dict
 
     def nullstep(self):
@@ -172,9 +154,18 @@ class Basic():
 
         return state, reward, done
 
-    def render(self, mode='human'):
-        self.speed = 5
-        self.use_gui = True
+    def render(self, mode):
+        
+        if mode =="gui":
+            self.sumo = self.sumo_con.connect_gui()
+        
+        elif mode =="libsumo":
+            self.sumo = self.sumo_con.connect_libsumo_no_gui()
+        
+        elif mode == "no_gui":
+            self.sumo = self.sumo_con.connect_no_gui()
+        
+        
         return
 
     def close(self):

@@ -9,13 +9,19 @@ from Agent.agent import Agent
 EPISODES=1000
 STEPS=3000
 BATCH_SIZE=32
+
 SUMOCONFIG="Nets/3x3.sumocfg"
-env = Basic(SUMOCONFIG,"Nets/3x3b.net.xml","Nets/3x3_2.rou.xml",False)
+env = Basic(SUMOCONFIG)
 agent = Agent(4,3)
 util=Utility()
 
 rewards,eps_history=[],[]
 for episode in range(EPISODES):
+    
+    if EPISODES % 10:
+        env.render("gui")
+    else:
+        env.render("libsumo")
     DONE=False
     state ,reward,no_choice,lane, out_dict= env.reset()
     state=T.from_numpy(state)

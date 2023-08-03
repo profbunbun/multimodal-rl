@@ -16,31 +16,26 @@ else:
 class SUMOConnection:
     
     CONNECTION_LABEL = 0
-    def __init__(self, sumocfg:str, gui:bool) -> None:
+    def __init__(self, sumocfg:str) -> None:
         self.label = str(SUMOConnection.CONNECTION_LABEL)
         SUMOConnection.CONNECTION_LABEL += 1
-        self.sumocfg=sumocfg
-        if gui:
-            
-            self.sumo_cmd = ["sumo-gui","-c",sumocfg,]
-        else:
-           
-            self.sumo_cmd = ["sumo","-c",sumocfg,]
-        self.sumo_=None
-        
+        self.sumocfg=sumocfg        
         pass
-    
+    # do i need the dconnection label?
     def connect_gui(self):
+        self.sumo_cmd = ["sumo-gui","-c",self.sumocfg,]
         traci.start(self.sumo_cmd,label=self.label)
         self.sumo_= traci
         return self.sumo_
     
     def connect_libsumo_no_gui(self):
+        self.sumo_cmd = ["sumo","-c",self.sumocfg,]
         libsumo.start(self.sumo_cmd,label=self.label)
         self.sumo_= libsumo
         return self.sumo_
     
     def connect_no_gui(self):
+        self.sumo_cmd = ["sumo","-c",self.sumocfg,]
         traci.start(self.sumo_cmd,label=self.label)
         self.sumo_= traci
         return self.sumo_

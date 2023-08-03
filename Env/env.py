@@ -1,32 +1,17 @@
-import sys
-import os
 import math
 import numpy as np
 from Objects.vehicle import Vehicle
 from Objects.person import Person
-from Util.utility import Utility
-
-
-if 'SUMO_HOME' in os.environ:
-    tools = os.path.join(os.environ['SUMO_HOME'], 'tools')
-    sys.path.append(tools)
-else:
-    sys.exit("No environment variable SUMO_HOME!")
-    
-
-import libsumo as traci
-
-util = Utility()
-
-LIBSUMO = "LIBSUMO_AS_TRACI" in os.environ
-
+from Connector.connect import SUMOConnection
 
 class Basic():
-    CONNECTION_LABEL = 0
 
-    def __init__(self, net_file: str,
-                 route_file: str,gui
-                 ) -> None:
+    def __init__(self,sumocon:str, net_file: str, route_file: str,gui) -> None:
+        
+        self.sumo_con=SUMOConnection(sumocon,False)
+        self.out_dict, self.index_dict,self.edge_list = self.sumo_con.getEdgesInfo()
+        
+        
         self.steps_per_episode = 2000
         self.episode_count = 0
         self.episode_step = 0
@@ -35,15 +20,9 @@ class Basic():
         self.done = False
         self.no_choice = False
 
-        self.out_dict = None
-        self.index_dict = None
-        self.edge_list = None
-        self.network = util.getNetInfo(net_file)
-        [self.out_dict, self.index_dict,
-            self.edge_list] = util.getEdgesInfo(self.network)
 
-        self._net = net_file
-        self._route = route_file
+        self.net_ = net_file
+        self.route_ = route_file
 
         self.use_gui = gui
         self.speed = None
@@ -51,27 +30,12 @@ class Basic():
 
         self.vehicle = None
 
-        self.label = str(Basic.CONNECTION_LABEL)
-        Basic.CONNECTION_LABEL += 1
-        self.sumo = None
+       
+        
 
     def reset(self):
 
-        sumo_cmd = [
-        "sumo",
-        
-        
-        "-c","Nets/3x3.sumocfg",
-        "--start",
-        "--quit-on-end", 
-        "--no-step-log",
-        "--no-warnings",
-        "--no-duration-log",]
-
-
-        
-        traci.start(sumo_cmd, label=self.label)
-        self.sumo = traci
+        self.sumo = self.sumo_con.connect_libsumo_no_gui()
 
         self.sumo.simulationStep()
         self.reward = 0
@@ -81,9 +45,9 @@ class Basic():
         self.steps = 0
         self.agent_step = 0
 
-        self.vehicle = Vehicle("1", self._net, self._route,
+        self.vehicle = Vehicle("1", self.net_, self.route_,
                                self.out_dict, self.index_dict, self.sumo)
-        self.person = Person("p_0", self._net, self._route, self.sumo)
+        self.person = Person("p_0", self.net_, self.route_, self.sumo)
 
         self.vedge = self.sumo.vehicle.getRoadID("1")
         self.pedge = self.sumo.person.getRoadID("p_0")
@@ -214,7 +178,6 @@ class Basic():
         return
 
     def close(self):
-        # self.vehicle.close()
-        # self.person.close()
+        
         self.sumo.close()
         return

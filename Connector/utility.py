@@ -1,28 +1,16 @@
-import os
-import sys
+
 import matplotlib.pyplot as plt
-
-
-import xml.dom.minidom
-from xml.dom.minidom import parse, parseString
+from xml.dom.minidom import parse
 import numpy as np
 import pandas as pd
-
-if 'SUMO_HOME' in os.environ:
-    tools = os.path.join(os.environ['SUMO_HOME'], 'tools')
-    sys.path.append(tools)
-else:
-    sys.exit("No environment variable SUMO_HOME!")
-
 import sumolib
-from sumolib import checkBinary
+
 
 class Utility:
     def __init__(self) -> None:
         pass
     
     def getNetInfo(self,net_file_name):
-   
         if net_file_name.endswith('.net.xml'):
             return sumolib.net.readNet(net_file_name)
         return None
@@ -136,3 +124,4 @@ class Utility:
 
     # Convert the 0-1 range into a value in the right range.
         return int(round((rightMin + (valueScaled * rightSpan)),0))
+    

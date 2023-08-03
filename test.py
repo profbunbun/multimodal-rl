@@ -2,14 +2,15 @@ import torch as T
 import numpy as np
 from Env.env import Basic
 
-from Util.utility import Utility
+from Connector.utility import Utility
 from Agent.agent import Agent
 
 
 EPISODES=1000
 STEPS=3000
 BATCH_SIZE=32
-env = Basic("Nets/3x3b.net.xml","Nets/3x3_2.rou.xml",False)
+SUMOCONFIG="Nets/3x3.sumocfg"
+env = Basic(SUMOCONFIG,"Nets/3x3b.net.xml","Nets/3x3_2.rou.xml",False)
 agent = Agent(4,3)
 util=Utility()
 

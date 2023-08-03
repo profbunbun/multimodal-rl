@@ -1,6 +1,5 @@
-import os
-import sys
-from Util.utility import Utility
+
+from Connector.utility import Utility
 
 util=Utility()
 

@@ -1,7 +1,6 @@
-import os
-import sys
+
 import numpy as np
-from Util.utility import Utility
+from Connector.utility import Utility
 
 
 import random

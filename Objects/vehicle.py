@@ -82,10 +82,6 @@ class Vehicle:
                 choice_mask=np.array([1,1,1])
         else:
             choice_mask=np.array([0,0,0])
-            
-        
-        
-        
         
         return choice_mask
             

@@ -98,21 +98,20 @@ class Agent:
                 adjusted_reward = (reward + self.gamma * T.max(new_state_policy))
                 
                 output=self.policy_net(state).to(self.device)
-                # output=output.detach().clone()
-                # output=output.float()
+               
                 
                 target=output.detach().clone()
                 target[action]=adjusted_reward
                 out_mask=out_mask.detach().clone()
                 
-                # use comprehension here??
+               
                 for i in enumerate(target):
                     if out_mask[i[0]]==0:
                         target[i[0]]=-100
                         
                 
                 target=target.to(self.device)
-                # target=target.float()
+               
                 
             else: 
                 
@@ -122,13 +121,13 @@ class Agent:
                 target[action]=reward
                 out_mask=out_mask.detach().clone()
                 
-                # use comprehension here??
+                
                 for i in enumerate(target):
                     if out_mask[i[0]]==0:
                         target[i[0]]=-100
                 
                 target=target.to(self.device)
-                # target=target.float()
+               
             
                
                
@@ -139,7 +138,7 @@ class Agent:
                 
                 # optimize parameters
                 optimizer=optim.Adam(self.policy_net.parameters(),lr=self.learning_rate)
-                # ----i think i have these backwards
+                
                 out=loss(output,target)
                 
                 # out=self.loss(output,target)

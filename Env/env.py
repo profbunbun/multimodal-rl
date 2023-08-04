@@ -71,7 +71,7 @@ class Basic():
         self.sumo.simulationStep()
         self.vedge = self.sumo.vehicle.getRoadID("1")
         
-        if  ':' not in self.vedge:
+        if  ':' not in self.vedge and self.old_edge == self.vedge:
             self.no_choice = False
         else:
             self.no_choice = True 
@@ -94,7 +94,7 @@ class Basic():
         out_mask= self.vehicle.get_stats()
             
 
-        if  ':' not in self.vedge:
+        if  ':' not in self.vedge and self.old_edge == self.vedge:
             self.no_choice = False
         else:
             self.no_choice = True
@@ -105,12 +105,13 @@ class Basic():
         self.ploc = self.person.location()
         self.new_distance = (math.dist(self.vloc, self.ploc))
 
-        if self.new_distance > self.old_distance:
-            self.reward += -.15
-        if self.new_distance < self.old_distance:
-
-            self.reward += .2
+        
         if not self.no_choice:
+           
+            if self.new_distance > self.old_distance:
+                self.reward += -.2
+            if self.new_distance < self.old_distance:
+                self.reward += .15
             
             self.vehicle.set_destination(action)
             self.reward += -.1

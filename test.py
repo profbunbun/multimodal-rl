@@ -6,9 +6,9 @@ from Connector.utility import Utility
 from Agent.agent import Agent
 
 
-EPISODES=100
+EPISODES=1000
 STEPS=3000
-BATCH_SIZE=32
+BATCH_SIZE=64
 
 SUMOCONFIG="Nets/3x3.sumocfg"
 env = Basic(SUMOCONFIG)
@@ -18,7 +18,7 @@ util=Utility()
 rewards,eps_history=[],[]
 for episode in range(EPISODES):
     
-    if episode % 10 == 0:
+    if (episode+1) % 100 == 0:
         env.render("gui")
     else:
         env.render("libsumo")
@@ -29,8 +29,7 @@ for episode in range(EPISODES):
     AGENT_STEP=0
     EPISODE_REWARD=0
     
-    # fix render
-    # env.render('human')
+
     while not done:
              
         if not env.no_choice:
@@ -41,8 +40,7 @@ for episode in range(EPISODES):
             agent.remember(state,action,new_reward,next_state,done,out_mask)
             state=next_state
             EPISODE_REWARD+=new_reward
-        # if (len(agent.memory)> 1000) :
-        #         agent.replay(BATCH_SIZE)
+        
         
         
         else:
@@ -53,8 +51,7 @@ for episode in range(EPISODES):
                 
         STEP+=1
              
-    # if (len(agent.memory)> BATCH_SIZE) :
-    #                     agent.replay(BATCH_SIZE)         
+           
     
     agent.epsilon_decay_2(episode,EPISODES)   
     

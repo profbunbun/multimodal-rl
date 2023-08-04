@@ -15,6 +15,14 @@ RIGHT = "r"
 SLIGHT_LEFT = "L"
 SLIGHT_RIGHT = "R"
 
+R=['r']
+S=['s']
+L=['l']
+RS=['r','s']
+RL=['r','l']
+SL=['s','l']
+RSL=['r','s','l']
+
 class Vehicle:
     
     def __init__(self,vehicle_id,out_dict,index_dict,sumo) -> None:
@@ -34,7 +42,7 @@ class Vehicle:
         pass
     
     def get_lane(self):        
-        current_lane=self.sumo.vehicle.getLaneID("1")
+        current_lane=self.sumo.vehicle.getLaneID(self.vehicle_id)
         return current_lane
     
     
@@ -54,10 +62,32 @@ class Vehicle:
     
     def get_stats(self):
         current_lane=self.get_lane()
-        current_location=current_lane.partition("_")[0]            
-        out_choices=list(self.out_dict[current_location].keys())
-        out_lanes=list(self.out_dict[current_location].values())
-        return current_lane,out_choices,out_lanes
+        current_location=current_lane.partition("_")[0] 
+        if ':' not in current_lane :           
+            out_choices=list(self.out_dict[current_location].keys())
+        
+            if out_choices==R:
+                choice_mask=np.array([1,0,0])
+            if out_choices == S:
+                choice_mask=np.array([0,1,0])
+            if out_choices == L:
+                choice_mask=np.array([0,0,1])
+            if out_choices == RS:
+                choice_mask=np.array([1,1,0])
+            if out_choices == RL:
+                choice_mask=np.array([1,0,1])
+            if out_choices == SL:
+                choice_mask=np.array([0,1,1])
+            if out_choices ==RSL:
+                choice_mask=np.array([1,1,1])
+        else:
+            choice_mask=np.array([0,0,0])
+            
+        
+        
+        
+        
+        return choice_mask
             
      
     def get_out_dict(self):

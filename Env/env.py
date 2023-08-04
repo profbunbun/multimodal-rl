@@ -12,7 +12,6 @@ class Basic():
         self.out_dict, self.index_dict,self.edge_list = self.sumo_con.getEdgesInfo()
         
         
-        self.steps_per_episode = 2000
         self.episode_count = 0
         self.episode_step = 0
         self.action = 0
@@ -34,22 +33,26 @@ class Basic():
         self.agent_step = 0
 
         self.vehicle = Vehicle("1", self.out_dict, self.index_dict, self.sumo)
-        self.person = Person("p_0",  self.sumo)
-
+        
+        out_mask= self.vehicle.get_stats()
         self.vedge = self.sumo.vehicle.getRoadID("1")
-        self.pedge = self.sumo.person.getRoadID("p_0")
-
-        self.vehicle_lane_index = self.index_dict[self.vedge]
-        self.person_lane_index = self.index_dict[self.pedge]
-
+        
         self.vloc = self.vehicle.location()
+            
+            
+        self.person = Person("p_0",  self.sumo)
+        self.pedge = self.sumo.person.getRoadID("p_0")
+       
         self.ploc = self.person.location()
+
+
+
         self.new_distance = (math.dist(self.vloc, self.ploc))
 
         state = np.array([])
-        state = np.append(state, self.vehicle_lane_index)
-        state = np.append(state, self.person_lane_index)
-        state = np.append(state, self.agent_step)
+        state = np.append(state, self.vloc)
+        state = np.append(state, self.ploc)
+        state = np.append(state, self.steps)
         state = np.append(state, self.new_distance)
 
         self.done = False
@@ -59,26 +62,19 @@ class Basic():
         self.out_dict = self.vehicle.get_out_dict()
         
         
-        if self.vehicle.is_indexed_lane():
-            current_lane,out_choices,out_lanes= self.vehicle.get_stats()
             
-        return state, self.reward, self.no_choice, self.lane, self.out_dict
-
+        return state, self.reward,  self.done, out_mask
+    
     def nullstep(self):
         self.reward = 0
-        
-
         self.old_edge = self.vedge
         self.sumo.simulationStep()
         self.vedge = self.sumo.vehicle.getRoadID("1")
-        # if self.vehicle.is_indexed_lane():
-        #     current_lane,out_choices,out_lanes= self.vehicle.get_stats()
-        #     print(current_lane,out_choices,out_lanes)
-
-        if self.old_edge == self.vedge:
-            self.no_choice = True
+        
+        if  ':' not in self.vedge:
+            self.no_choice = False
         else:
-            self.no_choice = False  
+            self.no_choice = True 
         pass
 
     def step(self, action=None):
@@ -95,31 +91,29 @@ class Basic():
        
         self.vedge = self.sumo.vehicle.getRoadID("1")
         
-        if self.vehicle.is_indexed_lane():
-            current_lane,out_choices,out_lanes= self.vehicle.get_stats()
-            # print(current_lane,out_choices,out_lanes)
+        out_mask= self.vehicle.get_stats()
+            
 
-        if self.old_edge == self.vedge and ':' not in self.vedge:
-            self.no_choice = True
-        else:
+        if  ':' not in self.vedge:
             self.no_choice = False
+        else:
+            self.no_choice = True
 
         self.lane = self.sumo.vehicle.getLaneID("1")
-        # self.done = True
-        # self.use_gui = False
+       
         self.vloc = self.vehicle.location()
         self.ploc = self.person.location()
         self.new_distance = (math.dist(self.vloc, self.ploc))
 
         if self.new_distance > self.old_distance:
-            self.reward += -.5
+            self.reward += -.15
         if self.new_distance < self.old_distance:
 
-            self.reward += .6
+            self.reward += .2
         if not self.no_choice:
             
             self.vehicle.set_destination(action)
-            self.reward += -.8
+            self.reward += -.1
             self.agent_step += 1
 
         self.vedge = self.sumo.vehicle.getRoadID("1")
@@ -137,22 +131,21 @@ class Basic():
         if self.vedge == self.pedge:
             self.reward += 5
             done = True
-        if self.steps > self.steps_per_episode:
-            self.reward += -10
-            done = True
-            # self.sumo.close()
+        
             
 
         state = np.array([])
-        state = np.append(state, self.vehicle_lane_index)
-        state = np.append(state, self.person_lane_index)
+        state = np.append(state, self.vloc)
+        state = np.append(state, self.ploc)
+        # state = np.append(state, self.vehicle_lane_index)
+        # state = np.append(state, self.person_lane_index)
         state = np.append(state, self.agent_step)
         state = np.append(state, self.new_distance)
 
         reward = np.array([])
         reward = np.append(reward, self.reward)
 
-        return state, reward, done
+        return state, reward, done, out_mask
 
     def render(self, mode):
         

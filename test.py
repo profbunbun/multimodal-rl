@@ -6,39 +6,39 @@ from Connector.utility import Utility
 from Agent.agent import Agent
 
 
-EPISODES=1000
+EPISODES=100
 STEPS=3000
 BATCH_SIZE=32
 
 SUMOCONFIG="Nets/3x3.sumocfg"
 env = Basic(SUMOCONFIG)
-agent = Agent(4,3)
+agent = Agent(6,3)
 util=Utility()
 
 rewards,eps_history=[],[]
 for episode in range(EPISODES):
     
-    if EPISODES % 10:
+    if episode % 10 == 0:
         env.render("gui")
     else:
         env.render("libsumo")
-    DONE=False
-    state ,reward,no_choice,lane, out_dict= env.reset()
-    state=T.from_numpy(state)
+    
+    state ,reward,done,out_mask= env.reset()
+    state,out_mask=T.from_numpy(state),T.from_numpy(out_mask)
     STEP=0
     AGENT_STEP=0
     EPISODE_REWARD=0
     
     # fix render
     # env.render('human')
-    while not DONE:
+    while not done:
              
         if not env.no_choice:
             action=agent.act(state)
-            next_state,new_reward, DONE = env.step(action) 
-            next_state,new_reward=T.from_numpy(next_state),T.from_numpy(new_reward)
+            next_state,new_reward, done,out_mask = env.step(action) 
+            next_state,new_reward,out_mask=T.from_numpy(next_state),T.from_numpy(new_reward),T.from_numpy(out_mask)
             AGENT_STEP+=1
-            agent.remember(state,action,new_reward,next_state,DONE)
+            agent.remember(state,action,new_reward,next_state,done,out_mask)
             state=next_state
             EPISODE_REWARD+=new_reward
         # if (len(agent.memory)> 1000) :

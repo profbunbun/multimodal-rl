@@ -58,18 +58,13 @@ class Agent:
             self.policy_net.eval()
         else:
             self.policy_net = DQN(self.state_size,self.action_size).to(self.device)
-        # self.policy_net = DQN(self.state_size,self.action_size).to(self.device)
-    #  rember function for training data
-    def remember(self,state,action,reward,next_state,done):
-        self.memory.append((state,action,reward,next_state,done))
-        
-    def set_legal_actions_filter(self,legal_actons):
-        
-        return
+
     
-    def filter_legalactions(self):
+    def remember(self,state,action,reward,next_state,done,out_mask):
+        self.memory.append((state,action,reward,next_state,done,out_mask))
+        pass
         
-        return    
+ 
         
 # make choice function
     def act(self,state):
@@ -84,24 +79,14 @@ class Agent:
             act=T.argmax(act_values)
             return act
         
-        # def act(self,state):
-        # actions=['r','s','l']
-        # rando=np.random.rand()
-        # if  rando < self.epsilon:
-        #     act=np.random.randint(0,high=self.action_size-1)
-        #     return act
-        # else:
-        #     act_values = self.policy_net(state)
-        #     # q-val
-        #     act=T.argmax(act_values)
-        #     return actions[act]
+        
  
 # Train the model
     def replay(self,batch_size):
         # T.cuda.empty_cache()
         minibatch=random.sample(self.memory,batch_size)
         
-        for state,action,reward,new_state,done in minibatch:
+        for state,action,reward,new_state,done,out_mask in minibatch:
           
             reward= reward.float()
             reward=reward.to(self.device)
@@ -118,6 +103,14 @@ class Agent:
                 
                 target=output.detach().clone()
                 target[action]=adjusted_reward
+                out_mask=out_mask.detach().clone()
+                
+                # use comprehension here??
+                for i in enumerate(target):
+                    if out_mask[i[0]]==0:
+                        target[i[0]]=-100
+                        
+                
                 target=target.to(self.device)
                 # target=target.float()
                 
@@ -127,6 +120,13 @@ class Agent:
                 output=self.policy_net(state).to(self.device)
                 target=output.detach().clone()
                 target[action]=reward
+                out_mask=out_mask.detach().clone()
+                
+                # use comprehension here??
+                for i in enumerate(target):
+                    if out_mask[i[0]]==0:
+                        target[i[0]]=-100
+                
                 target=target.to(self.device)
                 # target=target.float()
             
@@ -152,10 +152,7 @@ class Agent:
                 T.save(self.policy_net.state_dict(),PATH)
                 # return loss.item()
             
-    
-    def available_action_filter(self,output):
-        
-        pass
+
     
     
     # trying differnt epsilon decay

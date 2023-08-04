@@ -12,7 +12,7 @@ BATCH_SIZE=64
 
 SUMOCONFIG="Nets/3x3.sumocfg"
 env = Basic(SUMOCONFIG)
-agent = Agent(6,3)
+agent = Agent(4,3)
 util=Utility()
 
 rewards,eps_history=[],[]
@@ -32,7 +32,7 @@ for episode in range(EPISODES):
 
     while not done:
              
-        if not env.no_choice:
+        if env.make_choice_flag:
             action=agent.act(state)
             next_state,new_reward, done,out_mask = env.step(action) 
             next_state,new_reward,out_mask=T.from_numpy(next_state),T.from_numpy(new_reward),T.from_numpy(out_mask)

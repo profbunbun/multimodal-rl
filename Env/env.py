@@ -17,14 +17,13 @@ class Basic():
         self.action = 0
 
         self.done = False
-        self.no_choice = False
+        self.make_choice_flag = False
 
         self.vehicle = None
 
-       
-        
 
     def reset(self):
+        
         self.sumo.simulationStep()
         self.reward = 0
         self.episode_step += 1
@@ -48,15 +47,41 @@ class Basic():
 
 
         self.new_distance = (math.dist(self.vloc, self.ploc))
+        
+        
+        
+        self.ve = self.sumo.vehicle.getRoadID("1")
+        self.ve =str(self.ve)
+        self.ve =list(self.ve)
+        # self.ve =list(self.ve)
+        self.ve=[ord(i) for i in self.ve]
+        for w,v in enumerate(self.ve):
+            v/=10**(w+w)
+            self.ve[w]=v
+            
+        self.ve =sum(self.ve)
+        self.vloc = self.vehicle.location()
+            
+            
+        self.pe = self.sumo.person.getRoadID("p_0")
+        self.pe =str(self.pe)
+        self.pe =list(self.pe)
+        # self.pe =list(self.pe)
+        self.pe=[ord(i) for i in self.pe]
+        for w,v in enumerate(self.pe):
+            v/=10**(w+w)
+            self.pe[w]=v
+            
+        self.pe =sum(self.pe)
 
         state = np.array([])
-        state = np.append(state, self.vloc)
-        state = np.append(state, self.ploc)
+        state = np.append(state, self.ve)
+        state = np.append(state, self.pe)
         state = np.append(state, self.steps)
         state = np.append(state, self.new_distance)
 
         self.done = False
-        self.no_choice = False
+        self.make_choice_flag = False
 
         self.lane = self.sumo.vehicle.getLaneID("1")
         self.out_dict = self.vehicle.get_out_dict()
@@ -71,10 +96,10 @@ class Basic():
         self.sumo.simulationStep()
         self.vedge = self.sumo.vehicle.getRoadID("1")
         
-        if  ':' not in self.vedge and self.old_edge == self.vedge:
-            self.no_choice = False
+        if  ':'  in self.vedge or self.old_edge == self.vedge:
+            self.make_choice_flag= False
         else:
-            self.no_choice = True 
+            self.make_choice_flag = True 
         pass
 
     def step(self, action=None):
@@ -84,7 +109,7 @@ class Basic():
         self.steps += 1
 
         self.action = action
-        self.old_edge = self.vedge
+        # self.old_edge = self.vedge
         self.sumo.simulationStep()
         
        
@@ -94,10 +119,10 @@ class Basic():
         out_mask= self.vehicle.get_stats()
             
 
-        if  ':' not in self.vedge and self.old_edge == self.vedge:
-            self.no_choice = False
+        if  ':'  in self.vedge or self.old_edge == self.vedge:
+            self.make_choice_flag = False
         else:
-            self.no_choice = True
+            self.make_choice_flag = True
 
         self.lane = self.sumo.vehicle.getLaneID("1")
        
@@ -106,7 +131,7 @@ class Basic():
         self.new_distance = (math.dist(self.vloc, self.ploc))
 
         
-        if not self.no_choice:
+        if  self.make_choice_flag:
            
             if self.new_distance > self.old_distance:
                 self.reward += -.2
@@ -120,10 +145,10 @@ class Basic():
         self.vedge = self.sumo.vehicle.getRoadID("1")
         self.pedge = self.sumo.person.getRoadID("p_0")
 
-        if ":" not in self.vedge:
-            self.vehicle_lane_index = self.index_dict[self.vedge]
-        else:
+        if ":" in self.vedge:
             self.vehicle_lane_index = self.vehicle_lane_index
+        else:
+            self.vehicle_lane_index = self.index_dict[self.vedge]
 
         self.person_lane_index = self.index_dict[self.pedge]
 
@@ -132,12 +157,36 @@ class Basic():
         if self.vedge == self.pedge:
             self.reward += 5
             done = True
+            
+        self.ve = self.sumo.vehicle.getRoadID("1")
+        self.ve =str(self.ve)
+        self.ve =list(self.ve)
+        # self.ve =list(self.ve)
+        self.ve=[ord(i) for i in self.ve]
+        for w,v in enumerate(self.ve):
+            v/=10**(w+w)
+            self.ve[w]=v
+            
+        self.ve =sum(self.ve)
+        self.vloc = self.vehicle.location()
+            
+            
+        self.pe = self.sumo.person.getRoadID("p_0")
+        self.pe =str(self.pe)
+        self.pe =list(self.pe)
+        # self.pe =list(self.pe)
+        self.pe=[ord(i) for i in self.pe]
+        for w,v in enumerate(self.pe):
+            v/=10**(w+w)
+            self.pe[w]=v
+            
+        self.pe =sum(self.pe)
         
             
 
         state = np.array([])
-        state = np.append(state, self.vloc)
-        state = np.append(state, self.ploc)
+        state = np.append(state, self.ve)
+        state = np.append(state, self.pe)
         # state = np.append(state, self.vehicle_lane_index)
         # state = np.append(state, self.person_lane_index)
         state = np.append(state, self.agent_step)

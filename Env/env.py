@@ -73,10 +73,13 @@ class Basic():
             self.pe[w]=v
             
         self.pe =sum(self.pe)
+        
+        self.vehicle_lane_index = self.index_dict[self.vedge]
+        self.person_lane_index = self.index_dict[self.pedge]
 
         state = np.array([])
-        state = np.append(state, self.ve)
-        state = np.append(state, self.pe)
+        state = np.append(state, self.vehicle_lane_index)
+        state = np.append(state, self.person_lane_index)
         state = np.append(state, self.steps)
         state = np.append(state, self.new_distance)
 
@@ -130,14 +133,13 @@ class Basic():
         self.ploc = self.person.location()
         self.new_distance = (math.dist(self.vloc, self.ploc))
 
+        if self.new_distance > self.old_distance:
+            self.reward += -.05
+        # if self.new_distance < self.old_distance:
+        #     self.reward += .15
         
         if  self.make_choice_flag:
            
-            if self.new_distance > self.old_distance:
-                self.reward += -.2
-            if self.new_distance < self.old_distance:
-                self.reward += .15
-            
             self.vehicle.set_destination(action)
             self.reward += -.1
             self.agent_step += 1
@@ -157,7 +159,9 @@ class Basic():
         if self.vedge == self.pedge:
             self.reward += 5
             done = True
-            
+        if self.steps > self.steps_per_episode:
+            self.reward += -10
+            done = True
         self.ve = self.sumo.vehicle.getRoadID("1")
         self.ve =str(self.ve)
         self.ve =list(self.ve)
@@ -185,10 +189,10 @@ class Basic():
             
 
         state = np.array([])
-        state = np.append(state, self.ve)
-        state = np.append(state, self.pe)
-        # state = np.append(state, self.vehicle_lane_index)
-        # state = np.append(state, self.person_lane_index)
+        # state = np.append(state, self.vedge)
+        # state = np.append(state, self.pedge)
+        state = np.append(state, self.vehicle_lane_index)
+        state = np.append(state, self.person_lane_index)
         state = np.append(state, self.agent_step)
         state = np.append(state, self.new_distance)
 

@@ -30,7 +30,7 @@ for episode in range(EPISODES):
     EPISODE_REWARD=0
     
 
-    while not done:
+    while STEP <=  STEPS:
              
         if env.make_choice_flag:
             action=agent.act(state)
@@ -51,6 +51,7 @@ for episode in range(EPISODES):
                 
         STEP+=1
              
+    env.close()
            
     
     agent.epsilon_decay_2(episode,EPISODES)   
@@ -72,4 +73,3 @@ for episode in range(EPISODES):
     filename = 'sumo-agent.png'
     
     util.plotLearning(x, rewards, eps_history, filename)              
-    env.close()

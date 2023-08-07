@@ -7,8 +7,8 @@ from Agent.agent import Agent
 
 
 EPISODES=1000
-STEPS=3000
-BATCH_SIZE=64
+STEPS=1000
+BATCH_SIZE=32
 
 SUMOCONFIG="Nets/3x3b.sumocfg"
 env = Basic(SUMOCONFIG,STEPS)

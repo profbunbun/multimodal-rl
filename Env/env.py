@@ -99,7 +99,7 @@ class Basic():
         
         if  self.make_choice_flag:
             self.vehicle.set_destination(action)
-            self.reward += -.01
+            self.reward += -.1
             self.agent_step += 1
             self.make_choice_flag = False
             

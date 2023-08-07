@@ -10,15 +10,15 @@ EPISODES=1000
 STEPS=3000
 BATCH_SIZE=64
 
-SUMOCONFIG="Nets/3x3.sumocfg"
-env = Basic(SUMOCONFIG)
+SUMOCONFIG="Nets/3x3b.sumocfg"
+env = Basic(SUMOCONFIG,STEPS)
 agent = Agent(4,3)
 util=Utility()
 
 rewards,eps_history=[],[]
 for episode in range(EPISODES):
     
-    if (episode+1) % 100 == 0:
+    if (episode) % 100 == 0:
         env.render("gui")
     else:
         env.render("libsumo")
@@ -30,7 +30,7 @@ for episode in range(EPISODES):
     EPISODE_REWARD=0
     
 
-    while STEP <=  STEPS:
+    while not env.done:
              
         if env.make_choice_flag:
             action=agent.act(state)
@@ -46,15 +46,14 @@ for episode in range(EPISODES):
         else:
             env.nullstep()
     
-        if (len(agent.memory)> BATCH_SIZE) and (STEP % BATCH_SIZE == 0):
+        if (len(agent.memory)> BATCH_SIZE) :
                     agent.replay(BATCH_SIZE)
                 
         STEP+=1
              
-    env.close()
            
     
-    agent.epsilon_decay_2(episode,EPISODES)   
+    agent.epsilon_decay_3(episode,EPISODES)   
     
           
     r = float(EPISODE_REWARD)  
@@ -73,3 +72,4 @@ for episode in range(EPISODES):
     filename = 'sumo-agent.png'
     
     util.plotLearning(x, rewards, eps_history, filename)              
+    env.close()

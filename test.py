@@ -54,8 +54,8 @@ for episode in range(EPISODES):
              
            
     
-    agent.epsilon_decay_2()   
-    # agent.epsilon_decay_2(episode,EPISODES)   
+    # agent.epsilon_decay()   
+    agent.epsilon_decay_2(episode,EPISODES)   
     
           
     r = float(EPISODE_REWARD)  

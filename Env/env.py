@@ -18,11 +18,13 @@ class Basic():
         self.make_choice_flag = False
 
         self.vehicle = None
+        self.route = []
 
 
     def reset(self):
         
         self.sumo.simulationStep()
+        # self.sumo
         self.reward = 0
         
         self.done = False
@@ -32,6 +34,7 @@ class Basic():
         self.vehicle = Vehicle("1", self.out_dict, self.index_dict, self.sumo)
         out_mask= self.vehicle.get_stats()
         self.vedge = self.sumo.vehicle.getRoadID("1")
+        self.route.append(self.vedge)
         self.vloc = self.vehicle.location()
              
         self.person = Person("p_0",  self.sumo)
@@ -54,6 +57,8 @@ class Basic():
 
         self.lane = self.sumo.vehicle.getLaneID("1")
         self.out_dict = self.vehicle.get_out_dict()
+        
+        print(self.sumo.simulation.findRoute(self.vedge,self.pedge))
         
         
         self.old_edge=self.vedge 
@@ -107,6 +112,7 @@ class Basic():
         self.old_edge=self.vedge
         self.vedge = self.sumo.vehicle.getRoadID("1")
         self.pedge = self.sumo.person.getRoadID("p_0")
+        self.route.append(self.vedge)
 
         if ":" in self.vedge:
             self.vehicle_lane_index = self.vehicle_lane_index
@@ -156,4 +162,5 @@ class Basic():
     def close(self):
         
         self.sumo.close()
+        print(self.route)
         return

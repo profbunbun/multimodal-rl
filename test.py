@@ -6,9 +6,10 @@ from Connector.utility import Utility
 from Agent.agent import Agent
 
 
-EPISODES=1000
+EPISODES=100
 STEPS=1000
-BATCH_SIZE=32
+BATCH_SIZE=64
+MIN_MEMORY=1000
 
 SUMOCONFIG="Nets/3x3b.sumocfg"
 env = Basic(SUMOCONFIG,STEPS)
@@ -18,7 +19,7 @@ util=Utility()
 rewards,eps_history=[],[]
 for episode in range(EPISODES):
     
-    if (episode) % 100 == 0:
+    if (episode) % 10 == 0:
         env.render("gui")
     else:
         env.render("libsumo")
@@ -53,7 +54,8 @@ for episode in range(EPISODES):
              
            
     
-    agent.epsilon_decay_3(episode,EPISODES)   
+    agent.epsilon_decay()   
+    # agent.epsilon_decay_2(episode,EPISODES)   
     
           
     r = float(EPISODE_REWARD)  

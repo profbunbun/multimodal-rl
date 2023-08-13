@@ -51,7 +51,7 @@ class Agent:
         
         self.memory= deque(maxlen=20000)
         self.gamma = 0.95
-        self.epsilon = .1
+        self.epsilon = .997
         self.epsilon_max = .9997
         self.decay = 0.99
         self.epsilon_min=0.01
@@ -139,8 +139,9 @@ class Agent:
                
             
                 # loss function
-                loss =  nn.MSELoss()
+                # loss =  nn.MSELoss()
                 # loss = nn.L1Loss()
+                loss = nn.HuberLoss()
                 
                 # optimize parameters
                 optimizer=optim.Adam(self.policy_net.parameters(),lr=self.learning_rate)

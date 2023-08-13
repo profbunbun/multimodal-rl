@@ -13,7 +13,7 @@ MIN_MEMORY=1000
 
 SUMOCONFIG="Nets/3x3b.sumocfg"
 env = Basic(SUMOCONFIG,STEPS)
-agent = Agent(4,3)
+agent = Agent(6,3)
 util=Utility()
 
 rewards,eps_history=[],[]
@@ -54,7 +54,7 @@ for episode in range(EPISODES):
              
            
     
-    agent.epsilon_decay()   
+    agent.epsilon_decay_2()   
     # agent.epsilon_decay_2(episode,EPISODES)   
     
           

@@ -47,8 +47,11 @@ class Basic():
         self.person_lane_index = self.index_dict[self.pedge]
 
         state = np.array([])
-        state = np.append(state, self.vehicle_lane_index)
-        state = np.append(state, self.person_lane_index)
+        # state = np.append(state, self.vehicle_lane_index)
+        # state = np.append(state, self.person_lane_index)
+        state = np.append(state, self.vloc)
+        state = np.append(state, self.ploc)
+        
         state = np.append(state, self.steps)
         state = np.append(state, self.new_distance)
 
@@ -58,7 +61,7 @@ class Basic():
         self.lane = self.sumo.vehicle.getLaneID("1")
         self.out_dict = self.vehicle.get_out_dict()
         
-        print(self.sumo.simulation.findRoute(self.vedge,self.pedge))
+        # print(self.sumo.simulation.findRoute(self.vedge,self.pedge))
         
         
         self.old_edge=self.vedge 
@@ -66,7 +69,7 @@ class Basic():
     
     def nullstep(self):
         self.steps += 1
-        self.reward = 0
+        # self.reward = 0
         self.sumo.simulationStep()
         
         if  ':'  in self.vedge or self.old_edge == self.vedge:
@@ -79,7 +82,7 @@ class Basic():
         pass
 
     def step(self, action=None):
-        self.reward = 0
+        # self.reward = 0
         self.old_distance = self.new_distance
 
         self.steps += 1
@@ -100,11 +103,11 @@ class Basic():
         if self.new_distance > self.old_distance:
             self.reward += -.05
         if self.new_distance < self.old_distance:
-            self.reward += .05
+            self.reward += -.01
         
         if  self.make_choice_flag:
             self.vehicle.set_destination(action)
-            self.reward += -.1
+            # self.reward += -.1
             self.agent_step += 1
             self.make_choice_flag = False
             
@@ -133,8 +136,10 @@ class Basic():
             
     
         state = np.array([])
-        state = np.append(state, self.vehicle_lane_index)
-        state = np.append(state, self.person_lane_index)
+        # state = np.append(state, self.vehicle_lane_index)
+        # state = np.append(state, self.person_lane_index)
+        state = np.append(state, self.vloc)
+        state = np.append(state, self.ploc)
         state = np.append(state, self.agent_step)
         state = np.append(state, self.new_distance)
 
@@ -162,5 +167,6 @@ class Basic():
     def close(self):
         
         self.sumo.close()
-        print(self.route)
+        # print(len(self.route))
+        # print(self.route)
         return

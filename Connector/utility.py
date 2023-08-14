@@ -57,12 +57,14 @@ class Utility:
     def plotLearning(self,x, scores, epsilons, filename,lines=None):
         N = len(scores)
         running_avg = np.empty(N)
+        avg_score=np.mean(scores)
         for t in range(N):
             running_avg[t] = np.mean(scores[max(0, t-20):(t+1)])
             
         
         fig,ax1=plt.subplots(1,figsize=(10,10))
         ax1.plot(x, running_avg, color="C1" ,label="Reward")
+        # ax1.plot(x, running_avg, color="C1" ,label="Reward")
         ax1.set_ylabel("Reward",color="C1")
         ax1.legend(loc="upper left")
         axa=ax1.twinx()

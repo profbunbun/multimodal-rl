@@ -76,7 +76,7 @@ class Agent:
     def act(self,state,outmask):
         choices= [1 for choice in outmask if choice == 1]
         if len(choices) > 1:
-            number_of_choices= len(choices)-1
+            number_of_choices= len(choices)
         else:
             number_of_choices=choices
         # print(len(choices))

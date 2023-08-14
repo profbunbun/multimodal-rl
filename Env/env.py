@@ -95,10 +95,10 @@ class Basic():
         
         self.new_distance = (math.dist(self.vloc, self.ploc))
 
-        if self.new_distance > self.old_distance:
-            self.reward += -.05
-        if self.new_distance < self.old_distance:
-            self.reward += -.01
+        # if self.new_distance > self.old_distance:
+        #     self.reward += -.05
+        # if self.new_distance < self.old_distance:
+        #     self.reward += -.01
         
         if  self.make_choice_flag:
             self.vehicle.set_destination(action)
@@ -138,7 +138,7 @@ class Basic():
             self.done = True
             
         if self.steps > self.steps_per_episode:
-            self.reward += -10
+            # self.reward += -10
             self.done = True
             
     
@@ -175,7 +175,7 @@ class Basic():
         
         self.sumo.close()
         # print(len(self.best_route))
-        # print(type(self.best_route))
+        print(self.best_route)
         # print(len(self.route))
-        # print(self.route)
+        print(self.route)
         return

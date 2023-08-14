@@ -6,7 +6,7 @@ from Connector.utility import Utility
 from Agent.agent import Agent
 
 
-EPISODES=100
+EPISODES=1000
 STEPS=1000
 BATCH_SIZE=32
 MIN_MEMORY=1000
@@ -54,7 +54,7 @@ for episode in range(EPISODES):
            
     
     # agent.epsilon_decay()   
-    agent.epsilon_decay_3(episode,EPISODES)   
+    agent.epsilon_decay_2(episode,EPISODES)   
     
           
     r = float(EPISODE_REWARD)  

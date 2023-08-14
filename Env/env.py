@@ -32,6 +32,9 @@ class Basic():
         self.agent_step = 0
 
         self.vehicle = Vehicle("1", self.out_dict, self.index_dict, self.sumo)
+        
+        
+        
         out_mask= self.vehicle.get_stats()
         self.vedge = self.sumo.vehicle.getRoadID("1")
         self.route.append(self.vedge)
@@ -84,20 +87,9 @@ class Basic():
     def step(self, action=None):
         # self.reward = 0
         self.old_distance = self.new_distance
-
-        self.steps += 1
-
-        self.action = action
-       
-
-        self.sumo.simulationStep()
-        
-        out_mask= self.vehicle.get_stats()
-        
-        self.lane = self.sumo.vehicle.getLaneID("1")
-       
         self.vloc = self.vehicle.location()
         self.ploc = self.person.location()
+        
         self.new_distance = (math.dist(self.vloc, self.ploc))
 
         if self.new_distance > self.old_distance:
@@ -110,6 +102,18 @@ class Basic():
             # self.reward += -.1
             self.agent_step += 1
             self.make_choice_flag = False
+
+        self.steps += 1
+
+        self.action = action
+       
+
+        self.sumo.simulationStep()
+        
+        out_mask= self.vehicle.get_stats()
+        
+        self.lane = self.sumo.vehicle.getLaneID("1")
+       
             
             
         self.old_edge=self.vedge

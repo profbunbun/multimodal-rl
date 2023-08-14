@@ -83,6 +83,8 @@ class Vehicle:
                 choice_mask=np.array([1,1,1])
         else:
             choice_mask=np.array([0,0,0])
+            
+        
         
         return choice_mask
             
@@ -93,7 +95,7 @@ class Vehicle:
     
         
     def set_destination(self,action):
-        # print(action)
+        print(action)
         
         self.current_lane=self.sumo.vehicle.getLaneID("1")
         self.cur_loc=self.current_lane.partition("_")[0]
@@ -102,12 +104,15 @@ class Vehicle:
             
             outlist=list(self.out_dict[self.cur_loc].keys())
             outlane=list(self.out_dict[self.cur_loc].values())
+            
+            
             if action < len(outlist) : 
                 outlist=np.array(outlist)
                 outlane=np.array(outlane)
                 target = outlane[action]
                 
                 self.sumo.vehicle.changeTarget("1",target)
+            
         return
 
     

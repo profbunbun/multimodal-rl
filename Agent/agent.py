@@ -73,7 +73,7 @@ class Agent:
  
         
 # make choice function
-    def act(self,state):
+    def act(self,state,outmask):
         
         rando=np.random.rand()
         if  rando < self.epsilon:

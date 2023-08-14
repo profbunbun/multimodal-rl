@@ -102,7 +102,7 @@ class Basic():
         
         if  self.make_choice_flag:
             self.vehicle.set_destination(action)
-            # self.reward += -.1
+            self.reward += -.01
             self.agent_step += 1
             self.make_choice_flag = False
 
@@ -134,7 +134,7 @@ class Basic():
         self.done = False
 
         if self.vedge == self.pedge:
-            self.reward += 20
+            # self.reward += 20
             self.done = True
             
         if self.steps > self.steps_per_episode:
@@ -175,7 +175,7 @@ class Basic():
         
         self.sumo.close()
         # print(len(self.best_route))
-        print(self.best_route)
+        # print(self.best_route)
         # print(len(self.route))
-        print(self.route)
+        # print(self.route)
         return

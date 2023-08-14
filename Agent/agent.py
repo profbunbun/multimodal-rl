@@ -18,15 +18,15 @@ class DQN(nn.Module):
         self.device = T.device("cuda" if T.cuda.is_available() else "cpu")
         
         self.layer1 = nn.Linear(state_size, 16)
-        nn.init.kaiming_normal_(self.layer1.weight)
+        nn.init.kaiming_normal_(self.layer1.weight,mode="fan_out")
         # nn.init.zeros_(self.layer1.weight)
         # nn.init.zeros_(self.layer1.bias)
         self.layer2 = nn.Linear(16, 32)
-        nn.init.kaiming_normal_(self.layer1.weight)
+        nn.init.kaiming_normal_(self.layer1.weight,mode="fan_out")
         # nn.init.zeros_(self.layer2.weight)
         # nn.init.zeros_(self.layer2.bias)
         self.layer3 = nn.Linear(32, 16)
-        nn.init.kaiming_normal_(self.layer1.weight)
+        nn.init.kaiming_normal_(self.layer1.weight,mode="fan_out")
         
         # nn.init.zeros_(self.layer3.weight)
         # nn.init.zeros_(self.layer3.bias)

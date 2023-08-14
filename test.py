@@ -19,7 +19,7 @@ util=Utility()
 rewards,eps_history=[],[]
 for episode in range(EPISODES):
     
-    if (episode) % 10 == 0:
+    if (episode) % 100 == 0:
         env.render("gui")
     else:
         env.render("libsumo")
@@ -54,7 +54,7 @@ for episode in range(EPISODES):
            
     
     # agent.epsilon_decay()   
-    agent.epsilon_decay_2(episode,EPISODES)   
+    agent.epsilon_decay_3(episode,EPISODES)   
     
           
     r = float(EPISODE_REWARD)  

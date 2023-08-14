@@ -63,8 +63,11 @@ class Basic():
 
         self.lane = self.sumo.vehicle.getLaneID("1")
         self.out_dict = self.vehicle.get_out_dict()
-        
-        # print(self.sumo.simulation.findRoute(self.vedge,self.pedge))
+        # 
+        # 
+        # 
+        # 
+        self.best_route=self.sumo.simulation.findRoute(self.vedge,self.pedge)
         
         
         self.old_edge=self.vedge 
@@ -135,7 +138,7 @@ class Basic():
             self.done = True
             
         if self.steps > self.steps_per_episode:
-            self.reward += -5
+            self.reward += -10
             self.done = True
             
     
@@ -171,6 +174,8 @@ class Basic():
     def close(self):
         
         self.sumo.close()
+        # print(len(self.best_route))
+        # print(type(self.best_route))
         # print(len(self.route))
         # print(self.route)
         return

@@ -8,7 +8,7 @@ from Agent.agent import Agent
 
 EPISODES=100
 STEPS=1000
-BATCH_SIZE=64
+BATCH_SIZE=32
 MIN_MEMORY=1000
 
 SUMOCONFIG="Nets/3x3b.sumocfg"
@@ -44,17 +44,17 @@ for episode in range(EPISODES):
             state=next_state
             EPISODE_REWARD+=new_reward   
             action=agent.act(state,out_mask)       
+            if (len(agent.memory)> BATCH_SIZE) :
+                        agent.replay(BATCH_SIZE)                
         else:
             env.nullstep()
     
-        if (len(agent.memory)> BATCH_SIZE) :
-                    agent.replay(BATCH_SIZE)                
         STEP+=1
          
            
     
     # agent.epsilon_decay()   
-    agent.epsilon_decay_2(episode,EPISODES)   
+    agent.epsilon_decay_3(episode,EPISODES)   
     
           
     r = float(EPISODE_REWARD)  

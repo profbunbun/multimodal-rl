@@ -18,20 +18,20 @@ class DQN(nn.Module):
         self.device = T.device("cuda" if T.cuda.is_available() else "cpu")
         
         self.layer1 = nn.Linear(state_size, 16)
-        
+        nn.init.kaiming_normal_(self.layer1.weight)
         # nn.init.zeros_(self.layer1.weight)
         # nn.init.zeros_(self.layer1.bias)
         self.layer2 = nn.Linear(16, 32)
-        
+        nn.init.kaiming_normal_(self.layer1.weight)
         # nn.init.zeros_(self.layer2.weight)
         # nn.init.zeros_(self.layer2.bias)
         self.layer3 = nn.Linear(32, 16)
-        
+        nn.init.kaiming_normal_(self.layer1.weight)
         
         # nn.init.zeros_(self.layer3.weight)
         # nn.init.zeros_(self.layer3.bias)
         self.layer4 = nn.Linear(16, action_size)
-        
+        nn.init.kaiming_normal_(self.layer1.weight)
         # nn.init.zeros_(self.layer4.weight)
         # nn.init.zeros_(self.layer4.bias)
 
@@ -82,7 +82,7 @@ class Agent:
         # print(len(choices))
         rando=np.random.rand()
         if  rando < self.epsilon:
-            act=np.random.randint(0,high=len(choices))
+            act=np.random.randint(0,high=number_of_choices)
             
             return act
             
@@ -120,7 +120,7 @@ class Agent:
                
                 for i in enumerate(target):
                     if out_mask[i[0]]==0:
-                        target[i[0]]=-100
+                        target[i[0]]=-1000
                         
                 
                 target=target.to(self.device)
@@ -137,7 +137,7 @@ class Agent:
                 
                 for i in enumerate(target):
                     if out_mask[i[0]]==0:
-                        target[i[0]]=-100
+                        target[i[0]]=-1000
                 
                 target=target.to(self.device)
                

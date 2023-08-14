@@ -32,7 +32,7 @@ class Vehicle:
         self.out_dict=out_dict
         self.index_dict=index_dict
         self.sumo = sumo
-        self.current_lane=self.sumo.vehicle.getLaneID("1")
+        self.current_lane=self.sumo.vehicle.getLaneID( self.vehicle_id)
         self.cur_loc=self.current_lane.partition("_")[0]
         
         if ':' not in self.cur_loc:
@@ -42,7 +42,7 @@ class Vehicle:
         pass
     
     def get_lane(self):        
-        self.current_lane=self.sumo.vehicle.getLaneID("1")
+        self.current_lane=self.sumo.vehicle.getLaneID( self.vehicle_id)
         self.cur_loc=self.current_lane.partition("_")[0]
         return self.current_lane
     
@@ -97,7 +97,7 @@ class Vehicle:
     def set_destination(self,action):
         # print(action)
         
-        self.current_lane=self.sumo.vehicle.getLaneID("1")
+        self.current_lane=self.sumo.vehicle.getLaneID( self.vehicle_id)
         self.cur_loc=self.current_lane.partition("_")[0]
         
         if ':' not in self.cur_loc:
@@ -112,8 +112,11 @@ class Vehicle:
                 outlist=np.array(outlist)
                 outlane=np.array(outlane)
                 target = outlane[action]
-                
-                self.sumo.vehicle.changeTarget("1",target)
+                if isinstance(target,str): 
+                 self.sumo.vehicle.changeTarget( self.vehicle_id,target)
+                else:
+                    self.sumo.vehicle.changeTarget( self.vehicle_id,target[0])
+                    
             
         return
 
@@ -137,8 +140,8 @@ class Vehicle:
     
     def random_relocate(self):
          self.new_lane=random.choice(list(self.index_dict.keys()))      
-         self.sumo.vehicle.changeTarget("1",edgeID=self.new_lane)
-         self.sumo.vehicle.moveTo("1",self.new_lane+"_0",5)
+         self.sumo.vehicle.changeTarget( self.vehicle_id,edgeID=self.new_lane)
+         self.sumo.vehicle.moveTo( self.vehicle_id,self.new_lane+"_0",5)
          return
     
     

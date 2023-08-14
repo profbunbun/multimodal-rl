@@ -32,8 +32,8 @@ class Basic():
         self.agent_step = 0
 
         self.vehicle = Vehicle("1", self.out_dict, self.index_dict, self.sumo)
-        
-        
+        self.vehicle.random_relocate()
+        self.sumo.simulationStep()
         
         out_mask= self.vehicle.get_stats()
         self.vedge = self.sumo.vehicle.getRoadID("1")
@@ -59,7 +59,7 @@ class Basic():
         state = np.append(state, self.new_distance)
 
         self.done = False
-        self.make_choice_flag = False
+        self.make_choice_flag = True
 
         self.lane = self.sumo.vehicle.getLaneID("1")
         self.out_dict = self.vehicle.get_out_dict()

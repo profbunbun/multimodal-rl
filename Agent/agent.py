@@ -74,11 +74,18 @@ class Agent:
         
 # make choice function
     def act(self,state,outmask):
-        
+        choices= [1 for choice in outmask if choice == 1]
+        if len(choices) > 1:
+            number_of_choices= len(choices)-1
+        else:
+            number_of_choices=choices
+        # print(len(choices))
         rando=np.random.rand()
         if  rando < self.epsilon:
-            act=np.random.randint(0,high=self.action_size-1)
+            act=np.random.randint(0,high=len(choices))
+            
             return act
+            
         else:
             act_values = self.policy_net(state)
             # q-val

@@ -30,6 +30,7 @@ for episode in range(EPISODES):
     AGENT_STEP=0
     EPISODE_REWARD=0
     action=agent.act(state,out_mask)
+    # next_state,new_reward, done,out_mask = env.step(action) 
     
 
     while not env.done:
@@ -41,14 +42,15 @@ for episode in range(EPISODES):
             AGENT_STEP+=1
             agent.remember(state,action,new_reward,next_state,done,out_mask)
             state=next_state
-            EPISODE_REWARD+=new_reward       
+            EPISODE_REWARD+=new_reward   
+            action=agent.act(state,out_mask)       
         else:
             env.nullstep()
     
         if (len(agent.memory)> BATCH_SIZE) :
                     agent.replay(BATCH_SIZE)                
         STEP+=1
-        action=agent.act(state,out_mask)    
+         
            
     
     # agent.epsilon_decay()   

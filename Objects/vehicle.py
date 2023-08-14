@@ -95,7 +95,7 @@ class Vehicle:
     
         
     def set_destination(self,action):
-        print(action)
+        # print(action)
         
         self.current_lane=self.sumo.vehicle.getLaneID("1")
         self.cur_loc=self.current_lane.partition("_")[0]
@@ -104,9 +104,11 @@ class Vehicle:
             
             outlist=list(self.out_dict[self.cur_loc].keys())
             outlane=list(self.out_dict[self.cur_loc].values())
+            # print(outlist[action],outlane[action])
             
             
-            if action < len(outlist) : 
+            
+            if action <= (len(outlist)-1) : 
                 outlist=np.array(outlist)
                 outlane=np.array(outlane)
                 target = outlane[action]

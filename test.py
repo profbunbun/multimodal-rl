@@ -6,7 +6,7 @@ from Connector.utility import Utility
 from Agent.agent import Agent
 
 
-EPISODES=1000
+EPISODES=10000
 STEPS=1000
 BATCH_SIZE=32
 MIN_MEMORY=1000

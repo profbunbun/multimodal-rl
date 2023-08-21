@@ -9,7 +9,7 @@ class Basic():
     def __init__(self,sumocon:str,steps_per_episode) -> None:
         
         self.sumo_con=SUMOConnection(sumocon)
-        self.out_dict, self.index_dict,self.edge_list = self.sumo_con.getEdgesInfo()
+        self.out_dict, self.index_dict,self.edge_list,self.edge_position = self.sumo_con.getEdgesInfo()
         
         self.steps_per_episode=steps_per_episode
         self.episode_count = 0
@@ -30,7 +30,7 @@ class Basic():
         self.done = False
         self.steps = 0
         self.agent_step = 0
-
+        
         self.vehicle = Vehicle("1", self.out_dict, self.index_dict, self.sumo)
         self.vehicle.random_relocate()
         self.sumo.simulationStep()
@@ -38,6 +38,9 @@ class Basic():
         out_mask= self.vehicle.get_stats()
         self.vedge = self.sumo.vehicle.getRoadID("1")
         self.route.append(self.vedge)
+        
+        
+        
         self.vloc = self.vehicle.location()
              
         self.person = Person("p_0",  self.sumo)
@@ -67,7 +70,7 @@ class Basic():
         # 
         # 
         # 
-        self.best_route=self.sumo.simulation.findRoute(self.vedge,self.pedge)
+        # self.best_route=self.sumo.simulation.findRoute(self.vedge,self.pedge)
         
         
         self.old_edge=self.vedge 

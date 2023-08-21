@@ -1,7 +1,7 @@
 import sys
 import os
 import traci
-
+import numpy as np
 import sumolib
 from xml.dom.minidom import parse
 import xml.etree.ElementTree as ET
@@ -65,12 +65,25 @@ class SUMOConnection:
         length_dict = {}
         index_dict = {}
         edge_list = []
+        edge_position_dict={}
         counter = 0
         all_edges = net.getEdges()
         for current_edge in all_edges:
             current_edge_id = current_edge.getID()
+            
+            if current_edge_id in edge_position_dict.keys():
+                print(current_edge_id+" already exists!")
+            else:
+                edge_start,edge_end=current_edge.getShape()
+                x=((edge_start[0]+edge_end[0])/2)
+                
+                y=((edge_start[1]+edge_end[1])/2)
+                               
+                edge_position_dict[current_edge_id] = x,y
+            
             if current_edge.allows("passenger"):
                 edge_list.append(current_edge)
+                
             if current_edge_id in index_dict.keys():
                 print(current_edge_id+" already exists!")
             else:
@@ -95,7 +108,7 @@ class SUMOConnection:
                     dir_now = conn.getDirection()
                     out_dict[current_edge_id][dir_now] = current_out_edge.getID()
 
-        return [ out_dict, index_dict, edge_list]
+        return [ out_dict, index_dict, edge_list,edge_position_dict]
     
     
     

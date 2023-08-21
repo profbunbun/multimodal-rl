@@ -35,7 +35,7 @@ class Basic():
         self.vehicle.random_relocate()
         self.sumo.simulationStep()
         
-        out_mask= self.vehicle.get_stats()
+        
         self.vedge = self.sumo.vehicle.getRoadID("1")
         self.route.append(self.vedge)
         
@@ -45,6 +45,9 @@ class Basic():
              
         self.person = Person("p_0",  self.sumo)
         self.pedge = self.sumo.person.getRoadID("p_0")
+        
+        self.choices=self.vehicle.get_out_dict()
+        
         self.ploc = self.person.location()
 
         self.new_distance = (math.dist(self.vloc, self.ploc))
@@ -74,7 +77,7 @@ class Basic():
         
         
         self.old_edge=self.vedge 
-        return state, self.reward,  self.done, out_mask
+        return state, self.reward,  self.done, self.choices
     
     def nullstep(self):
         self.steps += 1
@@ -95,13 +98,10 @@ class Basic():
         self.old_distance = self.new_distance
         self.vloc = self.vehicle.location()
         self.ploc = self.person.location()
-        
+        self.choices=self.vehicle.get_out_dict()
         self.new_distance = (math.dist(self.vloc, self.ploc))
 
-        # if self.new_distance > self.old_distance:
-        #     self.reward += -.05
-        # if self.new_distance < self.old_distance:
-        #     self.reward += -.01
+      
         
         if  self.make_choice_flag:
             self.vehicle.set_destination(action)
@@ -116,7 +116,7 @@ class Basic():
 
         self.sumo.simulationStep()
         
-        out_mask= self.vehicle.get_stats()
+       
         
         self.lane = self.sumo.vehicle.getLaneID("1")
        
@@ -158,7 +158,7 @@ class Basic():
         
         
 
-        return state, reward, self.done, out_mask
+        return state, reward, self.done, self.choices
 
     def render(self, mode):
         

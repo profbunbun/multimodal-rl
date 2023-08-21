@@ -10,6 +10,13 @@ import numpy as np
 random.seed(0)
 T.autograd.set_detect_anomaly(True)
 
+STRAIGHT = "s"
+TURN_AROUND = "t"
+LEFT = "l"
+RIGHT = "r"
+SLIGHT_LEFT = "L"
+SLIGHT_RIGHT = "R"
+
 PATH="Models/model.pt"
 class DQN(nn.Module):
 
@@ -48,7 +55,7 @@ class Agent:
     def __init__(self,state_size,action_size) -> None:
         self.state_size = state_size
         self.action_size = action_size
-        
+        self.direction_choices = [STRAIGHT, TURN_AROUND,  SLIGHT_RIGHT, RIGHT, SLIGHT_LEFT, LEFT]
         self.memory= deque(maxlen=20000)
         self.gamma = 0.95
         self.epsilon = .997
@@ -66,30 +73,35 @@ class Agent:
             self.policy_net = DQN(self.state_size,self.action_size).to(self.device)
 
     
-    def remember(self,state,action,reward,next_state,done,out_mask):
-        self.memory.append((state,action,reward,next_state,done,out_mask))
+    def remember(self,state,action,reward,next_state,done):
+        self.memory.append((state,action,reward,next_state,done))
         pass
         
- 
+    def explore(self,available_choices):
+        
+        return
+    
+    def exploit(self):
+        return
         
 # make choice function
-    def act(self,state,outmask):
-        choices= [1 for choice in outmask if choice == 1]
-        if len(choices) > 1:
-            number_of_choices= len(choices)
-        else:
-            number_of_choices=choices
-        # print(len(choices))
+    def act(self,state, options):
+        
+     
         rando=np.random.rand()
         if  rando < self.epsilon:
-            act=np.random.randint(0,high=number_of_choices)
+            
+            available_choices=list(options.keys())
+            
+            act=np.random.choice(available_choices)
             
             return act
             
         else:
             act_values = self.policy_net(state)
             # q-val
-            act=T.argmax(act_values)
+            # act=T.argmax(act_values)
+            act=self.direction_choices[T.argmax(act_values)]
             return act
         
         
@@ -99,7 +111,7 @@ class Agent:
         # T.cuda.empty_cache()
         minibatch=random.sample(self.memory,batch_size)
         
-        for state,action,reward,new_state,done,out_mask in minibatch:
+        for state,action,reward,new_state,done in minibatch:
           
             reward= reward.float()
             reward=reward.to(self.device)

@@ -30,7 +30,7 @@ class Basic():
         self.done = False
         self.steps = 0
         self.agent_step = 0
-        
+        # Error here in self.out_dict, two vars with same name causing an issue
         self.vehicle = Vehicle("1", self.out_dict, self.index_dict, self.sumo)
         self.vehicle.random_relocate()
         self.sumo.simulationStep()

@@ -13,7 +13,7 @@ MIN_MEMORY=1000
 
 SUMOCONFIG="Nets/3x3b.sumocfg"
 env = Basic(SUMOCONFIG,STEPS)
-agent = Agent(6,6)
+agent = Agent(6,4)
 util=Utility()
 
 rewards,eps_history=[],[]

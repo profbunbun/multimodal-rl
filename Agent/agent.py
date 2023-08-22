@@ -14,8 +14,7 @@ STRAIGHT = "s"
 TURN_AROUND = "t"
 LEFT = "l"
 RIGHT = "r"
-SLIGHT_LEFT = "L"
-SLIGHT_RIGHT = "R"
+
 
 PATH="Models/model.pt"
 class DQN(nn.Module):
@@ -55,7 +54,7 @@ class Agent:
     def __init__(self,state_size,action_size) -> None:
         self.state_size = state_size
         self.action_size = action_size
-        self.direction_choices = [STRAIGHT, TURN_AROUND,  SLIGHT_RIGHT, RIGHT, SLIGHT_LEFT, LEFT]
+        self.direction_choices = [STRAIGHT, TURN_AROUND,   RIGHT,  LEFT]
         self.memory= deque(maxlen=20000)
         self.gamma = 0.95
         self.epsilon = .997
@@ -129,12 +128,12 @@ class Agent:
                 
                 target=output.detach().clone()
                 target[action]=adjusted_reward
-                out_mask=out_mask.detach().clone()
+                # out_mask=out_mask.detach().clone()
                 
                
-                for i in enumerate(target):
-                    if out_mask[i[0]]==0:
-                        target[i[0]]=-1000
+                # for i in enumerate(target):
+                #     if out_mask[i[0]]==0:
+                #         target[i[0]]=-1000
                         
                 
                 target=target.to(self.device)
@@ -146,12 +145,12 @@ class Agent:
                 output=self.policy_net(state).to(self.device)
                 target=output.detach().clone()
                 target[action]=reward
-                out_mask=out_mask.detach().clone()
+                # out_mask=out_mask.detach().clone()
                 
                 
-                for i in enumerate(target):
-                    if out_mask[i[0]]==0:
-                        target[i[0]]=-1000
+                # for i in enumerate(target):
+                #     if out_mask[i[0]]==0:
+                #         target[i[0]]=-1000
                 
                 target=target.to(self.device)
                

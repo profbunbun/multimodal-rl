@@ -12,8 +12,7 @@ STRAIGHT = "s"
 TURN_AROUND = "t"
 LEFT = "l"
 RIGHT = "r"
-SLIGHT_LEFT = "L"
-SLIGHT_RIGHT = "R"
+
 
 
 
@@ -21,7 +20,7 @@ class Vehicle:
     
     def __init__(self,vehicle_id,out_dict,index_dict,sumo) -> None:
         
-        self.direction_choices = [STRAIGHT, TURN_AROUND,  SLIGHT_RIGHT, RIGHT, SLIGHT_LEFT, LEFT]
+        self.direction_choices = [STRAIGHT, TURN_AROUND,  RIGHT,LEFT]
         self.vehicle_id =vehicle_id
         self.out_dict=out_dict
         self.index_dict=index_dict
@@ -29,9 +28,9 @@ class Vehicle:
         self.current_lane=self.sumo.vehicle.getLaneID( self.vehicle_id)
         self.cur_loc=self.current_lane.partition("_")[0]
         
-        if ':' not in self.cur_loc:
-            self.outlist=list(self.out_dict[self.cur_loc].keys())
-            self.outlane=list(self.out_dict[self.cur_loc].values())
+        # if ':' not in self.cur_loc:
+        #     self.outlist=list(self.out_dict[self.cur_loc].keys())
+        #     self.outlane=list(self.out_dict[self.cur_loc].values())
         
         pass
     

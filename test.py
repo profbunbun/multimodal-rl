@@ -29,7 +29,7 @@ for episode in range(EPISODES):
     STEP=0
     AGENT_STEP=0
     EPISODE_REWARD=0
-    action=agent.act(state,options)
+    action,action_index=agent.act(state,options)
     # next_state,new_reward, done,out_mask = env.step(action) 
     
 
@@ -40,10 +40,10 @@ for episode in range(EPISODES):
             next_state,new_reward, done,options = env.step(action) 
             next_state,new_reward=T.from_numpy(next_state),T.from_numpy(new_reward)
             AGENT_STEP+=1
-            agent.remember(state,action,new_reward,next_state,done)
+            agent.remember(state,action_index,new_reward,next_state,done)
             state=next_state
             EPISODE_REWARD+=new_reward   
-            action=agent.act(state,options)       
+            action,action_index=agent.act(state,options)       
             if (len(agent.memory)> BATCH_SIZE) :
                         agent.replay(BATCH_SIZE)                
         else:

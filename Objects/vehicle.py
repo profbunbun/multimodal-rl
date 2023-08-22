@@ -69,7 +69,7 @@ class Vehicle:
      
     def get_out_dict(self):
         lane = self.get_lane()
-        options=self.out_dict
+        options=self.out_dict[lane]
         return options
     
     

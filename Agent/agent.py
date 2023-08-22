@@ -87,22 +87,24 @@ class Agent:
 # make choice function
     def act(self,state, options):
         
-     
+        available_choices=list(options.keys())
+        
+        ac=list(options.values())
         rando=np.random.rand()
         if  rando < self.epsilon:
             
-            available_choices=list(options.keys())
             
             act=np.random.choice(available_choices)
-            
-            return act
+            action_index=self.direction_choices.index(act)
+            return options[act], action_index
             
         else:
             act_values = self.policy_net(state)
             # q-val
             # act=T.argmax(act_values)
             act=self.direction_choices[T.argmax(act_values)]
-            return act
+            action_index=self.direction_choices.index(act)
+            return act, action_index
         
         
  

@@ -23,7 +23,7 @@ class SUMOConnection:
         pass
     # do i need the dconnection label?
     def connect_gui(self):
-        self.sumo_cmd = ["sumo-gui","-c",self.sumocfg,"--start","--quit-on-end"]
+        self.sumo_cmd = ["sumo-gui","-c",self.sumocfg,"--start","--quit-on-end","--human-readable-time"]
         traci.start(self.sumo_cmd,label=self.label)
         self.sumo_= traci
         return self.sumo_

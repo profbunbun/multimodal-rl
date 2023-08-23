@@ -13,7 +13,7 @@ TURN_AROUND = "t"
 LEFT = "l"
 RIGHT = "r"
 
-
+# out_mask=[]
 
 
 class Vehicle:
@@ -54,11 +54,11 @@ class Vehicle:
         else:
             return False
     
-    def get_stats(self):
-        current_lane=self.get_lane()
-        current_location=current_lane.partition("_")[0] 
-        if ':' not in current_lane :     
-            return      
+    # def get_stats(self):
+    #     current_lane=self.get_lane()
+    #     current_location=current_lane.partition("_")[0] 
+    #     if ':' not in current_lane :     
+    #         return      
    
             
         

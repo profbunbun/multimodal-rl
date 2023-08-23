@@ -6,7 +6,7 @@ from Connector.utility import Utility
 from Agent.agent import Agent
 
 
-EPISODES=10000
+EPISODES=100
 STEPS=1000
 BATCH_SIZE=32
 MIN_MEMORY=1000
@@ -19,7 +19,7 @@ util=Utility()
 rewards,eps_history=[],[]
 for episode in range(EPISODES):
     
-    if (episode) % 100 == 0:
+    if (episode) % 10 == 0:
         env.render("gui")
     else:
         env.render("libsumo")

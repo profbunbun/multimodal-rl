@@ -68,7 +68,7 @@ class Basic():
         self.make_choice_flag = True
 
         self.lane = self.sumo.vehicle.getLaneID("1")
-        self.out_dict = self.vehicle.get_out_dict()
+        self.choices= self.vehicle.get_out_dict()
         # 
         # 
         # 

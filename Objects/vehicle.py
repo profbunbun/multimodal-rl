@@ -83,15 +83,17 @@ class Vehicle:
             
             outlist=list(self.out_dict[self.cur_loc].keys())
             outlane=list(self.out_dict[self.cur_loc].values())
+            out_choices=list(self.out_dict[self.cur_loc])
+            # print(out_choices)
             # print(outlist[action],outlane[action])
             
             
             
             if action in outlist : 
                 
-                target = self.out_dict[self.cur_loc][action]
+                target_lane = self.out_dict[self.cur_loc][action]
                 # if isinstance(target,str): 
-                self.sumo.vehicle.changeTarget( self.vehicle_id,target)
+                self.sumo.vehicle.changeTarget( self.vehicle_id,target_lane)
                 # else:
                 #     self.sumo.vehicle.changeTarget( self.vehicle_id,target[0])
                     

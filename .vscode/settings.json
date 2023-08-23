@@ -1,4 +1,7 @@
 {
+    "json.schemaDownload.enable": true,
+
+   
     "python.autoComplete.extraPaths": [
        "/usr/share/sumo/bin","/usr/share/sumo/tools" 
     ],
@@ -7,11 +10,17 @@
         "/usr/share/sumo/tools"
     ],
     "python.analysis.typeCheckingMode": "off",
-    "[python]": {
-        "editor.defaultFormatter": "ms-python.python"
-    },
-    "python.formatting.provider": "none",
-    "cmake.configureOnOpen": false
+    // "[python]": {
+    //     "editor.defaultFormatter": "ms-python.python"
+    // },
+    // "python.formatting.provider": "black",
+    "workbench.settings.openDefaultSettings": false,
+    "workbench.commandPalette.experimental.suggestCommands": true,
+    "python.linting.pylintEnabled": true,
+    "python.linting.enabled": true,
+  
+    // "workbench.settings.editor": "json"
+   
     
     
 }

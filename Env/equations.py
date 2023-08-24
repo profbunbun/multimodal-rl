@@ -88,36 +88,20 @@ class MakeGraph:
                     dir_now = conn.getDirection()
                     out_dict[current_edge_id][dir_now] = current_out_edge.getID()
 
-        # all_nodes= net.getNodes()
-        # for current_node in all_nodes:
-        #     current_node_id = current_node.getID()
-        #     # dir(current_node_id)
-        #     position= net.getNode(current_node_id).getCoord()
-
-        # print(position)
-
-        return [out_dict, index_dict, edge_list, lane_pos]
+        return [out_dict, lane_pos]
 
     def edges_nodes(self):
-        '''
+        """
         edges_nodes _summary_
 
         _extended_summary_
 
         Returns:
             _description_
-        '''
-        out_dict, index_dict, edge_list, lane_pos = self.get_edges_info()
+        """
+        out_dict, lane_pos = self.get_edges_info()
         graph = nx.Graph()
         print(lane_pos)
-        # for edge_1 in edge_list:
-        #     # print(edge_1._id,edge_1._from._id,edge_1._to._id)
-        #     for edge_2 in edge_list:
-        #         if edge_1._from._id == edge_2._to._id:
-        #             graph.append([edge_1._id,edge_2._id])
-
-        # pr
-        # print(index_dict)
 
         for key in out_dict.items():
             # print(key,out_dict[key])

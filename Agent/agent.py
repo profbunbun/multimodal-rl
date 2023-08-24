@@ -128,7 +128,7 @@ class Agent:
         minibatch = random.sample(self.memory, batch_size)
 
         for state, action, reward, new_state, done in minibatch:
-            reward = reward.float()
+            reward= T.tensor(reward)  # pylint: disable=E1101
             reward = reward.to(self.device)
 
             if not done:

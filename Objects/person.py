@@ -14,7 +14,6 @@ class Person:
     def __init__(self, person_id, sumo) -> None:
         self.person_id = person_id
         self.sumo = sumo
-        pass
 
     def location(self):
         """
@@ -25,9 +24,9 @@ class Person:
         Returns:
             _description_
         """
-        self.ppos = self.sumo.person.getPosition(self.person_id)
+        ppos = self.sumo.person.getPosition(self.person_id)
 
-        return self.ppos
+        return ppos
 
     def set_destination(self):
         """
@@ -35,7 +34,6 @@ class Person:
 
         _extended_summary_
         """
-        pass
 
     def set_pickup(self):
         """
@@ -43,7 +41,6 @@ class Person:
 
         _extended_summary_
         """
-        pass
 
     def pickup(self):
         """
@@ -51,7 +48,6 @@ class Person:
 
         _extended_summary_
         """
-        pass
 
     def close(self):
         """

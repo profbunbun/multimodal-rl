@@ -11,69 +11,81 @@ EPISODES = 100
 STEPS = 1000
 BATCH_SIZE = 32
 MIN_MEMORY = 1000
-
 SUMOCONFIG = "Nets/3x3b.sumocfg"
-env = Basic(SUMOCONFIG, STEPS)
-agent = Agent(6, 4)
-util = Utility()
 
-rewards, eps_history = [], []
-for episode in range(EPISODES):
-    if (episode) % 10 == 0:
-        env.render("gui")
-    else:
-        env.render("libsumo")
 
-    state, reward, done, options = env.reset()
-    # pylint: disable=E1101
-    state = T.from_numpy(state)
-    # pylint: enable=E1101
-    STEP = 0
-    AGENT_STEP = 0
-    EPISODE_REWARD = 0
-    action, action_index = agent.act(state, options)
-    # next_state,new_reward, done,out_mask = env.step(action)
+def main():
+    """
+    main _summary_
 
-    while not env.done:
-        if env.make_choice_flag:
-            next_state, new_reward, done, options = env.step(action)
-            next_state, new_reward = T.from_numpy(next_state
-                                                  ), T.from_numpy(new_reward)
-            AGENT_STEP += 1
-            agent.remember(state, action_index, new_reward, next_state, done)
-            state = next_state
-            EPISODE_REWARD += new_reward
-            action, action_index = agent.act(state, options)
-            if len(agent.memory) > BATCH_SIZE:
-                agent.replay(BATCH_SIZE)
+    _extended_summary_
+    """
+
+    env = Basic(SUMOCONFIG, STEPS)
+    agent = Agent(6, 4)
+    util = Utility()
+
+    rewards, eps_history = [], []
+    for episode in range(EPISODES):
+        if (episode) % 10 == 0:
+            env.render("gui")
         else:
-            env.nullstep()
+            env.render("libsumo")
 
-        STEP += 1
+        state, done, options = env.reset()
 
-    # agent.epsilon_decay()
-    agent.epsilon_decay_3(episode, EPISODES)
+        state = T.from_numpy(state)  # pylint: disable=E1101
 
-    r = float(EPISODE_REWARD)
-    # r = float(new_reward)
-    rewards.append(r)
+        step = 0
+        agent_step = 0
 
-    eps_history.append(agent.epsilon)
-    avg_reward = np.mean(rewards[-100:])
+        accumulated_reward = 0
+        action, action_index = agent.act(state, options)
+        # next_state,new_reward, done,out_mask = env.step(action)
 
-    # avg_reward = np.mean(rewards)
+        while not env.done:
+            if env.make_choice_flag:
+                next_state, new_reward, done, options = env.step(action)
+                next_state = T.from_numpy(next_state)
+                accumulated_reward += new_reward
+                agent_step += 1
+                agent.remember(state, action_index, new_reward, next_state, done)
+                state = next_state
+                action, action_index = agent.act(state, options)
+                if len(agent.memory) > BATCH_SIZE:
+                    agent.replay(BATCH_SIZE)
+            else:
+                env.nullstep()
 
-    print(
-        "EP: ",
-        episode,
-        f"Reward: {r:.3}",
-        f" Average Reward  {avg_reward:.3}",
-        f"epsilon {agent.epsilon:.5}",
-        f" **** STEP: {STEP}",
-        f"*** Agent STEPs: {AGENT_STEP}"
-    )
-    x = [i + 1 for i in range(len(rewards))]
-    FILE_NAME = "sumo-agent.png"
+            step += 1
 
-    util.plot_learning(x, rewards, eps_history, FILE_NAME)
-    env.close()
+        # agent.epsilon_decay()
+        agent.epsilon_decay_3(episode, EPISODES)
+
+        acc_r = float(accumulated_reward)
+        # r = float(new_reward)
+        rewards.append(acc_r)
+
+        eps_history.append(agent.epsilon)
+        avg_reward = np.mean(rewards[-100:])
+
+        # avg_reward = np.mean(rewards)
+
+        print(
+            "EP: ",
+            episode,
+            f"Reward: {acc_r:.3}",
+            f" Average Reward  {avg_reward:.3}",
+            f"epsilon {agent.epsilon:.5}",
+            f" **** step: {step}",
+            f"*** Agent steps: {agent_step}",
+        )
+        x = [i + 1 for i in range(len(rewards))]
+        file_name = "sumo-agent.png"
+
+        util.plot_learning(x, rewards, eps_history, file_name)
+        env.close()
+
+
+if __name__ == "__main__":
+    main()

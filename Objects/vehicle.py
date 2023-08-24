@@ -69,8 +69,8 @@ class Vehicle:
         Returns:
             _type_: _description_
         """
-        self.vpos = self.sumo.vehicle.getPosition(self.vehicle_id)
-        return [self.vpos[0], self.vpos[1]]
+        vpos = self.sumo.vehicle.getPosition(self.vehicle_id)
+        return [vpos[0], vpos[1]]
 
     def is_indexed_lane(self):
         """
@@ -175,7 +175,7 @@ class Vehicle:
 
         _extended_summary_
         """
-        self.new_lane = random.choice(list(self.index_dict.keys()))
-        self.sumo.vehicle.changeTarget(self.vehicle_id, edgeID=self.new_lane)
-        self.sumo.vehicle.moveTo(self.vehicle_id, self.new_lane + "_0", 5)
+        new_lane = random.choice(list(self.index_dict.keys()))
+        self.sumo.vehicle.changeTarget(self.vehicle_id, edgeID=new_lane)
+        self.sumo.vehicle.moveTo(self.vehicle_id, new_lane + "_0", 5)
         return

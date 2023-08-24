@@ -27,9 +27,14 @@ class Basic:
         self.action = 0
         self.done = False
         self.make_choice_flag = False
-
         self.vehicle = None
+        self.person = None
         self.route = []
+        self.done = False
+        self.steps = 0
+        self.agent_step = 0
+        self.old_edge = None
+        self.sumo = None
 
     def reset(self):
         """
@@ -41,56 +46,41 @@ class Basic:
             _description_
         """
         self.sumo.simulationStep()
-        # self.sumo
-        self.reward = 0
 
-        self.done = False
-        self.steps = 0
-        self.agent_step = 0
-        # Error here in self.out_dict, two vars with same name causing an issue
         self.vehicle = Vehicle("1", self.out_dict, self.index_dict, self.sumo)
         self.vehicle.random_relocate()
         self.sumo.simulationStep()
 
-        self.vedge = self.sumo.vehicle.getRoadID("1")
-        self.route.append(self.vedge)
+        vedge = self.sumo.vehicle.getRoadID(self.vehicle.vehicle_id)
+        self.route.append(vedge)
 
-        self.vloc = self.vehicle.location()
+        vloc = self.vehicle.location()
 
         self.person = Person("p_0", self.sumo)
-        self.pedge = self.sumo.person.getRoadID("p_0")
 
-        self.choices = self.vehicle.get_out_dict()
+        choices = self.vehicle.get_out_dict()
 
-        self.ploc = self.person.location()
+        ploc = self.person.location()
 
-        self.new_distance = math.dist(self.vloc, self.ploc)
-
-        self.vehicle_lane_index = self.index_dict[self.vedge]
-        self.person_lane_index = self.index_dict[self.pedge]
+        distance = math.dist(vloc, ploc)
 
         state = np.array([])
-        # state = np.append(state, self.vehicle_lane_index)
-        # state = np.append(state, self.person_lane_index)
-        state = np.append(state, self.vloc)
-        state = np.append(state, self.ploc)
+
+        state = np.append(state, vloc)
+        state = np.append(state, ploc)
 
         state = np.append(state, self.steps)
-        state = np.append(state, self.new_distance)
+        state = np.append(state, distance)
 
         self.done = False
         self.make_choice_flag = True
 
-        self.lane = self.sumo.vehicle.getLaneID("1")
-        self.choices = self.vehicle.get_out_dict()
-        #
-        #
-        #
-        #
+        choices = self.vehicle.get_out_dict()
+
         # self.best_route=self.sumo.simulation.findRoute(self.vedge,self.pedge)
 
-        self.old_edge = self.vedge
-        return state, self.reward, self.done, self.choices
+        self.old_edge = vedge
+        return state, self.done, choices
 
     def nullstep(self):
         """
@@ -98,20 +88,19 @@ class Basic:
 
         _extended_summary_
         """
+        self.sumo.simulationStep()
         self.steps += 1
         # self.reward = 0
-        self.sumo.simulationStep()
+        vedge = self.sumo.vehicle.getRoadID("1")
 
-        if ":" in self.vedge or self.old_edge == self.vedge:
+        if ":" in vedge or self.old_edge == vedge:
             self.make_choice_flag = False
         else:
             self.make_choice_flag = True
 
-        self.old_edge = self.vedge
-        self.vedge = self.sumo.vehicle.getRoadID("1")
-        pass
+        self.old_edge = vedge
 
-    def step(self, action=None):
+    def step(self, action):
         """
         step _summary_
 
@@ -123,61 +112,48 @@ class Basic:
         Returns:
             _description_
         """
-        # self.reward = 0
-        self.old_distance = self.new_distance
-        self.vloc = self.vehicle.location()
-        self.ploc = self.person.location()
-        self.choices = self.vehicle.get_out_dict()
-        self.new_distance = math.dist(self.vloc, self.ploc)
+        self.sumo.simulationStep()
+        self.steps += 1
+        vedge = self.sumo.vehicle.getRoadID("1")
+        reward = 0
+        vloc = self.vehicle.location()
+        ploc = self.person.location()
+        choices = self.vehicle.get_out_dict()
+        distance = math.dist(vloc, ploc)
 
         if self.make_choice_flag:
             self.vehicle.set_destination(action)
-            self.reward += -0.01
+            reward += -0.01
             self.agent_step += 1
             self.make_choice_flag = False
 
-        self.steps += 1
-
-        self.action = action
-
-        self.sumo.simulationStep()
-
-        self.lane = self.sumo.vehicle.getLaneID("1")
-
-        self.old_edge = self.vedge
-        self.vedge = self.sumo.vehicle.getRoadID("1")
-        self.pedge = self.sumo.person.getRoadID("p_0")
-        self.route.append(self.vedge)
-
-        if ":" in self.vedge:
-            self.vehicle_lane_index = self.vehicle_lane_index
-        else:
-            self.vehicle_lane_index = self.index_dict[self.vedge]
-
-        self.person_lane_index = self.index_dict[self.pedge]
+        vedge = self.sumo.vehicle.getRoadID("1")
+        pedge = self.sumo.person.getRoadID("p_0")
+        self.route.append(vedge)
 
         self.done = False
 
-        if self.vedge == self.pedge:
-            # self.reward += 20
+        if vedge == pedge:
+            # reward += 20
             self.done = True
 
-        if self.steps > self.steps_per_episode:
-            # self.reward += -10
+        if self.steps >= self.steps_per_episode:
+            # reward += -10
             self.done = True
 
         state = np.array([])
         # state = np.append(state, self.vehicle_lane_index)
         # state = np.append(state, self.person_lane_index)
-        state = np.append(state, self.vloc)
-        state = np.append(state, self.ploc)
+        state = np.append(state, vloc)
+        state = np.append(state, ploc)
         state = np.append(state, self.agent_step)
-        state = np.append(state, self.new_distance)
+        state = np.append(state, distance)
 
-        reward = np.array([])
-        reward = np.append(reward, self.reward)
+        # reward = np.array([])
+        # reward = np.append(reward, self.reward)
 
-        return state, reward, self.done, self.choices
+        self.old_edge = vedge
+        return state, reward, self.done, choices
 
     def render(self, mode):
         """

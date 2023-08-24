@@ -1,3 +1,4 @@
+""" import stuff """
 import math
 import numpy as np
 from Objects.vehicle import Vehicle
@@ -6,6 +7,12 @@ from Connector.connect import SUMOConnection
 
 
 class Basic:
+    """
+     _summary_
+
+    _extended_summary_
+    """
+
     def __init__(self, sumocon: str, steps_per_episode) -> None:
         self.sumo_con = SUMOConnection(sumocon)
         (
@@ -13,7 +20,7 @@ class Basic:
             self.index_dict,
             self.edge_list,
             self.edge_position,
-        ) = self.sumo_con.getEdgesInfo()
+        ) = self.sumo_con.get_edges_info()
 
         self.steps_per_episode = steps_per_episode
         self.episode_count = 0
@@ -25,6 +32,14 @@ class Basic:
         self.route = []
 
     def reset(self):
+        """
+        reset _summary_
+
+        _extended_summary_
+
+        Returns:
+            _description_
+        """
         self.sumo.simulationStep()
         # self.sumo
         self.reward = 0
@@ -78,6 +93,11 @@ class Basic:
         return state, self.reward, self.done, self.choices
 
     def nullstep(self):
+        """
+        nullstep _summary_
+
+        _extended_summary_
+        """
         self.steps += 1
         # self.reward = 0
         self.sumo.simulationStep()
@@ -92,6 +112,17 @@ class Basic:
         pass
 
     def step(self, action=None):
+        """
+        step _summary_
+
+        _extended_summary_
+
+        Keyword Arguments:
+            action -- _description_ (default: {None})
+
+        Returns:
+            _description_
+        """
         # self.reward = 0
         self.old_distance = self.new_distance
         self.vloc = self.vehicle.location()
@@ -149,6 +180,14 @@ class Basic:
         return state, reward, self.done, self.choices
 
     def render(self, mode):
+        """
+        render _summary_
+
+        _extended_summary_
+
+        Arguments:
+            mode -- _description_
+        """
         if mode == "gui":
             self.sumo = self.sumo_con.connect_gui()
 
@@ -161,6 +200,11 @@ class Basic:
         return
 
     def close(self):
+        """
+        close _summary_
+
+        _extended_summary_
+        """
         self.sumo.close()
         # print(len(self.best_route))
         # print(self.best_route)

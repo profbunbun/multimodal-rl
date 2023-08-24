@@ -1,3 +1,4 @@
+"""module stuff"""
 # import numpy as np
 import random
 from Connector.utility import Utility
@@ -15,6 +16,12 @@ RIGHT = "r"
 
 
 class Vehicle:
+    """
+     _summary_
+
+    _extended_summary_
+    """
+
     def __init__(self, vehicle_id, out_dict, index_dict, sumo) -> None:
         """
         __init__ _summary_

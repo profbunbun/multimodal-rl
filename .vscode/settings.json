@@ -18,6 +18,11 @@
     "workbench.commandPalette.experimental.suggestCommands": true,
     "python.linting.pylintEnabled": true,
     "python.linting.enabled": true,
+    "python.createEnvironment.contentButton": "show",
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter"
+    },
+    "python.formatting.provider": "none",
   
     // "workbench.settings.editor": "json"
    

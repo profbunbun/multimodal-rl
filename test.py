@@ -1,3 +1,4 @@
+""" import stuff """
 import torch as T
 import numpy as np
 from Env.env import Basic
@@ -24,7 +25,9 @@ for episode in range(EPISODES):
         env.render("libsumo")
 
     state, reward, done, options = env.reset()
+    # pylint: disable=E1101
     state = T.from_numpy(state)
+    # pylint: enable=E1101
     STEP = 0
     AGENT_STEP = 0
     EPISODE_REWARD = 0
@@ -63,16 +66,14 @@ for episode in range(EPISODES):
     print(
         "EP: ",
         episode,
-        "Reward: %.3f" % r,
-        " Average Reward %.3f" % avg_reward,
-        "epsilon %.5f" % agent.epsilon,
-        " **** STEP: ",
-        STEP,
-        "*** Agent STEPs: ",
-        AGENT_STEP,
+        f"Reward: {r:.3}",
+        f" Average Reward  {avg_reward:.3}",
+        f"epsilon {agent.epsilon:.5}",
+        f" **** STEP: {STEP}",
+        f"*** Agent STEPs: {AGENT_STEP}"
     )
     x = [i + 1 for i in range(len(rewards))]
-    filename = "sumo-agent.png"
+    FILE_NAME = "sumo-agent.png"
 
-    util.plotLearning(x, rewards, eps_history, filename)
+    util.plot_learning(x, rewards, eps_history, FILE_NAME)
     env.close()

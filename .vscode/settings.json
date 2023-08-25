@@ -23,6 +23,10 @@
         "editor.defaultFormatter": "ms-python.black-formatter"
     },
     "python.formatting.provider": "none",
+    "pylint.args": [
+        "--extension-pkg-whitelist=pytorch.*,torch.*",
+        "--generated-members=torch"
+    ],
   
     // "workbench.settings.editor": "json"
    

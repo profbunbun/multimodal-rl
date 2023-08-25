@@ -66,24 +66,40 @@ class Agent:
         """
         self.memory.append((state, action, reward, next_state, done))
 
-    def explore(self):
+    def explore(self, options):
         """
         explore _summary_
         _extended_summary_
 
         """
-        return
+        action = np.random.choice(options)
 
-    def exploit(self):
+        return action
+
+    def exploit(self, state, options):
         """
         exploit _summary_
 
         _extended_summary_
         """
-        return
+        act_values = self.policy_net.forward(state)
+
+        action = self.direction_choices[
+            T.argmax(act_values)]  # pylint: disable=E1101
+
+        if action in options:
+            return action
+
+        choice_values = list(zip(self.direction_choices, act_values))
+        action_options = [act[1] for act in choice_values if act[0] in options]
+
+        action_vals = action_options.index(max(action_options))
+        action = options[action_vals]
+
+        return action
 
     # make choice function
-    def act(self, state, options):
+    def choose_action(self, state, options):
         """
         act _summary_
 
@@ -97,22 +113,14 @@ class Agent:
             _type_: _description_
         """
         available_choices = list(options.keys())
-
         rando = np.random.rand()
+
         if rando < self.epsilon:
-            act = np.random.choice(available_choices)
-            action_index = self.direction_choices.index(act)
-            return options[act], action_index
+            action = self.explore(available_choices)
+            return action, self.direction_choices.index(action)
 
-        act_values = self.policy_net.forward(state)
-
-        # q-val
-        # act=T.argmax(act_values)
-        # pylint: disable=E1101
-        act = self.direction_choices[T.argmax(act_values)]
-        # pylint: enable=E1101
-        action_index = self.direction_choices.index(act)
-        return act, action_index
+        action = self.exploit(state, available_choices)
+        return action, self.direction_choices.index(action)
 
     # Train the model
     def replay(self, batch_size):
@@ -124,67 +132,42 @@ class Agent:
         Args:
             batch_size (_type_): _description_
         """
-        # T.cuda.empty_cache()
+
         minibatch = random.sample(self.memory, batch_size)
 
         for state, action, reward, new_state, done in minibatch:
-            reward= T.tensor(reward)  # pylint: disable=E1101
+            reward = T.tensor(reward)  # pylint: disable=E1101
             reward = reward.to(self.device)
 
             if not done:
                 new_state_policy = self.policy_net.forward(
                     new_state).to(self.device)
 
-                # pylint: disable=E1101
-                adjusted_reward = reward + self.gamma * T.max(new_state_policy)
-                # pylint: enable=E1101
-                output = self.policy_net.forward(state).to(self.device)
+                adjusted_reward = (
+                    reward + self.gamma * T.max(  # pylint: disable=E1101
+                        new_state_policy))
 
+                output = self.policy_net.forward(state).to(self.device)
                 target = output.detach().clone()
                 target[action] = adjusted_reward
-                # out_mask=out_mask.detach().clone()
-
-                # for i in enumerate(target):
-                #     if out_mask[i[0]]==0:
-                #         target[i[0]]=-1000
-
                 target = target.to(self.device)
 
             else:
                 output = self.policy_net.forward(state).to(self.device)
                 target = output.detach().clone()
                 target[action] = reward
-                # out_mask=out_mask.detach().clone()
-
-                # for i in enumerate(target):
-                #     if out_mask[i[0]]==0:
-                #         target[i[0]]=-1000
-
                 target = target.to(self.device)
-
-                # loss function
-                # loss =  nn.MSELoss()
-                # loss = nn.L1Loss()
                 loss = nn.HuberLoss()
-
-                # optimize parameters
                 optimizer = optim.Adam(
                     self.policy_net.parameters(), lr=self.learning_rate
                 )
 
                 out = loss(output, target)
-
-                # out=self.loss(output,target)
                 optimizer.zero_grad()
-                # out.backward()
                 out.backward(retain_graph=True)
                 optimizer.step()
-                # T.cuda.empty_cache()
-
                 T.save(self.policy_net.state_dict(), PATH)
-                # return loss.item()
 
-    # trying differnt epsilon decay
     def epsilon_decay(self):
         """
         epsilon_decay _summary_

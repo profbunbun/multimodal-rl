@@ -16,27 +16,18 @@ class DQN(nn.Module):
 
     def __init__(self, state_size, action_size):
         super().__init__()
-        # pylint: disable=E1101
-        self.device = T.device("cuda" if T.cuda.is_available() else "cpu")
-        # pylint: enable=E1101
 
+        self.device = T.device(  # pylint: disable=E1101
+            "cuda" if T.cuda.is_available() else "cpu"
+        )
         self.layer1 = nn.Linear(state_size, 16)
         nn.init.kaiming_normal_(self.layer1.weight, mode="fan_out")
-        # nn.init.zeros_(self.layer1.weight)
-        # nn.init.zeros_(self.layer1.bias)
         self.layer2 = nn.Linear(16, 32)
         nn.init.kaiming_normal_(self.layer1.weight, mode="fan_out")
-        # nn.init.zeros_(self.layer2.weight)
-        # nn.init.zeros_(self.layer2.bias)
         self.layer3 = nn.Linear(32, 16)
         nn.init.kaiming_normal_(self.layer1.weight, mode="fan_out")
-
-        # nn.init.zeros_(self.layer3.weight)
-        # nn.init.zeros_(self.layer3.bias)
         self.layer4 = nn.Linear(16, action_size)
         nn.init.kaiming_normal_(self.layer1.weight)
-        # nn.init.zeros_(self.layer4.weight)
-        # nn.init.zeros_(self.layer4.bias)
 
     def forward(self, x_net):
         """
@@ -50,6 +41,7 @@ class DQN(nn.Module):
         Returns:
             _type_: _description_
         """
+        x_net = T.from_numpy(x_net)  # pylint: disable=E1101
         x_net = x_net.float()
         x_net = x_net.to(self.device)
         x_net = F.relu(self.layer1(x_net))

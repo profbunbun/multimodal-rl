@@ -24,7 +24,7 @@ class Basic:
 
         self.steps_per_episode = steps_per_episode
         self.episode_count = 0
-        self.action = 0
+        
         self.done = False
         self.make_choice_flag = False
         self.vehicle = None
@@ -45,14 +45,18 @@ class Basic:
         Returns:
             _description_
         """
+        self.steps = 0
+        self.agent_step = 0
+        self.route = []
         self.sumo.simulationStep()
 
         self.vehicle = Vehicle("1", self.out_dict, self.index_dict, self.sumo)
         self.vehicle.random_relocate()
         self.sumo.simulationStep()
+        self.steps += 1
 
         vedge = self.sumo.vehicle.getRoadID(self.vehicle.vehicle_id)
-        self.route.append(vedge)
+        # self.route.append(vedge)
 
         vloc = self.vehicle.location()
 
@@ -90,13 +94,18 @@ class Basic:
         """
         self.sumo.simulationStep()
         self.steps += 1
-        # self.reward = 0
+        
         vedge = self.sumo.vehicle.getRoadID("1")
+        pedge = self.sumo.person.getRoadID("p_0")
 
         if ":" in vedge or self.old_edge == vedge:
             self.make_choice_flag = False
         else:
             self.make_choice_flag = True
+        if vedge == pedge:
+            self.done = True
+        if self.steps >= self.steps_per_episode:
+            self.done = True
 
         self.old_edge = vedge
 
@@ -112,20 +121,21 @@ class Basic:
         Returns:
             _description_
         """
-        self.sumo.simulationStep()
-        self.steps += 1
-        vedge = self.sumo.vehicle.getRoadID("1")
+        
         reward = 0
-        vloc = self.vehicle.location()
-        ploc = self.person.location()
-        choices = self.vehicle.get_out_dict()
-        distance = math.dist(vloc, ploc)
-
         if self.make_choice_flag:
             self.vehicle.set_destination(action)
             reward += -0.01
             self.agent_step += 1
             self.make_choice_flag = False
+        
+        self.sumo.simulationStep()
+        self.steps += 1
+        vedge = self.sumo.vehicle.getRoadID("1")
+        vloc = self.vehicle.location()
+        ploc = self.person.location()
+        choices = self.vehicle.get_out_dict()
+        distance = math.dist(vloc, ploc)
 
         vedge = self.sumo.vehicle.getRoadID("1")
         pedge = self.sumo.person.getRoadID("p_0")
@@ -134,12 +144,11 @@ class Basic:
         self.done = False
 
         if vedge == pedge:
-            # reward += 20
             self.done = True
-
+            reward += 0.01
         if self.steps >= self.steps_per_episode:
-            # reward += -10
             self.done = True
+            reward += -0.01
 
         state = np.array([])
         # state = np.append(state, self.vehicle_lane_index)
@@ -153,6 +162,8 @@ class Basic:
         # reward = np.append(reward, self.reward)
 
         self.old_edge = vedge
+        while not self.make_choice_flag and not self.done:
+            self.nullstep()
         return state, reward, self.done, choices
 
     def render(self, mode):

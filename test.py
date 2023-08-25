@@ -1,5 +1,4 @@
 """ import stuff """
-import torch as T
 import numpy as np
 from Env.env import Basic
 
@@ -24,40 +23,34 @@ def main():
     env = Basic(SUMOCONFIG, STEPS)
     agent = Agent(6, 4)
     util = Utility()
-
     rewards, eps_history = [], []
+
     for episode in range(EPISODES):
+
+        accumulated_reward = 0
+
         if (episode) % 10 == 0:
             env.render("gui")
         else:
             env.render("libsumo")
 
-        state, done, options = env.reset()
-
-        state = T.from_numpy(state)  # pylint: disable=E1101
-
-        step = 0
-        agent_step = 0
-
-        accumulated_reward = 0
-        action, action_index = agent.act(state, options)
-        # next_state,new_reward, done,out_mask = env.step(action)
+        state, done, legal_actions = env.reset()
 
         while not env.done:
-            if env.make_choice_flag:
-                next_state, new_reward, done, options = env.step(action)
-                next_state = T.from_numpy(next_state)
-                accumulated_reward += new_reward
-                agent_step += 1
-                agent.remember(state, action_index, new_reward, next_state, done)
-                state = next_state
-                action, action_index = agent.act(state, options)
-                if len(agent.memory) > BATCH_SIZE:
-                    agent.replay(BATCH_SIZE)
-            else:
-                env.nullstep()
 
-            step += 1
+            action, action_index = agent.choose_action(state, legal_actions)
+            (next_state,
+             new_reward,
+             done,
+             legal_actions) = env.step(action)
+
+            accumulated_reward += new_reward
+
+            agent.remember(state, action_index, new_reward, next_state, done)
+
+            state = next_state
+            if len(agent.memory) > BATCH_SIZE:
+                agent.replay(BATCH_SIZE)
 
         # agent.epsilon_decay()
         agent.epsilon_decay_3(episode, EPISODES)
@@ -77,8 +70,8 @@ def main():
             f"Reward: {acc_r:.3}",
             f" Average Reward  {avg_reward:.3}",
             f"epsilon {agent.epsilon:.5}",
-            f" **** step: {step}",
-            f"*** Agent steps: {agent_step}",
+            f" **** step: {env.steps}",
+            f"*** Agent steps: {env.agent_step}",
         )
         x = [i + 1 for i in range(len(rewards))]
         file_name = "sumo-agent.png"

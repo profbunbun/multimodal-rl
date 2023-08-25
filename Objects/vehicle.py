@@ -124,23 +124,10 @@ class Vehicle:
 
         self.current_lane = self.sumo.vehicle.getLaneID(self.vehicle_id)
         self.cur_loc = self.current_lane.partition("_")[0]
-
-        if ":" not in self.cur_loc:
-            outlist = list(self.out_dict[self.cur_loc].keys())
-            # outlane = list(self.out_dict[self.cur_loc].values())
-            # out_choices = list(self.out_dict[self.cur_loc])
-            # print(out_choices)
-            # print(outlist[action],outlane[action])
-
-            if action in outlist:
-                target_lane = self.out_dict[self.cur_loc][action]
-                # if isinstance(target,str):
-                self.sumo.vehicle.changeTarget(self.vehicle_id, target_lane)
-                # else:
-                #     self.sumo.vehicle.changeTarget( self.vehicle_id,
-                # target[0])
-
-        return
+        outlist = list(self.out_dict[self.cur_loc].keys())
+        if action in outlist:
+            target_lane = self.out_dict[self.cur_loc][action]
+            self.sumo.vehicle.changeTarget(self.vehicle_id, target_lane)
 
     def set_pickup(self):
         """

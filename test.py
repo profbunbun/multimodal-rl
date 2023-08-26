@@ -10,7 +10,8 @@ EPISODES = 100
 STEPS = 1000
 BATCH_SIZE = 32
 MIN_MEMORY = 1000
-SUMOCONFIG = "Nets/3x3b.sumocfg"
+EXPERIMENT_PATH = "Experiments/3x3"
+SUMOCONFIG = "/Nets/3x3b.sumocfg"
 
 
 def main():
@@ -19,8 +20,8 @@ def main():
 
     _extended_summary_
     """
-
-    env = Basic(SUMOCONFIG, STEPS)
+    path = EXPERIMENT_PATH + SUMOCONFIG
+    env = Basic(path, STEPS)
     agent = Agent(6, 4)
     util = Utility()
     rewards, eps_history = [], []

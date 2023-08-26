@@ -122,7 +122,9 @@ class SUMOConnection:
         """
         net_file = self.parse_net_files()
         path_ = self.sumocfg.rsplit("/")
-        net = sumolib.net.readNet(path_[0] + "/" + net_file)
+        path_.pop()
+        path_b= "/".join(path_)
+        net = sumolib.net.readNet(path_b + "/" + net_file)
         out_dict = {}
         length_dict = {}
         index_dict = {}

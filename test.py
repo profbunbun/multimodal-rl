@@ -22,7 +22,7 @@ def main():
 
         accumulated_reward = 0
 
-        if (episode) % 1000 == 0:
+        if (episode) % 100 == 0:
             env.render("gui")
         else:
             env.render("libsumo")
@@ -31,16 +31,18 @@ def main():
 
         while not env.done:
 
-            action, action_index = agent.choose_action(state, legal_actions)
+            action, action_index, validator = agent.choose_action(state, legal_actions)
+            # if validator != -1:
             (next_state,
-             new_reward,
-             done,
-             legal_actions,
-             distance_mask) = env.step(action)
+            new_reward,
+            done,
+            legal_actions,
+            distance_mask) = env.step(action, validator)
 
             accumulated_reward += new_reward
 
-            agent.remember(state, action_index, new_reward, next_state, done, distance_mask)
+            agent.remember(state, action_index,
+                           new_reward, next_state, done, distance_mask)
 
             state = next_state
             if len(agent.memory) > BATCH_SIZE:

@@ -89,17 +89,9 @@ class Agent:
             T.argmax(act_values)]  # pylint: disable=E1101
 
         if action in options:
-            return action
+            return action,1
+        return action,-1
 
-        choice_values = list(zip(self.direction_choices, act_values))
-        action_options = [act[1] for act in choice_values if act[0] in options]
-
-        action_vals = action_options.index(max(action_options))
-        action = options[action_vals]
-
-        return action
-
-    # make choice function
     def choose_action(self, state, options):
         """
         act _summary_
@@ -118,10 +110,16 @@ class Agent:
 
         if rando < self.epsilon:
             action = self.explore(available_choices)
-            return action, self.direction_choices.index(action)
+            return action, self.direction_choices.index(action), 1
 
-        action = self.exploit(state, available_choices)
-        return action, self.direction_choices.index(action)
+        action,valid = self.exploit(state, available_choices)
+        
+        if valid != -1:
+            
+            return action, self.direction_choices.index(action), valid
+        else:
+            return action, self.direction_choices.index(action), valid
+            
 
     # Train the model
     def replay(self, batch_size):
@@ -208,7 +206,7 @@ class Agent:
                     10 * episode - ((5.4 / 10 * episodes) * 10)
                 )
         else:
-            self.epsilon = self.epsilon
+            self.epsilon = 0
 
     def epsilon_decay_3(self, episode, episodes):
         """
@@ -226,4 +224,4 @@ class Agent:
             self.epsilon = (1 / 9.5) * math.log(((-episode) + episodes + 1))
             # self.epsilon_max-1.01**(10*episode-((4.4/10 * episodes)*10))
         else:
-            self.epsilon = self.epsilon
+            self.epsilon = 0

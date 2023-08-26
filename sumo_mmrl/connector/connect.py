@@ -173,9 +173,3 @@ class SUMOConnection:
 
         return [out_dict, index_dict, edge_list, edge_position_dict]
 
-
-# con=SUMOConnection("Nets/3x3.sumocfg",False)
-# con.connect()
-# out_dict, index_dict, edge_list=con.getEdgesInfo()
-# print(out_dict, index_dict, edge_list)
-# con.close()

@@ -40,8 +40,10 @@ class Basic:
         self.rewards = []
         self.eps_history = []
         self.vehicles = []
+        self.choices = None
                             #  s    t    r    l
         self.distance_mask = [-100,-100,-100,-100]
+        self.state = np.array([])
         
         # for v_id in range(10):
         #     self.vehicles.append(Vehicle(str(v_id), self.out_dict, self.index_dict, self.sumo))
@@ -81,11 +83,11 @@ class Basic:
 
         self.person = Person("p_0", self.sumo)
 
-        choices = self.vehicle.get_out_dict()
+        self.choices = self.vehicle.get_out_dict()
         ploc = self.person.location()
-        distance = math.dist(vloc, ploc)
+        # distance = math.dist(vloc, ploc)
 
-        for key, value in choices.items():
+        for key, value in self.choices.items():
             if key == 's':
                 sloc = self.edge_position[value]
                 s_dist = math.dist(sloc,pedge_loc)
@@ -120,24 +122,24 @@ class Basic:
 
 
 
-        state = np.array([])
+        self.state= np.array([])
 
-        state = np.append(state, vedge_loc)
-        state = np.append(state, pedge_loc)
+        self.state= np.append(self.state, vedge_loc)
+        self.state= np.append(self.state, pedge_loc)
 
-        state = np.append(state, self.steps)
-        state = np.append(state, edge_distance)
-        state = np.append(state,self.distance_mask)
+        self.state= np.append(self.state, self.steps)
+        self.state= np.append(self.state, edge_distance)
+        self.state= np.append(self.state,self.distance_mask)
 
         self.done = False
         self.make_choice_flag = True
 
-        choices = self.vehicle.get_out_dict()
+        self.choices = self.vehicle.get_out_dict()
 
         # self.best_route=self.sumo.simulation.findRoute(self.vedge,self.pedge)
 
         self.old_edge = vedge
-        return state, self.done, choices, self.distance_mask
+        return self.state, self.done, self.choices, self.distance_mask
 
     def nullstep(self):
         """
@@ -160,7 +162,7 @@ class Basic:
 
         self.old_edge = vedge
 
-    def step(self, action):
+    def step(self, action, validator):
         """
         step _summary_
 
@@ -172,84 +174,91 @@ class Basic:
         Returns:
             _description_
         """
-        self.distance_mask = [-100,-100,-100,-100]
         reward = 0
-        if self.make_choice_flag:
-            self.vehicle.set_destination(action)
-            reward += -0.01
-            self.accumulated_reward += reward
-            self.agent_step += 1
-            self.make_choice_flag = False
-
-        self.sumo.simulationStep()
-        self.steps += 1
-        vedge = self.sumo.vehicle.getRoadID(self.vehicle.vehicle_id)
-        pedge = self.sumo.person.getRoadID("p_0")
-        vedge_loc=self.edge_position[vedge]
-        pedge_loc=self.edge_position[pedge]
-        edge_distance=math.dist(vedge_loc, pedge_loc)
-        # vloc = self.vehicle.location()
-        # ploc = self.person.location()
-        # distance = math.dist(vloc, ploc)
-        choices = self.vehicle.get_out_dict()
-        for key, value in choices.items():
-            if key == 's':
-                sloc = self.edge_position[value]
-                s_dist = math.dist(sloc,pedge_loc)
-                if s_dist < edge_distance:
-                    self.distance_mask[0] = 1
-                else:
-                    self.distance_mask[0] = -1   
-            if key == 't':
-                tloc = self.edge_position[value]
-                t_dist = math.dist(tloc,pedge_loc)
-                if t_dist < edge_distance:
-                    self.distance_mask[1] = 1
-                else:
-                    self.distance_mask[1] = -1
+        if validator != -1:
             
-            if key == 'r':
-                rloc = self.edge_position[value]
-                r_dist = math.dist(rloc,pedge_loc)
-                if r_dist < edge_distance:
-                    self.distance_mask[2] = 1
-                else:
-                    self.distance_mask[2] = -1
+            self.distance_mask = [-100,-100,-100,-100]
+            if self.make_choice_flag:
+                self.vehicle.set_destination(action)
+                reward += -0.01
+                self.accumulated_reward += reward
+                self.agent_step += 1
+                self.make_choice_flag = False
+
+            self.sumo.simulationStep()
+            self.steps += 1
+            vedge = self.sumo.vehicle.getRoadID(self.vehicle.vehicle_id)
+            pedge = self.sumo.person.getRoadID("p_0")
+            vedge_loc=self.edge_position[vedge]
+            pedge_loc=self.edge_position[pedge]
+            edge_distance=math.dist(vedge_loc, pedge_loc)
+            self.choices = self.vehicle.get_out_dict()
+            for key, value in self.choices.items():
+                if key == 's':
+                    sloc = self.edge_position[value]
+                    s_dist = math.dist(sloc,pedge_loc)
+                    if s_dist < edge_distance:
+                        self.distance_mask[0] = 1
+                    else:
+                        self.distance_mask[0] = -1   
+                if key == 't':
+                    tloc = self.edge_position[value]
+                    t_dist = math.dist(tloc,pedge_loc)
+                    if t_dist < edge_distance:
+                        self.distance_mask[1] = 1
+                    else:
+                        self.distance_mask[1] = -1
+                
+                if key == 'r':
+                    rloc = self.edge_position[value]
+                    r_dist = math.dist(rloc,pedge_loc)
+                    if r_dist < edge_distance:
+                        self.distance_mask[2] = 1
+                    else:
+                        self.distance_mask[2] = -1
+                
+                if key == 'l':
+                    lloc = self.edge_position[value]
+                    l_dist = math.dist(lloc,pedge_loc)
+                    if l_dist < edge_distance:
+                        self.distance_mask[3] = 1
+                    else:
+                        self.distance_mask[3] = -1
+
+            vedge = self.sumo.vehicle.getRoadID(self.vehicle.vehicle_id)
+            pedge = self.sumo.person.getRoadID("p_0")
+            self.route.append(vedge)
+
+            self.done = False
+
+            if vedge == pedge:
+                self.done = True
+                reward += 2
+                self.accumulated_reward += reward
+            if self.steps >= self.steps_per_episode:
+                self.done = True
+                reward += -1
+                self.accumulated_reward += reward
+            self.state= np.array([])
+            self.state= np.append(self.state, vedge_loc)
+            self.state= np.append(self.state, pedge_loc)
+            self.state= np.append(self.state, self.agent_step)
+            self.state= np.append(self.state, edge_distance)
+            self.state= np.append(self.state,self.distance_mask)
+
+            self.old_edge = vedge
+            while not self.make_choice_flag and not self.done:
+                self.nullstep()
+            return self.state, reward, self.done, self.choices, self.distance_mask
+        else:
+            self.done = True
+            reward += -10
+            self.accumulated_reward += reward
+            self.make_choice_flag=False
+                  
+           
             
-            if key == 'l':
-                lloc = self.edge_position[value]
-                l_dist = math.dist(lloc,pedge_loc)
-                if l_dist < edge_distance:
-                    self.distance_mask[3] = 1
-                else:
-                    self.distance_mask[3] = -1
-
-        vedge = self.sumo.vehicle.getRoadID(self.vehicle.vehicle_id)
-        pedge = self.sumo.person.getRoadID("p_0")
-        self.route.append(vedge)
-
-        self.done = False
-
-        if vedge == pedge:
-            self.done = True
-            reward += 0.11
-            self.accumulated_reward += reward
-        if self.steps >= self.steps_per_episode:
-            self.done = True
-            reward += -0.1
-            self.accumulated_reward += reward
-
-        state = np.array([])
-        state = np.append(state, vedge_loc)
-        state = np.append(state, pedge_loc)
-        state = np.append(state, self.agent_step)
-        state = np.append(state, edge_distance)
-        state = np.append(state,self.distance_mask)
-
-        self.old_edge = vedge
-        while not self.make_choice_flag and not self.done:
-            self.nullstep()
-        return state, reward, self.done, choices, self.distance_mask
+            return self.state, reward, self.done, self.choices, self.distance_mask
 
     def render(self, mode):
         """

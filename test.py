@@ -22,7 +22,7 @@ def main():
     """
     path = EXPERIMENT_PATH + SUMOCONFIG
     env = Basic(path, STEPS)
-    agent = Agent(6, 4)
+    agent = Agent(6, 4,EXPERIMENT_PATH)
     util = Utility()
     rewards, eps_history = [], []
 
@@ -75,7 +75,7 @@ def main():
             f"*** Agent steps: {env.agent_step}",
         )
         x = [i + 1 for i in range(len(rewards))]
-        file_name = "sumo-agent.png"
+        file_name = EXPERIMENT_PATH+"/Graphs/sumo-agent.png"
 
         util.plot_learning(x, rewards, eps_history, file_name)
         env.close()

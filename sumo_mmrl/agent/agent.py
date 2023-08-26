@@ -17,7 +17,7 @@ TURN_AROUND = "t"
 LEFT = "l"
 RIGHT = "r"
 
-PATH = "Models/model.pt"
+PATH = "/Models/model.pt"
 
 
 class Agent:
@@ -28,7 +28,8 @@ class Agent:
     _extended_summary_
     """
 
-    def __init__(self, state_size, action_size) -> None:
+    def __init__(self, state_size, action_size, path) -> None:
+        self.path = path
         self.state_size = state_size
         self.action_size = action_size
         self.direction_choices = [STRAIGHT, TURN_AROUND, RIGHT, LEFT]
@@ -42,10 +43,10 @@ class Agent:
         # pylint: disable=E1101
         self.device = T.device("cuda" if T.cuda.is_available() else "cpu")
         # pylint: enable=E1101
-        if os.path.exists(PATH):
+        if os.path.exists(path+PATH):
             self.policy_net = dqn.DQN(self.state_size,
                                       self.action_size).to(self.device)
-            self.policy_net.load_state_dict(T.load(PATH))
+            self.policy_net.load_state_dict(T.load(path+PATH))
             self.policy_net.eval()
         else:
             self.policy_net = dqn.DQN(self.state_size,
@@ -166,7 +167,7 @@ class Agent:
                 optimizer.zero_grad()
                 out.backward(retain_graph=True)
                 optimizer.step()
-                T.save(self.policy_net.state_dict(), PATH)
+                T.save(self.policy_net.state_dict(), self.path+PATH)
 
     def epsilon_decay(self):
         """

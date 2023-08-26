@@ -3,9 +3,7 @@ import sys
 import os
 import xml.etree.ElementTree as ET
 import traci
-
 import sumolib
-
 import libsumo
 
 if "SUMO_HOME" in os.environ:
@@ -28,10 +26,8 @@ class SUMOConnection:
         self.label = str(SUMOConnection.CONNECTION_LABEL)
         SUMOConnection.CONNECTION_LABEL += 1
         self.sumocfg = sumocfg
-        self.sumo_=None
-        self.sumo_cmd=None
-
-    # do i need the dconnection label?
+        self.sumo_ = None
+        self.sumo_cmd = None
 
     def connect_gui(self):
         """_summary_
@@ -49,6 +45,7 @@ class SUMOConnection:
         ]
         traci.start(self.sumo_cmd, label=self.label)
         self.sumo_ = traci
+        # self.sumo_.addStepListener(self.listener)
         return self.sumo_
 
     def connect_libsumo_no_gui(self):
@@ -67,6 +64,7 @@ class SUMOConnection:
         ]
         libsumo.start(self.sumo_cmd, label=self.label)
         self.sumo_ = libsumo
+        # self.sumo_.addStepListener(self.listener)
         return self.sumo_
 
     def connect_no_gui(self):
@@ -85,6 +83,7 @@ class SUMOConnection:
         ]
         traci.start(self.sumo_cmd, label=self.label)
         self.sumo_ = traci
+        # self.sumo_.addStepListener(self.listener)
         return self.sumo_
 
     def close(self):
@@ -123,7 +122,7 @@ class SUMOConnection:
         net_file = self.parse_net_files()
         path_ = self.sumocfg.rsplit("/")
         path_.pop()
-        path_b= "/".join(path_)
+        path_b = "/".join(path_)
         net = sumolib.net.readNet(path_b + "/" + net_file)
         out_dict = {}
         length_dict = {}

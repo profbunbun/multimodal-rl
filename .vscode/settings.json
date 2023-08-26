@@ -25,7 +25,8 @@
     "python.formatting.provider": "none",
     "pylint.args": [
         "--extension-pkg-whitelist=pytorch.*,torch.*",
-        "--generated-members=torch"
+        "--generated-members=torch",
+        "--good-names=x,y,t,df"
     ],
   
     // "workbench.settings.editor": "json"

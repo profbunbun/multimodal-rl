@@ -39,12 +39,12 @@ class Vehicle:
         self.out_dict = out_dict
         self.index_dict = index_dict
         self.sumo = sumo
+        
+        self.sumo.vehicle.add(self.vehicle_id,"r_0", typeID='taxi')
+        
+        
         self.current_lane = self.sumo.vehicle.getLaneID(self.vehicle_id)
         self.cur_loc = self.current_lane.partition("_")[0]
-
-        # if ':' not in self.cur_loc:
-        #     self.outlist=list(self.out_dict[self.cur_loc].keys())
-        #     self.outlane=list(self.out_dict[self.cur_loc].values())
 
     def get_lane(self):
         """
@@ -71,32 +71,6 @@ class Vehicle:
         """
         vpos = self.sumo.vehicle.getPosition(self.vehicle_id)
         return [vpos[0], vpos[1]]
-
-    def is_indexed_lane(self):
-        """
-        is_indexed_lane _summary_
-
-        _extended_summary_
-
-        Returns:
-            _type_: _description_
-        """
-        current_lane = self.get_lane()
-        if current_lane == "":
-            return False
-
-        if ":" not in current_lane:
-            return True
-        else:
-            return False
-
-        # def get_stats(self):
-        #     current_lane=self.get_lane()
-        #     current_location=current_lane.partition("_")[0]
-        #     if ':' not in current_lane :
-        #         return
-
-        return
 
     def get_out_dict(self):
         """
@@ -154,7 +128,6 @@ class Vehicle:
         _extended_summary_
         """
         self.sumo.close()
-        return
 
     def random_relocate(self):
         """
@@ -165,4 +138,3 @@ class Vehicle:
         new_lane = random.choice(list(self.index_dict.keys()))
         self.sumo.vehicle.changeTarget(self.vehicle_id, edgeID=new_lane)
         self.sumo.vehicle.moveTo(self.vehicle_id, new_lane + "_0", 5)
-        return

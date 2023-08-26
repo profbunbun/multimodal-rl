@@ -13,9 +13,9 @@
     <!-- Routes -->
     <route id="r_0" edges="9e 13s 16w 12n"/>
     <!-- Vehicles, persons and containers (sorted by depart) -->
-    <vehicle id="1" type="taxi" depart="0.00">
+    <!-- <vehicle id="T" type="taxi" depart="0.00">
         <route edges="9e"/>
-    </vehicle>
+    </vehicle> -->
     <person id="p_0" depart="0.00">
         <ride from="2e" to="24w" lines="taxi"/>
     </person>

@@ -1,10 +1,5 @@
 """ import stuff """
-import numpy as np
-from sumo_mmrl import Basic, Utility, Agent
-
-# from Connector.utility import Utility
-# from Agent.agent import Agent
-
+from sumo_mmrl import Basic, Agent
 
 EPISODES = 100
 STEPS = 1000
@@ -20,11 +15,8 @@ def main():
 
     _extended_summary_
     """
-    path = EXPERIMENT_PATH + SUMOCONFIG
-    env = Basic(path, STEPS)
+    env = Basic(EXPERIMENT_PATH , SUMOCONFIG, STEPS)
     agent = Agent(6, 4,EXPERIMENT_PATH)
-    util = Utility()
-    rewards, eps_history = [], []
 
     for episode in range(EPISODES):
 
@@ -53,32 +45,9 @@ def main():
             if len(agent.memory) > BATCH_SIZE:
                 agent.replay(BATCH_SIZE)
 
-        # agent.epsilon_decay()
         agent.epsilon_decay_2(episode, EPISODES)
 
-        acc_r = float(accumulated_reward)
-        # r = float(new_reward)
-        rewards.append(acc_r)
-
-        eps_history.append(agent.epsilon)
-        avg_reward = np.mean(rewards[-100:])
-
-        # avg_reward = np.mean(rewards)
-
-        print(
-            "EP: ",
-            episode,
-            f"Reward: {acc_r:.3}",
-            f" Average Reward  {avg_reward:.3}",
-            f"epsilon {agent.epsilon:.5}",
-            f" **** step: {env.steps}",
-            f"*** Agent steps: {env.agent_step}",
-        )
-        x = [i + 1 for i in range(len(rewards))]
-        file_name = EXPERIMENT_PATH+"/Graphs/sumo-agent.png"
-
-        util.plot_learning(x, rewards, eps_history, file_name)
-        env.close()
+        env.close(episode, agent.epsilon)
 
 
 if __name__ == "__main__":

@@ -16,7 +16,7 @@ def main():
     _extended_summary_
     """
     env = Basic(EXPERIMENT_PATH , SUMOCONFIG, STEPS)
-    agent = Agent(6, 4,EXPERIMENT_PATH)
+    agent = Agent(10, 4,EXPERIMENT_PATH)
 
     for episode in range(EPISODES):
 
@@ -27,7 +27,7 @@ def main():
         else:
             env.render("libsumo")
 
-        state, done, legal_actions = env.reset()
+        state, done, legal_actions, distance_mask = env.reset()
 
         while not env.done:
 
@@ -35,17 +35,18 @@ def main():
             (next_state,
              new_reward,
              done,
-             legal_actions) = env.step(action)
+             legal_actions,
+             distance_mask) = env.step(action)
 
             accumulated_reward += new_reward
 
-            agent.remember(state, action_index, new_reward, next_state, done)
+            agent.remember(state, action_index, new_reward, next_state, done, distance_mask)
 
             state = next_state
             if len(agent.memory) > BATCH_SIZE:
                 agent.replay(BATCH_SIZE)
 
-        agent.epsilon_decay_2(episode, EPISODES)
+        agent.epsilon_decay_3(episode, EPISODES)
 
         env.close(episode, agent.epsilon)
 

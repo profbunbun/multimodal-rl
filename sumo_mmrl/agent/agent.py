@@ -52,7 +52,7 @@ class Agent:
             self.policy_net = dqn.DQN(self.state_size,
                                       self.action_size).to(self.device)
 
-    def remember(self, state, action, reward, next_state, done):
+    def remember(self, state, action, reward, next_state, done, distance_mask):
         """
         remember _summary_
 
@@ -65,7 +65,7 @@ class Agent:
             next_state (_type_): _description_
             done (function): _description_
         """
-        self.memory.append((state, action, reward, next_state, done))
+        self.memory.append((state, action, reward, next_state, done, distance_mask))
 
     def explore(self, options):
         """
@@ -136,7 +136,7 @@ class Agent:
 
         minibatch = random.sample(self.memory, batch_size)
 
-        for state, action, reward, new_state, done in minibatch:
+        for state, action, reward, new_state, done, distance_mask in minibatch:
             reward = T.tensor(reward)  # pylint: disable=E1101
             reward = reward.to(self.device)
 
@@ -151,12 +151,21 @@ class Agent:
                 output = self.policy_net.forward(state).to(self.device)
                 target = output.detach().clone()
                 target[action] = adjusted_reward
+                
+                for mask in enumerate(distance_mask):
+                    if mask[1] == -100:
+                        target[mask[0]]=mask[1]
+
+                
                 target = target.to(self.device)
 
             else:
                 output = self.policy_net.forward(state).to(self.device)
                 target = output.detach().clone()
                 target[action] = reward
+                for mask in enumerate(distance_mask):
+                    if mask[1] == -100:
+                        target[mask[0]]=mask[1]
                 target = target.to(self.device)
                 loss = nn.HuberLoss()
                 optimizer = optim.Adam(

@@ -1,7 +1,7 @@
 """ import stuff """
 from sumo_mmrl import Basic, Agent
 
-EPISODES = 100
+EPISODES = 10000
 STEPS = 1000
 BATCH_SIZE = 32
 MIN_MEMORY = 1000
@@ -49,6 +49,7 @@ def main():
                 agent.replay(BATCH_SIZE)
 
         agent.epsilon_decay_3(episode, EPISODES)
+        # agent.epsilon_null()
 
         env.close(episode, agent.epsilon)
 

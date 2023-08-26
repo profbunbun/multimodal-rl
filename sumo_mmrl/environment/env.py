@@ -180,7 +180,7 @@ class Basic:
             self.distance_mask = [-100,-100,-100,-100]
             if self.make_choice_flag:
                 self.vehicle.set_destination(action)
-                reward += -0.01
+                reward += -0.05
                 self.accumulated_reward += reward
                 self.agent_step += 1
                 self.make_choice_flag = False
@@ -233,7 +233,7 @@ class Basic:
 
             if vedge == pedge:
                 self.done = True
-                reward += 2
+                reward += 3
                 self.accumulated_reward += reward
             if self.steps >= self.steps_per_episode:
                 self.done = True

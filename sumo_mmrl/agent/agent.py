@@ -225,3 +225,6 @@ class Agent:
             # self.epsilon_max-1.01**(10*episode-((4.4/10 * episodes)*10))
         else:
             self.epsilon = 0
+    
+    def epsilon_null(self):
+        self.epsilon=0

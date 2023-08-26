@@ -1,9 +1,9 @@
 """ import stuff """
 import math
 import numpy as np
-from Objects.vehicle import Vehicle
-from Objects.person import Person
-from Connector.connect import SUMOConnection
+from .vehicle import Vehicle
+from .person import Person
+from ..connector.connect import SUMOConnection
 
 
 class Basic:

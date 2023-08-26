@@ -1,9 +1,9 @@
 """ import stuff """
 import numpy as np
-from Env.env import Basic
+from sumo_mmrl import Basic, Utility, Agent
 
-from Connector.utility import Utility
-from Agent.agent import Agent
+# from Connector.utility import Utility
+# from Agent.agent import Agent
 
 
 EPISODES = 100
@@ -29,7 +29,7 @@ def main():
 
         accumulated_reward = 0
 
-        if (episode) % 10 == 0:
+        if (episode) % 1000 == 0:
             env.render("gui")
         else:
             env.render("libsumo")
@@ -53,7 +53,7 @@ def main():
                 agent.replay(BATCH_SIZE)
 
         # agent.epsilon_decay()
-        agent.epsilon_decay_3(episode, EPISODES)
+        agent.epsilon_decay_2(episode, EPISODES)
 
         acc_r = float(accumulated_reward)
         # r = float(new_reward)

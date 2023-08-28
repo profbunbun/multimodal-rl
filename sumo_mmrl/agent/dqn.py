@@ -21,14 +21,12 @@ class DQN(nn.Module):
             "cuda" if T.cuda.is_available() else "cpu"
         )
         self.layer1 = nn.Linear(state_size, 32)
-        # nn.init.zeros_(self.layer1,)
-        # nn.init.kaiming_normal_(self.layer1.weight, mode="fan_out")
+        
         self.layer2 = nn.Linear(32, 16)
-        # nn.init.zeros_(self.layer2)
-        # nn.init.kaiming_normal_(self.layer1.weight, mode="fan_out")
+        # self.layer2 = nn.DataParallel(self.layer2)
         self.layer3 = nn.Linear(16, 8)
-        # nn.init.zeros_(self.layer3)
-        # nn.init.kaiming_normal_(self.layer1.weight, mode="fan_out")
+        # self.layer2 = nn.DataParallel(self.layer3)
+
         self.layer4 = nn.Linear(8, action_size)
         # nn.init.zeros_(self.layer4)
         # nn.init.kaiming_normal_(self.layer1.weight)

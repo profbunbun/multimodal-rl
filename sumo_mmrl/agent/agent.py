@@ -39,18 +39,26 @@ class Agent:
         self.epsilon_max = 0.9997
         self.decay = 0.99
         self.epsilon_min = 0.01
-        self.learning_rate = 0.001
+        self.learning_rate = 0.01
         # pylint: disable=E1101
         self.device = T.device("cuda" if T.cuda.is_available() else "cpu")
         # pylint: enable=E1101
-        if os.path.exists(path+PATH):
+        if os.path.exists(path + PATH):
             self.policy_net = dqn.DQN(self.state_size,
-                                      self.action_size).to(self.device)
-            self.policy_net.load_state_dict(T.load(path+PATH))
+                                      self.action_size)
+            # self.policy_net = nn.DataParallel(self.policy_net)
+
+            self.policy_net.to(self.device)
+            
+            self.policy_net.load_state_dict(T.load(path + PATH))
             self.policy_net.eval()
         else:
             self.policy_net = dqn.DQN(self.state_size,
-                                      self.action_size).to(self.device)
+                                      self.action_size)
+            # self.policy_net = nn.DataParallel(self.policy_net)
+
+            self.policy_net.to(self.device)
+            
 
     def remember(self, state, action, reward, next_state, done, distance_mask):
         """
@@ -73,9 +81,10 @@ class Agent:
         _extended_summary_
 
         """
-        action = np.random.choice(options)
-
-        return action
+        action = np.random.choice(self.direction_choices)
+        if action in options:
+            return action, 1
+        return action, -1
 
     def exploit(self, state, options):
         """
@@ -83,14 +92,14 @@ class Agent:
 
         _extended_summary_
         """
+        # state = T.from_numpy(state)  # pylint: disable=E1101
         act_values = self.policy_net.forward(state)
 
-        action = self.direction_choices[
-            T.argmax(act_values)]  # pylint: disable=E1101
+        action = self.direction_choices[T.argmax(act_values)]  # pylint: disable=E1101
 
         if action in options:
-            return action,1
-        return action,-1
+            return action, 1
+        return action, -1
 
     def choose_action(self, state, options):
         """
@@ -109,19 +118,15 @@ class Agent:
         rando = np.random.rand()
 
         if rando < self.epsilon:
-            action = self.explore(available_choices)
-            return action, self.direction_choices.index(action), 1
+            action, valid = self.explore(available_choices)
+            return action, self.direction_choices.index(action), valid
 
-        action,valid = self.exploit(state, available_choices)
-        
+        action, valid = self.exploit(state, available_choices)
+
         if valid != -1:
-            
             return action, self.direction_choices.index(action), valid
-        else:
-            return action, self.direction_choices.index(action), valid
-            
+        return action, self.direction_choices.index(action), valid
 
-    # Train the model
     def replay(self, batch_size):
         """
         replay _summary_
@@ -139,22 +144,20 @@ class Agent:
             reward = reward.to(self.device)
 
             if not done:
-                new_state_policy = self.policy_net.forward(
-                    new_state).to(self.device)
+                new_state_policy = self.policy_net.forward(new_state).to(self.device)
 
-                adjusted_reward = (
-                    reward + self.gamma * T.max(  # pylint: disable=E1101
-                        new_state_policy))
+                adjusted_reward = reward + self.gamma*T.max(  # pylint: disable=E1101
+                    new_state_policy
+                )
 
                 output = self.policy_net.forward(state).to(self.device)
                 target = output.detach().clone()
                 target[action] = adjusted_reward
-                
-                for mask in enumerate(distance_mask):
-                    if mask[1] == -100:
-                        target[mask[0]]=mask[1]
 
-                
+                for mask in enumerate(distance_mask):
+                    if mask[1] == -10:
+                        target[mask[0]] = mask[1]
+
                 target = target.to(self.device)
 
             else:
@@ -162,8 +165,8 @@ class Agent:
                 target = output.detach().clone()
                 target[action] = reward
                 for mask in enumerate(distance_mask):
-                    if mask[1] == -100:
-                        target[mask[0]]=mask[1]
+                    if mask[1] == -10:
+                        target[mask[0]] = mask[1]
                 target = target.to(self.device)
                 loss = nn.HuberLoss()
                 optimizer = optim.Adam(
@@ -174,7 +177,7 @@ class Agent:
                 optimizer.zero_grad()
                 out.backward(retain_graph=True)
                 optimizer.step()
-                T.save(self.policy_net.state_dict(), self.path+PATH)
+                T.save(self.policy_net.state_dict(), self.path + PATH)
 
     def epsilon_decay(self):
         """
@@ -206,7 +209,7 @@ class Agent:
                     10 * episode - ((5.4 / 10 * episodes) * 10)
                 )
         else:
-            self.epsilon = 0
+            self.epsilon = 0.00
 
     def epsilon_decay_3(self, episode, episodes):
         """
@@ -224,7 +227,12 @@ class Agent:
             self.epsilon = (1 / 9.5) * math.log(((-episode) + episodes + 1))
             # self.epsilon_max-1.01**(10*episode-((4.4/10 * episodes)*10))
         else:
-            self.epsilon = 0
-    
+            self.epsilon = 0.00
+
     def epsilon_null(self):
-        self.epsilon=0
+        """
+        epsilon_null _summary_
+
+        _extended_summary_
+        """        
+        self.epsilon = 0.00

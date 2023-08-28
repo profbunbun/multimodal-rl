@@ -230,11 +230,11 @@ class Basic:
             self.done = False
 
             if new_dist_check == 1:
-                reward += 0.4
+                reward += 0.3
 
             if vedge == pedge:
                 self.done = True
-                reward += 20
+                reward += 35
                 print("Success")
                 self.accumulated_reward += reward
             if self.steps >= self.steps_per_episode:

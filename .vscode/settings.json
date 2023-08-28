@@ -28,6 +28,9 @@
         "--generated-members=torch",
         "--good-names=x,y,t,df"
     ],
+    "cSpell.words": [
+        "SUMOCONFIG"
+    ],
   
     // "workbench.settings.editor": "json"
    

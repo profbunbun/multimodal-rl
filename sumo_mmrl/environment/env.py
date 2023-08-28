@@ -43,7 +43,7 @@ class Basic:
         self.vehicles = []
         self.choices = None
         #  s    t    r    l
-        self.dist_mask = [-100, -100, -100, -100]
+        self.dist_mask = [-1, -1, -1, -1]
         self.state = np.array([])
         self.edge_distance = None
 
@@ -60,7 +60,7 @@ class Basic:
         self.agent_step = 0
         self.route = []
         self.vehicles = []
-        self.dist_mask = [-100, -100, -100, -100]
+        self.dist_mask = [-1, -1, -1, -1]
         self.accumulated_reward = 0
         for v_id in range(1):
             self.vehicles.append(
@@ -133,7 +133,7 @@ class Basic:
         # self.best_route=self.sumo.simulation.findRoute(self.vedge,self.pedge)
 
         self.old_edge = vedge
-        return self.state, self.done, self.choices, self.dist_mask
+        return self.state, self.done, self.choices
 
     def nullstep(self):
         """
@@ -186,7 +186,7 @@ class Basic:
             vedge_loc = self.edge_position[vedge]
             pedge_loc = self.edge_position[pedge]
             self.edge_distance = math.dist(vedge_loc, pedge_loc)
-            
+
             if old_dist > self.edge_distance:
                 new_dist_check = 1
             else:
@@ -252,14 +252,14 @@ class Basic:
             self.old_edge = vedge
             while not self.make_choice_flag and not self.done:
                 self.nullstep()
-            return self.state, reward, self.done, self.choices, self.dist_mask
+            return self.state, reward, self.done, self.choices
         else:
             self.done = True
             reward += -10
             self.accumulated_reward += reward
             self.make_choice_flag = False
 
-            return self.state, reward, self.done, self.choices, self.dist_mask
+            return self.state, reward, self.done, self.choices
 
     def render(self, mode):
         """

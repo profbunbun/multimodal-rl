@@ -56,4 +56,4 @@ class Person:
         _extended_summary_
         """
         self.sumo.close()
-        return
+

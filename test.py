@@ -1,7 +1,7 @@
 """ import stuff """
 from sumo_mmrl import Basic, Agent
 
-EPISODES = 1000
+EPISODES = 1
 STEPS = 1000
 BATCH_SIZE = 64
 MIN_MEMORY = 1000
@@ -15,41 +15,37 @@ def main():
 
     _extended_summary_
     """
+    # start_time = time.time()
     env = Basic(EXPERIMENT_PATH, SUMOCONFIG, STEPS)
     agent = Agent(10, 4, EXPERIMENT_PATH)
 
-    for episode in range(EPISODES+1):
+    for episode in range(EPISODES + 1):
         accumulated_reward = 0
 
-        if (episode) % 100 == 0:
+        if (episode) % 100== 0:
             env.render("gui")
         else:
             env.render("libsumo")
 
-        state, done, legal_actions, distance_mask = env.reset()
+        state, done, legal_actions = env.reset()
 
         while not env.done:
-            (action,
-             action_index,
-             validator) = agent.choose_action(state, legal_actions)
-            # if validator != -1:
+            (action, action_index, validator) = agent.choose_action(
+                state, legal_actions
+            )
+
             (next_state,
              new_reward,
              done,
-             legal_actions,
-             distance_mask) = env.step(
-                action, validator
-            )
+             legal_actions) = env.step(action, validator)
 
             accumulated_reward += new_reward
 
-            agent.remember(
-                state,
-                action_index,
-                new_reward,
-                next_state,
-                done,
-                distance_mask)
+            agent.remember(state,
+                           action_index,
+                           new_reward,
+                           next_state,
+                           done)
 
             state = next_state
             if len(agent.memory) > BATCH_SIZE:

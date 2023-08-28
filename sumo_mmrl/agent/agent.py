@@ -44,23 +44,20 @@ class Agent:
         self.device = T.device("cuda" if T.cuda.is_available() else "cpu")
         # pylint: enable=E1101
         if os.path.exists(path + PATH):
-            self.policy_net = dqn.DQN(self.state_size,
-                                      self.action_size)
+            self.policy_net = dqn.DQN(self.state_size, self.action_size)
             # self.policy_net = nn.DataParallel(self.policy_net)
 
             self.policy_net.to(self.device)
-            
+
             self.policy_net.load_state_dict(T.load(path + PATH))
             self.policy_net.eval()
         else:
-            self.policy_net = dqn.DQN(self.state_size,
-                                      self.action_size)
+            self.policy_net = dqn.DQN(self.state_size, self.action_size)
             # self.policy_net = nn.DataParallel(self.policy_net)
 
             self.policy_net.to(self.device)
-            
 
-    def remember(self, state, action, reward, next_state, done, distance_mask):
+    def remember(self, state, action, reward, next_state, done):
         """
         remember _summary_
 
@@ -73,7 +70,8 @@ class Agent:
             next_state (_type_): _description_
             done (function): _description_
         """
-        self.memory.append((state, action, reward, next_state, done, distance_mask))
+        self.memory.append((state,
+                            action, reward, next_state, done))
 
     def explore(self, options):
         """
@@ -95,7 +93,8 @@ class Agent:
         # state = T.from_numpy(state)  # pylint: disable=E1101
         act_values = self.policy_net.forward(state)
 
-        action = self.direction_choices[T.argmax(act_values)]  # pylint: disable=E1101
+        action = (self.direction_choices
+                  [T.argmax(act_values)])  # pylint: disable=E1101
 
         if action in options:
             return action, 1
@@ -139,34 +138,27 @@ class Agent:
 
         minibatch = random.sample(self.memory, batch_size)
 
-        for state, action, reward, new_state, done, distance_mask in minibatch:
+        for state, action, reward, new_state, done in minibatch:
             reward = T.tensor(reward)  # pylint: disable=E1101
             reward = reward.to(self.device)
 
             if not done:
-                new_state_policy = self.policy_net.forward(new_state).to(self.device)
+                new_state_policy = (self.policy_net.forward(new_state)
+                                    .to(self.device))
 
-                adjusted_reward = reward + self.gamma*T.max(  # pylint: disable=E1101
-                    new_state_policy
-                )
+                adjusted_reward = (
+                    reward + self.gamma * T.max(  # pylint: disable=E1101
+                        new_state_policy))
 
                 output = self.policy_net.forward(state).to(self.device)
                 target = output.detach().clone()
                 target[action] = adjusted_reward
-
-                for mask in enumerate(distance_mask):
-                    if mask[1] == -10:
-                        target[mask[0]] = mask[1]
-
                 target = target.to(self.device)
 
             else:
                 output = self.policy_net.forward(state).to(self.device)
                 target = output.detach().clone()
                 target[action] = reward
-                for mask in enumerate(distance_mask):
-                    if mask[1] == -10:
-                        target[mask[0]] = mask[1]
                 target = target.to(self.device)
                 loss = nn.HuberLoss()
                 optimizer = optim.Adam(
@@ -234,5 +226,5 @@ class Agent:
         epsilon_null _summary_
 
         _extended_summary_
-        """        
+        """
         self.epsilon = 0.00

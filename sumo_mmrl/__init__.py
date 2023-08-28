@@ -5,4 +5,3 @@ from .connector.connect import SUMOConnection
 from .connector.utility import Utility
 from .agent.dqn import DQN
 from .agent.agent import Agent
-

@@ -31,7 +31,6 @@ class Basic:
         self.vehicle = None
         self.person = None
         self.route = []
-        self.done = False
         self.steps = 0
         self.agent_step = 0
         self.old_edge = None
@@ -174,7 +173,7 @@ class Basic:
             self.dist_mask = [-100, -100, -100, -100]
             if self.make_choice_flag:
                 self.vehicle.set_destination(action)
-                reward += -0.05
+                reward += -0.6
                 self.accumulated_reward += reward
                 self.agent_step += 1
                 self.make_choice_flag = False
@@ -231,11 +230,11 @@ class Basic:
             self.done = False
 
             if new_dist_check == 1:
-                reward += 0.06
+                reward += 0.4
 
             if vedge == pedge:
                 self.done = True
-                reward += 10
+                reward += 20
                 print("Success")
                 self.accumulated_reward += reward
             if self.steps >= self.steps_per_episode:

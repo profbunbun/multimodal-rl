@@ -1,7 +1,7 @@
 """ import stuff """
 from sumo_mmrl import Basic, Agent
 
-EPISODES = 10000
+EPISODES = 20000
 STEPS = 1000
 BATCH_SIZE = 32
 MIN_MEMORY = 1000

@@ -40,6 +40,7 @@ class Basic:
         self.rewards = []
         self.eps_history = []
         self.vehicles = []
+        self.people = []
         self.choices = None
         #  s    t    r    l
         self.dist_mask = [-1, -1, -1, -1]
@@ -59,27 +60,33 @@ class Basic:
         self.agent_step = 0
         self.route = []
         self.vehicles = []
+        self.people = []
         self.dist_mask = [-1, -1, -1, -1]
         self.accumulated_reward = 0
+        self.p_index = 0
         for v_id in range(1):
             self.vehicles.append(
                 Vehicle(str(v_id), self.out_dict, self.index_dict, self.sumo)
             )
         self.vehicle = self.vehicles[0]
 
+        for p_id in range(2):
+            self.people.append(Person(str(p_id), self.sumo, self.index_dict))
+        self.person = self.people[self.p_index]
+
         # self.vehicle.random_relocate()
         self.sumo.simulationStep()
         self.steps += 1
 
         vedge = self.sumo.vehicle.getRoadID(self.vehicle.vehicle_id)
-        pedge = self.sumo.person.getRoadID("p_0")
+        pedge = self.sumo.person.getRoadID(self.person.person_id)
 
         vedge_loc = self.edge_position[vedge]
         pedge_loc = self.edge_position[pedge]
         self.edge_distance = math.dist(vedge_loc, pedge_loc)
         new_dist_check = 1
         # self.route.append(vedge)
-        self.person = Person("p_0", self.sumo)
+        # self.person = Person("p_0", self.sumo,self.index_dict)
 
         self.choices = self.vehicle.get_out_dict()
 
@@ -170,7 +177,7 @@ class Basic:
         old_dist = self.edge_distance
         reward = 0
         if validator != -1:
-            self.dist_mask = [-100, -100, -100, -100]
+            self.dist_mask = [-1, -1, -1, -1]
             if self.make_choice_flag:
                 self.vehicle.set_destination(action)
                 reward += -0.6
@@ -181,7 +188,7 @@ class Basic:
             self.sumo.simulationStep()
             self.steps += 1
             vedge = self.sumo.vehicle.getRoadID(self.vehicle.vehicle_id)
-            pedge = self.sumo.person.getRoadID("p_0")
+            pedge = self.sumo.person.getRoadID(self.person.person_id)
             vedge_loc = self.edge_position[vedge]
             pedge_loc = self.edge_position[pedge]
             self.edge_distance = math.dist(vedge_loc, pedge_loc)
@@ -224,18 +231,30 @@ class Basic:
                         self.dist_mask[3] = -1
 
             vedge = self.sumo.vehicle.getRoadID(self.vehicle.vehicle_id)
-            pedge = self.sumo.person.getRoadID("p_0")
-            self.route.append(vedge)
+            pedge = self.sumo.person.getRoadID(self.person.person_id)
+            # self.route.append(vedge)
 
             self.done = False
 
             if new_dist_check == 1:
-                reward += 0.3
+                reward += 0.1
 
             if vedge == pedge:
-                self.done = True
+                # self.done = True
+                self.person.remove_person()
+                self.p_index += 1
+                self.people.pop(0)
+                print("Pickup ", self.p_index)
                 reward += 35
-                print("Success")
+                if self.people:
+                    self.person = self.people[0]
+                    pedge = self.sumo.person.getRoadID(self.person.person_id)
+                    pedge_loc = self.edge_position[pedge]
+                    
+                else:
+                    self.done = True
+                    print("Success")
+
                 self.accumulated_reward += reward
             if self.steps >= self.steps_per_episode:
                 self.done = True

@@ -1,6 +1,6 @@
 """module stuff"""
 from ..connector.utility import Utility
-
+import random
 util = Utility()
 
 
@@ -11,9 +11,14 @@ class Person:
     _extended_summary_
     """
 
-    def __init__(self, person_id, sumo) -> None:
+    def __init__(self, person_id, sumo, index_dict) -> None:
         self.person_id = person_id
         self.sumo = sumo
+        self.index_dict = index_dict
+        new_lane = random.choice(list(self.index_dict.keys()))
+        destination = random.choice(list(self.index_dict.keys()))
+        self.sumo.person.add(person_id, new_lane, 20)
+        self.sumo.person.appendDrivingStage(person_id, destination, lines="taxi")
 
     def location(self):
         """
@@ -49,6 +54,15 @@ class Person:
         _extended_summary_
         """
 
+    def remove_person(self):
+        """
+        remove_person _summary_
+
+        _extended_summary_
+        """    
+        self.sumo.person.remove(self.person_id)
+        return
+                
     def close(self):
         """
         close _summary_

@@ -39,6 +39,8 @@ class SUMOConnection:
             "sumo-gui",
             "-c",
             self.sumocfg,
+            "-d",
+            "5",
             "--start",
             "--quit-on-end",
             "--human-readable-time",

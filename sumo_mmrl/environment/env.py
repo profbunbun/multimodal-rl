@@ -44,8 +44,9 @@ class Basic:
         self.choices = None
         #  s    t    r    l
         self.dist_mask = [-1, -1, -1, -1]
-        self.state = np.array([])
+        self.state = None
         self.edge_distance = None
+        self.p_index = 0
 
     def reset(self):
         """
@@ -70,7 +71,7 @@ class Basic:
             )
         self.vehicle = self.vehicles[0]
 
-        for p_id in range(2):
+        for p_id in range(1):
             self.people.append(Person(str(p_id), self.sumo, self.index_dict))
         self.person = self.people[self.p_index]
 
@@ -122,15 +123,16 @@ class Basic:
                 else:
                     self.dist_mask[3] = -1
 
-        self.state = np.array([])
+        # self.state = np.array([])
 
-        self.state = np.append(self.state, vedge_loc)
-        self.state = np.append(self.state, pedge_loc)
+        # self.state = np.append(self.state, vedge_loc, pedge_loc)
+        # # self.state = np.append(self.state, pedge_loc)
 
-        self.state = np.append(self.state, self.steps)
-        self.state = np.append(self.state, new_dist_check)
-        self.state = np.append(self.state, self.dist_mask)
+        # self.state = np.append(self.state, self.steps)
+        # self.state = np.append(self.state, new_dist_check)
+        # self.state = np.append(self.state, self.dist_mask)
 
+        self.state = [list(vedge_loc), list(pedge_loc), list(self.steps), list(new_dist_check), self.dist_mask]
         self.done = False
         self.make_choice_flag = True
 
@@ -176,11 +178,12 @@ class Basic:
         """
         old_dist = self.edge_distance
         reward = 0
+        
         if validator != -1:
             self.dist_mask = [-1, -1, -1, -1]
             if self.make_choice_flag:
                 self.vehicle.set_destination(action)
-                reward += -0.6
+                reward += -0.1
                 self.accumulated_reward += reward
                 self.agent_step += 1
                 self.make_choice_flag = False
@@ -245,7 +248,7 @@ class Basic:
                 self.p_index += 1
                 self.people.pop(0)
                 print("Pickup ", self.p_index)
-                reward += 35
+                reward += 15
                 if self.people:
                     self.person = self.people[0]
                     pedge = self.sumo.person.getRoadID(self.person.person_id)
@@ -254,18 +257,20 @@ class Basic:
                 else:
                     self.done = True
                     print("Success")
+                    reward += 35
 
                 self.accumulated_reward += reward
             if self.steps >= self.steps_per_episode:
                 self.done = True
                 reward += -10
-                self.accumulated_reward += reward
-            self.state = np.array([])
-            self.state = np.append(self.state, vedge_loc)
-            self.state = np.append(self.state, pedge_loc)
-            self.state = np.append(self.state, self.agent_step)
-            self.state = np.append(self.state, new_dist_check)
-            self.state = np.append(self.state, self.dist_mask)
+            self.accumulated_reward += reward
+            # self.state = np.array([])
+            # self.state = np.append(self.state, vedge_loc)
+            # self.state = np.append(self.state, pedge_loc)
+            # self.state = np.append(self.state, self.agent_step)
+            # self.state = np.append(self.state, new_dist_check)
+            # self.state = np.append(self.state, self.dist_mask)
+            self.state = [list(vedge_loc), list(pedge_loc), list(self.steps), list(new_dist_check), self.dist_mask]
 
             self.old_edge = vedge
             while not self.make_choice_flag and not self.done:
@@ -273,7 +278,7 @@ class Basic:
             return self.state, reward, self.done, self.choices
         else:
             self.done = True
-            reward += -10
+            reward += -15
             self.accumulated_reward += reward
             self.make_choice_flag = False
 
@@ -345,3 +350,5 @@ class Basic:
         # print(self.best_route)
         # print(len(self.route))
         # print(self.route)
+
+                

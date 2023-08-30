@@ -40,7 +40,7 @@ class SUMOConnection:
             "-c",
             self.sumocfg,
             "-d",
-            "5",
+            "50",
             "--start",
             "--quit-on-end",
             "--human-readable-time",

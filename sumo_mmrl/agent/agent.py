@@ -8,7 +8,6 @@ from torch import nn
 from torch import optim
 import numpy as np
 from . import dqn
-
 random.seed(0)
 T.autograd.set_detect_anomaly(True)
 
@@ -30,10 +29,12 @@ class Agent:
 
     def __init__(self, state_size, action_size, path) -> None:
         self.path = path
-        self.state_size = state_size
-        self.action_size = action_size
         self.direction_choices = [STRAIGHT, TURN_AROUND, RIGHT, LEFT]
-        self.memory = deque(maxlen=20000)
+
+        
+        self.memory = deque(maxlen=50000)
+
+        
         self.gamma = 0.95
         self.epsilon = 0.997
         self.epsilon_max = 0.9997
@@ -41,10 +42,12 @@ class Agent:
         self.epsilon_min = 0.01
         self.learning_rate = 0.01
         # pylint: disable=E1101
+
+        
         self.device = T.device("cuda" if T.cuda.is_available() else "cpu")
         # pylint: enable=E1101
         if os.path.exists(path + PATH):
-            self.policy_net = dqn.DQN(self.state_size, self.action_size)
+            self.policy_net = dqn.DQN(state_size, action_size)
             # self.policy_net = nn.DataParallel(self.policy_net)
 
             self.policy_net.to(self.device)
@@ -52,7 +55,7 @@ class Agent:
             self.policy_net.load_state_dict(T.load(path + PATH))
             self.policy_net.eval()
         else:
-            self.policy_net = dqn.DQN(self.state_size, self.action_size)
+            self.policy_net = dqn.DQN(state_size, action_size)
             # self.policy_net = nn.DataParallel(self.policy_net)
 
             self.policy_net.to(self.device)

@@ -3,7 +3,7 @@ from sumo_mmrl import Basic, Agent
 
 EPISODES = 1000
 STEPS = 1000
-BATCH_SIZE = 64
+BATCH_SIZE = 32
 MIN_MEMORY = 1000
 EXPERIMENT_PATH = "Experiments/4x4"
 SUMOCONFIG = "/Nets/4x4.sumocfg"
@@ -16,13 +16,14 @@ def main():
     _extended_summary_
     """
     # start_time = time.time()
+
     env = Basic(EXPERIMENT_PATH, SUMOCONFIG, STEPS)
     agent = Agent(10, 4, EXPERIMENT_PATH)
 
     for episode in range(EPISODES + 1):
         accumulated_reward = 0
 
-        if (episode) % 100 == 0:
+        if (episode) % 1000 == 0:
             env.render("gui")
         else:
             env.render("libsumo")
@@ -53,11 +54,15 @@ def main():
 
             # agent.epsilon_null()
             # agent.epsilon_decay()
-            # agent.epsilon_decay_2(episode, EPISODES)
-        agent.epsilon_decay_2(episode, EPISODES)
+        if episode < (.5 * EPISODES):
+            agent.epsilon_decay_3(episode, (.5 * EPISODES))
+
+        else:
+            agent.epsilon_decay_2(episode, (.5 * EPISODES))
+            
 
         env.close(episode, agent.epsilon)
-
+        
 
 if __name__ == "__main__":
     # cProfile.run('main()', sort='ncalls')

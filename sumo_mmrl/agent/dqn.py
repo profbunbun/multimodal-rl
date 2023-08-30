@@ -40,8 +40,10 @@ class DQN(nn.Module):
         Returns:
             _type_: _description_
         """
-        x_net = T.from_numpy(x_net)  # pylint: disable=E1101
-        x_net = x_net.float()
+        # x_net = T.from_numpy(x_net)  # pylint: disable=E1101
+        # x_net = x_net.float()
+        x_net = sum(x_net,[])
+        x_net = T.Tensor(x_net)
         x_net = x_net.to(self.device)
         x_net = F.relu(self.layer1(x_net))
         x_net = F.relu(self.layer2(x_net))

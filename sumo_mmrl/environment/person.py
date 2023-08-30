@@ -15,7 +15,8 @@ class Person:
         self.person_id = person_id
         self.sumo = sumo
         self.index_dict = index_dict
-        new_lane = random.choice(list(self.index_dict.keys()))
+        # new_lane = random.choice(list(self.index_dict.keys()))
+        new_lane = list(self.index_dict.keys())[0]
         destination = random.choice(list(self.index_dict.keys()))
         self.sumo.person.add(person_id, new_lane, 20)
         self.sumo.person.appendDrivingStage(person_id, destination, lines="taxi")

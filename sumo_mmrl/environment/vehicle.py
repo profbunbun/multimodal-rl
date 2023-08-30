@@ -40,7 +40,7 @@ class Vehicle:
         self.index_dict = index_dict
         self.sumo = sumo
 
-        self.sumo.vehicle.add(self.vehicle_id, "", typeID="taxi")
+        self.sumo.vehicle.add(self.vehicle_id, "r_0", typeID="taxi")
 
         self.current_lane = self.sumo.vehicle.getLaneID(self.vehicle_id)
         self.cur_loc = self.current_lane.partition("_")[0]

@@ -9,7 +9,7 @@ from torch import optim
 import numpy as np
 from . import dqn
 random.seed(0)
-T.autograd.set_detect_anomaly(True)
+
 
 STRAIGHT = "s"
 TURN_AROUND = "t"
@@ -30,35 +30,35 @@ class Agent:
     def __init__(self, state_size, action_size, path) -> None:
         self.path = path
         self.direction_choices = [STRAIGHT, TURN_AROUND, RIGHT, LEFT]
-
-        
         self.memory = deque(maxlen=50000)
-
-        
         self.gamma = 0.95
         self.epsilon = 0.997
         self.epsilon_max = 0.9997
         self.decay = 0.99
         self.epsilon_min = 0.01
         self.learning_rate = 0.01
-        # pylint: disable=E1101
+        device = T.device(  # pylint: disable=E1101
+            "cuda" if T.cuda.is_available() else "cpu"
+        )
 
-        
-        self.device = T.device("cuda" if T.cuda.is_available() else "cpu")
-        # pylint: enable=E1101
+        self.policy_net = dqn.DQN(state_size, action_size)
+        # net = dqn.DQN(state_size, action_size)
+        if T.cuda.device_count() > 1:
+            print("Let's use", T.cuda.device_count(), "GPUs!")
+            self.policy_net = nn.DataParallel(self.policy_net)
+        self.policy_net.to(device)
+        self.loss = nn.HuberLoss()
+        self.optimizer = optim.Adam(
+                self.policy_net.parameters(), lr=self.learning_rate
+            )
+
         if os.path.exists(path + PATH):
             self.policy_net = dqn.DQN(state_size, action_size)
-            # self.policy_net = nn.DataParallel(self.policy_net)
-
-            self.policy_net.to(self.device)
-
             self.policy_net.load_state_dict(T.load(path + PATH))
             self.policy_net.eval()
         else:
             self.policy_net = dqn.DQN(state_size, action_size)
-            # self.policy_net = nn.DataParallel(self.policy_net)
 
-            self.policy_net.to(self.device)
 
     def remember(self, state, action, reward, next_state, done):
         """
@@ -93,11 +93,11 @@ class Agent:
 
         _extended_summary_
         """
-        # state = T.from_numpy(state)  # pylint: disable=E1101
-        act_values = self.policy_net.forward(state)
+
+        act_values = self.policy_net(state)
 
         action = (self.direction_choices
-                  [T.argmax(act_values)])  # pylint: disable=E1101
+                  [T.argmax(act_values)])
 
         if action in options:
             return action, 1
@@ -142,36 +142,26 @@ class Agent:
         minibatch = random.sample(self.memory, batch_size)
 
         for state, action, reward, new_state, done in minibatch:
-            reward = T.tensor(reward)  # pylint: disable=E1101
-            reward = reward.to(self.device)
 
             if not done:
-                new_state_policy = (self.policy_net.forward(new_state)
-                                    .to(self.device))
+                new_state_policy = (self.policy_net(new_state)
+                                    )
 
                 adjusted_reward = (
-                    reward + self.gamma * T.max(  # pylint: disable=E1101
-                        new_state_policy))
+                    reward + self.gamma * max(new_state_policy))
 
-                output = self.policy_net.forward(state).to(self.device)
+                output = self.policy_net(state)
                 target = output.detach().clone()
                 target[action] = adjusted_reward
-                target = target.to(self.device)
 
             else:
-                output = self.policy_net.forward(state).to(self.device)
+                output = self.policy_net(state)
                 target = output.detach().clone()
                 target[action] = reward
-                target = target.to(self.device)
-                loss = nn.HuberLoss()
-                optimizer = optim.Adam(
-                    self.policy_net.parameters(), lr=self.learning_rate
-                )
-
-                out = loss(output, target)
-                optimizer.zero_grad()
-                out.backward(retain_graph=True)
-                optimizer.step()
+                out = self.loss(output, target)
+                self.optimizer.zero_grad()
+                out.mean().backward()
+                self.optimizer.step()
                 T.save(self.policy_net.state_dict(), self.path + PATH)
 
     def epsilon_decay(self):

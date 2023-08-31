@@ -44,7 +44,7 @@ class Basic:
         self.choices = None
         #  s    t    r    l
         self.dist_mask = [-1, -1, -1, -1]
-        self.state = None
+        self.state = []
         self.edge_distance = None
         self.p_index = 0
 
@@ -87,7 +87,6 @@ class Basic:
         self.edge_distance = math.dist(vedge_loc, pedge_loc)
         new_dist_check = 1
         # self.route.append(vedge)
-        # self.person = Person("p_0", self.sumo,self.index_dict)
 
         self.choices = self.vehicle.get_out_dict()
 
@@ -97,42 +96,33 @@ class Basic:
                 s_dist = math.dist(sloc, pedge_loc)
                 if s_dist < self.edge_distance:
                     self.dist_mask[0] = 1
-                else:
-                    self.dist_mask[0] = -1
+
             elif key == "t":
                 tloc = self.edge_position[value]
                 t_dist = math.dist(tloc, pedge_loc)
                 if t_dist < self.edge_distance:
                     self.dist_mask[1] = 1
-                else:
-                    self.dist_mask[1] = -1
 
             elif key == "r":
                 rloc = self.edge_position[value]
                 r_dist = math.dist(rloc, pedge_loc)
                 if r_dist < self.edge_distance:
                     self.dist_mask[2] = 1
-                else:
-                    self.dist_mask[2] = -1
 
             elif key == "l":
                 lloc = self.edge_position[value]
                 l_dist = math.dist(lloc, pedge_loc)
                 if l_dist < self.edge_distance:
                     self.dist_mask[3] = 1
-                else:
-                    self.dist_mask[3] = -1
 
-        # self.state = np.array([])
+        self.state = []
 
-        # self.state = np.append(self.state, vedge_loc, pedge_loc)
-        # # self.state = np.append(self.state, pedge_loc)
+        self.state.extend(vedge_loc)
+        self.state.extend(pedge_loc)
+        self.state.append(self.steps)
+        self.state.append(new_dist_check)
+        self.state.extend(self.dist_mask)
 
-        # self.state = np.append(self.state, self.steps)
-        # self.state = np.append(self.state, new_dist_check)
-        # self.state = np.append(self.state, self.dist_mask)
-
-        self.state = [list(vedge_loc), list(pedge_loc), list(self.steps), list(new_dist_check), self.dist_mask]
         self.done = False
         self.make_choice_flag = True
 
@@ -207,31 +197,24 @@ class Basic:
                     s_dist = math.dist(sloc, pedge_loc)
                     if s_dist < self.edge_distance:
                         self.dist_mask[0] = 1
-                    else:
-                        self.dist_mask[0] = -1
+                    
                 if key == "t":
                     tloc = self.edge_position[value]
                     t_dist = math.dist(tloc, pedge_loc)
                     if t_dist < self.edge_distance:
                         self.dist_mask[1] = 1
-                    else:
-                        self.dist_mask[1] = -1
 
                 if key == "r":
                     rloc = self.edge_position[value]
                     r_dist = math.dist(rloc, pedge_loc)
                     if r_dist < self.edge_distance:
                         self.dist_mask[2] = 1
-                    else:
-                        self.dist_mask[2] = -1
 
                 if key == "l":
                     lloc = self.edge_position[value]
                     l_dist = math.dist(lloc, pedge_loc)
                     if l_dist < self.edge_distance:
                         self.dist_mask[3] = 1
-                    else:
-                        self.dist_mask[3] = -1
 
             vedge = self.sumo.vehicle.getRoadID(self.vehicle.vehicle_id)
             pedge = self.sumo.person.getRoadID(self.person.person_id)
@@ -243,34 +226,33 @@ class Basic:
                 reward += 0.1
 
             if vedge == pedge:
-                # self.done = True
+                self.done = True
                 self.person.remove_person()
                 self.p_index += 1
                 self.people.pop(0)
                 print("Pickup ", self.p_index)
                 reward += 15
-                if self.people:
-                    self.person = self.people[0]
-                    pedge = self.sumo.person.getRoadID(self.person.person_id)
-                    pedge_loc = self.edge_position[pedge]
+                # if self.people:
+                #     self.person = self.people[0]
+                #     pedge = self.sumo.person.getRoadID(self.person.person_id)
+                #     pedge_loc = self.edge_position[pedge]
                     
-                else:
-                    self.done = True
-                    print("Success")
-                    reward += 35
+                # else:
+                #     self.done = True
+                #     print("Success")
+                #     reward += 35
 
                 self.accumulated_reward += reward
             if self.steps >= self.steps_per_episode:
                 self.done = True
                 reward += -10
             self.accumulated_reward += reward
-            # self.state = np.array([])
-            # self.state = np.append(self.state, vedge_loc)
-            # self.state = np.append(self.state, pedge_loc)
-            # self.state = np.append(self.state, self.agent_step)
-            # self.state = np.append(self.state, new_dist_check)
-            # self.state = np.append(self.state, self.dist_mask)
-            self.state = [list(vedge_loc), list(pedge_loc), list(self.steps), list(new_dist_check), self.dist_mask]
+            self.state = []
+            self.state.extend(vedge_loc)
+            self.state.extend(pedge_loc)
+            self.state.append(self.steps)
+            self.state.append(new_dist_check)
+            self.state.extend(self.dist_mask)
 
             self.old_edge = vedge
             while not self.make_choice_flag and not self.done:

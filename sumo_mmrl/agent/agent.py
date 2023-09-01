@@ -36,7 +36,7 @@ class Agent:
         self.epsilon_max = 0.9997
         self.decay = 0.99
         self.epsilon_min = 0.01
-        self.learning_rate = 0.01
+        self.learning_rate = 0.001
         device = T.device(  # pylint: disable=E1101
             "cuda" if T.cuda.is_available() else "cpu"
         )
@@ -194,7 +194,7 @@ class Agent:
                     10 * episode - ((5.4 / 10 * episodes) * 10)
                 )
         else:
-            self.epsilon = 0.00
+            self.epsilon = self.epsilon_min
 
     def epsilon_decay_3(self, episode, episodes):
         """
@@ -212,7 +212,7 @@ class Agent:
             self.epsilon = (1 / 9.5) * math.log(((-episode) + episodes + 1))
             # self.epsilon_max-1.01**(10*episode-((4.4/10 * episodes)*10))
         else:
-            self.epsilon = 0.00
+            self.epsilon = self.epsilon_min
 
     def epsilon_null(self):
         """
@@ -220,4 +220,4 @@ class Agent:
 
         _extended_summary_
         """
-        self.epsilon = 0.00
+        self.epsilon = self.epsilon_min

@@ -3,10 +3,10 @@ from sumo_mmrl import Basic, Agent
 
 EPISODES = 1000
 STEPS = 1000
-BATCH_SIZE = 1026
+BATCH_SIZE = 128
 MIN_MEMORY = 1000
-EXPERIMENT_PATH = "Experiments/3x3"
-SUMOCONFIG = "/Nets/3x3b.sumocfg"
+EXPERIMENT_PATH = "Experiments/4x4"
+SUMOCONFIG = "/Nets/4x4.sumocfg"
 
 
 def main():

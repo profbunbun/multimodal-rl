@@ -230,8 +230,8 @@ class Basic:
                 self.person.remove_person()
                 self.p_index += 1
                 self.people.pop(0)
-                print("Pickup ", self.p_index)
-                reward += 15
+                # print("Pickup ", self.p_index)
+                reward += 45
                 # if self.people:
                 #     self.person = self.people[0]
                 #     pedge = self.sumo.person.getRoadID(self.person.person_id)

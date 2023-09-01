@@ -1,9 +1,9 @@
 """ import stuff """
 from sumo_mmrl import Basic, Agent
 
-EPISODES = 1000
+EPISODES = 100000
 STEPS = 1000
-BATCH_SIZE = 128
+BATCH_SIZE = 64
 MIN_MEMORY = 1000
 EXPERIMENT_PATH = "Experiments/4x4"
 SUMOCONFIG = "/Nets/4x4.sumocfg"
@@ -23,7 +23,7 @@ def main():
     for episode in range(EPISODES + 1):
         accumulated_reward = 0
 
-        if (episode) % 1000 == 0:
+        if (episode) % 100000 == 0:
             env.render("gui")
         else:
             env.render("libsumo")

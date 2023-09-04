@@ -24,7 +24,7 @@ def main():
 
         accumulated_reward = 0
 
-        if (episode) % 1000 == 0:
+        if (episode) % 100 == 0:
             env.render("gui")
         else:
             env.render("libsumo")

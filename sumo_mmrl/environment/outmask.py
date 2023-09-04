@@ -30,11 +30,13 @@ class OutMask():
         :type edge_position: _type_
         :return: _description_
         :rtype: _type_
-        '''        
+        '''
+  
         vedge_loc = edge_position[vedge]
         pedge_loc = edge_position[pedge]
         edge_distance = math.dist(vedge_loc, pedge_loc)
         outmask = [-1,-1,-1,-1]
+        
         for key, value in choices.items():
             if key == "s":
                 sloc = edge_position[value]

@@ -15,8 +15,8 @@ class Person:
         self.sumo = sumo
         self.index_dict = index_dict
         self.edge_position = edge_position
-        # new_lane = random.choice(list(self.index_dict.keys()))
-        new_lane = list(self.index_dict.keys())[0]
+        new_lane = random.choice(list(self.index_dict.keys()))
+        # new_lane = list(self.index_dict.keys())[0]
         destination = random.choice(list(self.index_dict.keys()))
         # self.sumo.person.add(person_id, "1w", 20)
         # self.sumo.person.appendDrivingStage(person_id, "24e", lines="taxi")
@@ -53,4 +53,13 @@ class Person:
         self.sumo.person.remove(self.person_id)
         return
                 
+    def get_road(self):
+        '''
+        get_road _summary_
 
+        _extended_summary_
+
+        :return: _description_
+        :rtype: _type_
+        '''        
+        return self.sumo.person.getRoadID(self.person_id)

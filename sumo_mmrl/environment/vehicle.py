@@ -1,6 +1,6 @@
 """module stuff"""
 # import numpy as np
-
+import random
 
 
 STRAIGHT = "s"
@@ -34,9 +34,8 @@ class Vehicle:
         self.index_dict = index_dict
         self.sumo = sumo
         self.edge_position = edge_position
-
         self.sumo.vehicle.add(self.vehicle_id, "r_0", typeID="taxi")
-
+        # self.random_relocate()
         self.current_lane = self.sumo.vehicle.getLaneID(self.vehicle_id)
         self.cur_loc = self.current_lane.partition("_")[0]
 
@@ -114,6 +113,26 @@ class Vehicle:
         reservation_id = reservation[0]
         self.sumo.vehicle.dispatchTaxi(self.vehicle_id,"0")
         # print(reservation_id)
+        
+    def get_road(self):
+        '''
+        get_road _summary_
 
-    
+        _extended_summary_
+
+        :return: _description_
+        :rtype: _type_
+        '''        
+        return self.sumo.vehicle.getRoadID(self.vehicle_id)
+
+    def random_relocate(self):
+        '''
+        random_relocate _summary_
+
+        _extended_summary_
+        '''        
+        new_lane=random.choice(list(self.index_dict.keys()))      
+        self.sumo.vehicle.changeTarget(self.vehicle_id,edgeID=new_lane)
+        self.sumo.vehicle.moveTo(self.vehicle_id,new_lane+"_0",5)
+
         

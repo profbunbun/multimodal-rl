@@ -57,14 +57,15 @@ class Basic:
         """
         self.steps = 0
         self.agent_step = 0
-        vehicles = []
-        people = []
         self.accumulated_reward = 0
-        self.p_index = 0
+        self.done = False
+        self.make_choice_flag = True
 
         out_dict = self.parser.get_out_dic()
         index_dict = self.parser.get_edge_index()
 
+        vehicles = []
+        people = []
 
         for v_id in range(1):
             vehicles.append(Vehicle(str(v_id), out_dict, index_dict, self.edge_position, self.sumo))
@@ -72,30 +73,26 @@ class Basic:
 
         for p_id in range(1):
             people.append(Person(str(p_id), self.sumo, self.edge_position, index_dict))
-        self.person = people[self.p_index]
+        self.person = people[0]
 
+        self.vehicle.random_relocate()
         self.sumo.simulationStep()
         self.steps += 1
-
-        vedge = self.sumo.vehicle.getRoadID(self.vehicle.vehicle_id)
-        pedge = self.sumo.person.getRoadID(self.person.person_id)
-
+        vedge = self.vehicle.get_road()
+        pedge = self.person.get_road()
+        choices=self.vehicle.get_out_dict()
+        vedge_loc, pedge_loc, outmask, self.edge_distance = self.out_mask.get_outmask(vedge, pedge, choices, self.edge_position)
 
         new_dist_check = 1
-        choices=self.vehicle.get_out_dict()
 
-        vedge_loc, pedge_loc, outmask, self.edge_distance = self.out_mask.get_outmask(vedge, pedge, choices, self.edge_position)
         
         self.state = []
-
         self.state.extend(vedge_loc)
         self.state.extend(pedge_loc)
         self.state.append(self.steps)
         self.state.append(new_dist_check)
         self.state.extend(outmask)
 
-        self.done = False
-        self.make_choice_flag = True
 
 
 
@@ -111,7 +108,8 @@ class Basic:
         self.sumo.simulationStep()
         self.steps += 1
 
-        vedge = self.sumo.vehicle.getRoadID(self.vehicle.vehicle_id)
+        vedge = self.vehicle.get_road()
+
 
         if ":" in vedge or self.old_edge == vedge:
             self.make_choice_flag = False
@@ -150,8 +148,8 @@ class Basic:
 
             self.sumo.simulationStep()
             self.steps += 1
-            vedge = self.sumo.vehicle.getRoadID(self.vehicle.vehicle_id)
-            pedge = self.sumo.person.getRoadID(self.person.person_id)
+            vedge = self.vehicle.get_road()
+            pedge = self.person.get_road()
             
             choices = self.vehicle.get_out_dict()
             vedge_loc, pedge_loc, outmask, self.edge_distance = self.out_mask.get_outmask(vedge, pedge, choices, self.edge_position)
@@ -163,8 +161,8 @@ class Basic:
                 new_dist_check = -1
             
 
-            vedge = self.sumo.vehicle.getRoadID(self.vehicle.vehicle_id)
-            pedge = self.sumo.person.getRoadID(self.person.person_id)
+            vedge = self.vehicle.get_road()
+            pedge = self.person.get_road()
 
 
             self.done = False
@@ -223,12 +221,14 @@ class Basic:
         elif mode == "no_gui":
             self.sumo = self.sumo_con.connect_no_gui()
 
-    def c_l_output(self, episode, epsilon):
+ 
+    def close(self, episode, epsilon):
         """
-        c_l_output _summary_
+        close _summary_
 
         _extended_summary_
         """
+        self.sumo.close()
         acc_r = self.accumulated_reward
         acc_r = float(self.accumulated_reward)
 
@@ -246,27 +246,11 @@ class Basic:
             f" **** step: {self.steps}",
             f"*** Agent steps: {self.agent_step}",
         )
-
-    def chart_output(self):
-        """
-        chart_output _summary_
-
-        _extended_summary_
-        """
+        
         x = [i + 1 for i in range(len(self.rewards))]
         file_name = self.path + "/Graphs/sumo-agent.png"
 
         self.util.plot_learning(x, self.rewards, self.epsilon_hist, file_name)
-
-    def close(self, episode, epsilon):
-        """
-        close _summary_
-
-        _extended_summary_
-        """
-        self.sumo.close()
-        self.c_l_output(episode, epsilon)
-        self.chart_output()
         # print(len(self.best_route))
         # print(self.best_route)
         # print(len(self.route))

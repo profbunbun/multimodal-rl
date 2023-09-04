@@ -1,9 +1,7 @@
 """import stuff"""
 import sys
 import os
-import xml.etree.ElementTree as ET
 import traci
-import sumolib
 import libsumo
 
 if "SUMO_HOME" in os.environ:

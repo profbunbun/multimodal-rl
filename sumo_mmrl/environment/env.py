@@ -17,38 +17,35 @@ class Basic:
 
     def __init__(self, path, sumocon, steps_per_episode) -> None:
         self.util = Utility()
-        parser = NetParser(path + sumocon)
+        self.parser = NetParser(path + sumocon)
         self.sumo_con = SUMOConnection(path + sumocon)
+        self.sumo = None
+        self.path = path
 
-        (   self.out_dict,
-            self.index_dict,
-            self.edge_list,
-            self.edge_position,
-        ) = parser.get_edges_info()
 
         self.steps_per_episode = steps_per_episode
+        self.steps = 0
+        self.agent_step = 0
+        self.accumulated_reward = 0
+        self.state = []
 
         self.done = False
         self.make_choice_flag = False
+
+        self.old_edge = None
+
+        self.rewards = []
+        self.epsilon_hist = []
+
         self.vehicle = None
         self.person = None
-        self.route = []
-        self.steps = 0
-        self.agent_step = 0
-        self.old_edge = None
-        self.sumo = None
-        self.path = path
-        self.accumulated_reward = 0
-        self.rewards = []
-        self.eps_history = []
-        self.vehicles = []
-        self.people = []
-        self.choices = None
-        #  s    t    r    l
-        self.dist_mask = [-1, -1, -1, -1]
-        self.state = []
-        self.edge_distance = None
+
         self.p_index = 0
+
+        self.choices = None
+        self.dist_mask = []
+        self.edge_position = self.parser.get_edge_pos_dic()
+        self.edge_distance = None
 
     def reset(self):
         """
@@ -61,21 +58,22 @@ class Basic:
         """
         self.steps = 0
         self.agent_step = 0
-        self.route = []
-        self.vehicles = []
-        self.people = []
-        self.dist_mask = [-1, -1, -1, -1]
+        vehicles = []
+        people = []
+        self.dist_mask = [-1, -1, -1, -1]  #  s    t    r    l
         self.accumulated_reward = 0
         self.p_index = 0
+
+        out_dict = self.parser.get_out_dic()
+        index_dict = self.parser.get_edge_index()
+
         for v_id in range(1):
-            self.vehicles.append(
-                Vehicle(str(v_id), self.out_dict, self.index_dict, self.sumo)
-            )
-        self.vehicle = self.vehicles[0]
+            vehicles.append(Vehicle(str(v_id), out_dict, index_dict, self.sumo))
+        self.vehicle = vehicles[0]
 
         for p_id in range(1):
-            self.people.append(Person(str(p_id), self.sumo, self.index_dict))
-        self.person = self.people[self.p_index]
+            people.append(Person(str(p_id), self.sumo, index_dict))
+        self.person = people[self.p_index]
 
         # self.vehicle.random_relocate()
         self.sumo.simulationStep()
@@ -171,7 +169,7 @@ class Basic:
         """
         old_dist = self.edge_distance
         reward = 0
-        
+
         if validator != -1:
             self.dist_mask = [-1, -1, -1, -1]
             if self.make_choice_flag:
@@ -200,7 +198,7 @@ class Basic:
                     s_dist = math.dist(sloc, pedge_loc)
                     if s_dist < self.edge_distance:
                         self.dist_mask[0] = 1
-                    
+
                 if key == "t":
                     tloc = self.edge_position[value]
                     t_dist = math.dist(tloc, pedge_loc)
@@ -230,23 +228,12 @@ class Basic:
 
             if vedge == pedge:
                 # self.done = True
-                # self.person.remove_person()
-                # self.p_index += 1
-                # self.people.pop(0)
+
                 self.vehicle.pickup()
                 print(self.sumo_con.busstopCheck())
                 # print("Pickup ", self.p_index)
                 reward += 45
                 self.vehicle.set_destination(self.sumo_con.busstopCheck()[0])
-                # if self.people:
-                #     self.person = self.people[0]
-                #     pedge = self.sumo.person.getRoadID(self.person.person_id)
-                #     pedge_loc = self.edge_position[pedge]
-                    
-                # else:
-                #     self.done = True
-                #     print("Success")
-                #     reward += 35
 
                 self.accumulated_reward += reward
             if self.steps >= self.steps_per_episode:
@@ -301,7 +288,7 @@ class Basic:
 
         self.rewards.append(acc_r)
 
-        self.eps_history.append(epsilon)
+        self.epsilon_hist.append(epsilon)
         avg_reward = np.mean(self.rewards[-100:])
 
         print(
@@ -323,7 +310,7 @@ class Basic:
         x = [i + 1 for i in range(len(self.rewards))]
         file_name = self.path + "/Graphs/sumo-agent.png"
 
-        self.util.plot_learning(x, self.rewards, self.eps_history, file_name)
+        self.util.plot_learning(x, self.rewards, self.epsilon_hist, file_name)
 
     def close(self, episode, epsilon):
         """
@@ -338,5 +325,3 @@ class Basic:
         # print(self.best_route)
         # print(len(self.route))
         # print(self.route)
-
-                

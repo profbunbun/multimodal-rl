@@ -3,8 +3,9 @@ import math
 import numpy as np
 from .vehicle import Vehicle
 from .person import Person
-from ..connector.connect import SUMOConnection
-from ..connector.utility import Utility
+from .connect import SUMOConnection
+from .plot_util import Utility
+from .net_parser import NetParser
 
 
 class Basic:
@@ -16,13 +17,14 @@ class Basic:
 
     def __init__(self, path, sumocon, steps_per_episode) -> None:
         self.util = Utility()
+        parser = NetParser(path + sumocon)
         self.sumo_con = SUMOConnection(path + sumocon)
-        (
-            self.out_dict,
+
+        (   self.out_dict,
             self.index_dict,
             self.edge_list,
             self.edge_position,
-        ) = self.sumo_con.get_edges_info()
+        ) = parser.get_edges_info()
 
         self.steps_per_episode = steps_per_episode
 

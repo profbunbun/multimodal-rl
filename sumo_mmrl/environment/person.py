@@ -1,7 +1,6 @@
 """module stuff"""
-from ..connector.utility import Utility
 import random
-util = Utility()
+
 
 
 class Person:

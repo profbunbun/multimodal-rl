@@ -113,7 +113,7 @@ class Vehicle:
         reservation = self.sumo.person.getTaxiReservations(0)
         reservation_id = reservation[0]
         self.sumo.vehicle.dispatchTaxi(self.vehicle_id,"0")
-        print(reservation_id)
+        # print(reservation_id)
 
     
         

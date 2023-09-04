@@ -1,7 +1,7 @@
 """ import stuff """
 from sumo_mmrl import Basic, Agent
-
-EPISODES = 1000
+# import time
+EPISODES = 10_000
 STEPS = 1000
 BATCH_SIZE = 64
 MIN_MEMORY = 1000
@@ -21,9 +21,10 @@ def main():
     agent = Agent(10, 4, EXPERIMENT_PATH)
 
     for episode in range(EPISODES + 1):
+        # start_time = time.time()
         accumulated_reward = 0
 
-        if (episode) % 100000 == 0:
+        if (episode) % 1000 == 0:
             env.render("gui")
         else:
             env.render("libsumo")
@@ -62,6 +63,7 @@ def main():
             
 
         env.close(episode, agent.epsilon)
+        # print("--- %s seconds ---" % (time.time() - start_time))
         
 
 if __name__ == "__main__":

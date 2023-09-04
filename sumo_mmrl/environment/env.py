@@ -174,10 +174,10 @@ class Basic:
                 reward += 0.1
 
             if vedge == pedge:
-                # self.done = True
+                self.done = True
 
                 self.vehicle.pickup()
-                print(self.sumo_con.busstopCheck())
+                # print(self.sumo_con.busstopCheck())
                 # print("Pickup ", self.p_index)
                 reward += 45
                 self.vehicle.set_destination(self.sumo_con.busstopCheck()[0])

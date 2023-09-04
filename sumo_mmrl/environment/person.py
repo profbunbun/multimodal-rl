@@ -10,10 +10,11 @@ class Person:
     _extended_summary_
     """
 
-    def __init__(self, person_id, sumo, index_dict) -> None:
+    def __init__(self, person_id, sumo, edge_position, index_dict) -> None:
         self.person_id = person_id
         self.sumo = sumo
         self.index_dict = index_dict
+        self.edge_position = edge_position
         # new_lane = random.choice(list(self.index_dict.keys()))
         new_lane = list(self.index_dict.keys())[0]
         destination = random.choice(list(self.index_dict.keys()))

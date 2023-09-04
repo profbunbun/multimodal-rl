@@ -8,8 +8,6 @@ TURN_AROUND = "t"
 LEFT = "l"
 RIGHT = "r"
 
-# out_mask=[]
-
 
 class Vehicle:
     """
@@ -18,7 +16,7 @@ class Vehicle:
     _extended_summary_
     """
 
-    def __init__(self, vehicle_id, out_dict, index_dict, sumo) -> None:
+    def __init__(self, vehicle_id, out_dict, index_dict, edge_position, sumo) -> None:
         """
         __init__ _summary_
 
@@ -35,6 +33,7 @@ class Vehicle:
         self.out_dict = out_dict
         self.index_dict = index_dict
         self.sumo = sumo
+        self.edge_position = edge_position
 
         self.sumo.vehicle.add(self.vehicle_id, "r_0", typeID="taxi")
 
@@ -115,3 +114,6 @@ class Vehicle:
         reservation_id = reservation[0]
         self.sumo.vehicle.dispatchTaxi(self.vehicle_id,"0")
         print(reservation_id)
+
+    
+        

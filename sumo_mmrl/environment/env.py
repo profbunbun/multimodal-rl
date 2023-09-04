@@ -127,6 +127,7 @@ class Basic:
         self.make_choice_flag = True
 
         self.choices = self.vehicle.get_out_dict()
+        # self.vehicle.pickup()
 
         # self.best_route=self.sumo.simulation.findRoute(self.vedge,self.pedge)
 
@@ -226,12 +227,15 @@ class Basic:
                 reward += 0.1
 
             if vedge == pedge:
-                self.done = True
-                self.person.remove_person()
-                self.p_index += 1
-                self.people.pop(0)
+                # self.done = True
+                # self.person.remove_person()
+                # self.p_index += 1
+                # self.people.pop(0)
+                self.vehicle.pickup()
+                print(self.sumo_con.busstopCheck())
                 # print("Pickup ", self.p_index)
                 reward += 45
+                self.vehicle.set_destination(self.sumo_con.busstopCheck()[0])
                 # if self.people:
                 #     self.person = self.people[0]
                 #     pedge = self.sumo.person.getRoadID(self.person.person_id)

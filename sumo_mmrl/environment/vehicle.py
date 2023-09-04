@@ -1,6 +1,6 @@
 """module stuff"""
 # import numpy as np
-import random
+# import random
 from ..connector.utility import Utility
 
 
@@ -115,25 +115,19 @@ class Vehicle:
 
         _extended_summary_
         """
-        # reservation = self.sumo.person.getTaxiReservations(0)
-        # reservation_id = reservation[0]
-        # self.sumo.vehicle.dispatchTaxi("1","0")
-        # print(reservation_id)
+        reservation = self.sumo.person.getTaxiReservations(0)
+        reservation_id = reservation[0]
+        self.sumo.vehicle.dispatchTaxi(self.vehicle_id,"0")
+        print(reservation_id)
 
-    def close(self):
-        """
-        close _summary_
 
-        _extended_summary_
-        """
-        self.sumo.close()
 
-    def random_relocate(self):
-        """
-        random_relocate _summary_
+    # def random_relocate(self):
+    #     """
+    #     random_relocate _summary_
 
-        _extended_summary_
-        """
-        new_lane = random.choice(list(self.index_dict.keys()))
-        self.sumo.vehicle.changeTarget(self.vehicle_id, edgeID=new_lane)
-        self.sumo.vehicle.moveTo(self.vehicle_id, new_lane + "_0", 5)
+    #     _extended_summary_
+    #     """
+    #     new_lane = random.choice(list(self.index_dict.keys()))
+    #     self.sumo.vehicle.changeTarget(self.vehicle_id, edgeID=new_lane)
+    #     self.sumo.vehicle.moveTo(self.vehicle_id, new_lane + "_0", 5)

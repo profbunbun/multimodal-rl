@@ -18,8 +18,10 @@ class Person:
         # new_lane = random.choice(list(self.index_dict.keys()))
         new_lane = list(self.index_dict.keys())[0]
         destination = random.choice(list(self.index_dict.keys()))
-        self.sumo.person.add(person_id, new_lane, 20)
-        self.sumo.person.appendDrivingStage(person_id, destination, lines="taxi")
+        self.sumo.person.add(person_id, "1w", 20)
+        self.sumo.person.appendDrivingStage(person_id, "24e", lines="taxi")
+        # self.sumo.person.add(person_id, new_lane, 20)
+        # self.sumo.person.appendDrivingStage(person_id, destination, lines="ANY")
 
     def location(self):
         """
@@ -41,19 +43,6 @@ class Person:
         _extended_summary_
         """
 
-    def set_pickup(self):
-        """
-        set_pickup _summary_
-
-        _extended_summary_
-        """
-
-    def pickup(self):
-        """
-        pickup _summary_
-
-        _extended_summary_
-        """
 
     def remove_person(self):
         """
@@ -64,11 +53,4 @@ class Person:
         self.sumo.person.remove(self.person_id)
         return
                 
-    def close(self):
-        """
-        close _summary_
-
-        _extended_summary_
-        """
-        self.sumo.close()
 

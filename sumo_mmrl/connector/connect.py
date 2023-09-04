@@ -175,3 +175,15 @@ class SUMOConnection:
 
         return [out_dict, index_dict, edge_list, edge_position_dict]
 
+    def busstopCheck(self):
+        '''
+        busstopCheck _summary_
+
+        _extended_summary_
+        '''        
+        # getting all bus stops on the map\
+        lanes=[]
+        stops = self.sumo_.busstop.getIDList()
+        for stop in stops:
+            lanes.append(self.sumo_.busstop.getLaneID(stop))
+        return lanes

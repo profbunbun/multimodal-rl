@@ -1,5 +1,4 @@
 """ import stuff """
-import math
 import numpy as np
 from .vehicle import Vehicle
 from .person import Person

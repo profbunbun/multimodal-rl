@@ -34,7 +34,7 @@ class OutMask():
   
         vedge_loc = edge_position[vedge]
         pedge_loc = edge_position[pedge]
-        edge_distance = math.dist(vedge_loc, pedge_loc)
+        edge_distance = self.manhat_dist(vedge_loc[0], vedge_loc[1], pedge_loc[0], pedge_loc[1])
         outmask = [-1,-1,-1,-1]
         
         for key, value in choices.items():

@@ -40,11 +40,11 @@ class Agent:
         device = T.device(  # pylint: disable=E1101
             "cuda" if T.cuda.is_available() else "cpu"
         )
-
+        # device = T.device("cuda:1")
         self.policy_net = dqn.DQN(state_size, action_size)
         # net = dqn.DQN(state_size, action_size)
         if T.cuda.device_count() > 1:
-            print("Let's use", T.cuda.device_count(), "GPUs!")
+            # print("Let's use", T.cuda.device_count(), "GPUs!")
             self.policy_net = nn.DataParallel(self.policy_net)
         self.policy_net.to(device)
         self.loss = nn.HuberLoss()

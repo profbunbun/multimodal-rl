@@ -6,7 +6,7 @@ from .connect import SUMOConnection
 from .plot_util import Utility
 from .net_parser import NetParser
 from .outmask import OutMask
-
+from .findStop import StopFinder
 
 class Basic:
     """
@@ -20,10 +20,9 @@ class Basic:
         self.parser = NetParser(path + sumocon)
         self.sumo_con = SUMOConnection(path + sumocon)
         self.out_mask = OutMask()
+        self.finder = StopFinder()
         self.sumo = None
         self.path = path
-
-
         self.steps_per_episode = steps_per_episode
         self.steps = 0
         self.agent_step = 0
@@ -46,6 +45,8 @@ class Basic:
         self.edge_position = self.parser.get_edge_pos_dic()
         self.edge_distance = None
 
+        self.destination_edge = None
+
     def reset(self):
         """
         reset _summary_
@@ -66,6 +67,7 @@ class Basic:
 
         vehicles = []
         people = []
+        
 
         for v_id in range(1):
             vehicles.append(Vehicle(str(v_id), out_dict, index_dict, self.edge_position, self.sumo))
@@ -80,21 +82,20 @@ class Basic:
         self.steps += 1
         vedge = self.vehicle.get_road()
         pedge = self.person.get_road()
-        choices=self.vehicle.get_out_dict()
-        vedge_loc, pedge_loc, outmask, self.edge_distance = self.out_mask.get_outmask(vedge, pedge, choices, self.edge_position)
+        choices = self.vehicle.get_out_dict()
+        self.destination_edge = pedge
+        vedge_loc, dest_edge_loc, outmask, self.edge_distance = self.out_mask.get_outmask(vedge, self.destination_edge, choices, self.edge_position)
 
         new_dist_check = 1
+        stops = self.finder.find_end_stop( self.destination_edge, self.edge_position, self.sumo)
+        print(stops)
 
-        
         self.state = []
         self.state.extend(vedge_loc)
-        self.state.extend(pedge_loc)
+        self.state.extend(dest_edge_loc)
         self.state.append(self.steps)
         self.state.append(new_dist_check)
         self.state.extend(outmask)
-
-
-
 
         self.old_edge = vedge
         return self.state, self.done, choices
@@ -152,8 +153,7 @@ class Basic:
             pedge = self.person.get_road()
             
             choices = self.vehicle.get_out_dict()
-            vedge_loc, pedge_loc, outmask, self.edge_distance = self.out_mask.get_outmask(vedge, pedge, choices, self.edge_position)
-
+            vedge_loc, dest_edge_loc, outmask, self.edge_distance = self.out_mask.get_outmask(vedge, self.destination_edge, choices, self.edge_position)
 
             if old_dist > self.edge_distance:
                 new_dist_check = 1
@@ -164,20 +164,19 @@ class Basic:
             vedge = self.vehicle.get_road()
             pedge = self.person.get_road()
 
-
             self.done = False
 
             if new_dist_check == 1:
                 reward += 0.1
 
-            if vedge == pedge:
+            if vedge == self.destination_edge:
                 self.done = True
 
-                self.vehicle.pickup()
+                # self.vehicle.pickup()
                 # print(self.sumo_con.busstopCheck())
                 # print("Pickup ", self.p_index)
                 reward += 45
-                self.vehicle.set_destination(self.sumo_con.busstopCheck()[0])
+                # self.vehicle.set_destination(self.sumo_con.busstopCheck()[0])
 
                 self.accumulated_reward += reward
             if self.steps >= self.steps_per_episode:
@@ -186,7 +185,7 @@ class Basic:
             self.accumulated_reward += reward
             self.state = []
             self.state.extend(vedge_loc)
-            self.state.extend(pedge_loc)
+            self.state.extend(dest_edge_loc)
             self.state.append(self.steps)
             self.state.append(new_dist_check)
             self.state.extend(outmask)

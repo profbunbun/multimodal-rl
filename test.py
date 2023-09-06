@@ -15,8 +15,7 @@ def main():
 
     _extended_summary_
     """
-
-
+    
     env = Basic(EXPERIMENT_PATH, SUMOCONFIG, STEPS)
     agent = Agent(10, 4, EXPERIMENT_PATH)
 
@@ -60,13 +59,10 @@ def main():
 
         else:
             agent.epsilon_decay_2(episode, (.5 * EPISODES))
-            
-
+ 
         env.close(episode, agent.epsilon)
 
-        
 
 if __name__ == "__main__":
 
     main()
-    

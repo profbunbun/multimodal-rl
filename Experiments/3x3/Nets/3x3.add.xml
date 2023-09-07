@@ -10,8 +10,8 @@
 
 <additional xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/additional_file.xsd">
 
-    <busStop id="bs_0" lane="15e_1" startPos="44.35" endPos="54.35"/>
-    <busStop id="bs_1" lane="24e_1" startPos="49.87" endPos="59.87"/>
+    <busStop id="bs_0" lane="15e_1" startPos="44.35" endPos="54.35" lines="64"/>
+    <busStop id="bs_1" lane="24e_1" startPos="49.87" endPos="59.87" lines="64"/>
 
     <rerouter id="pa10e" edges="10e">
         <interval begin="0.0" end="86400">

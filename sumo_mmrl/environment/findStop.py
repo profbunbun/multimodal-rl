@@ -89,3 +89,36 @@ class StopFinder:
          
         dic = self.get_stop_dists(end_loc, loc_dic)      
         return max(dic, key=dic.get)
+
+    def find_begin_stop(self, begin_loc, loc_dic, con):
+        """
+        find_begin_stop _summary_
+
+        _extended_summary_
+
+        Args:
+            begin_loc (_type_): _description_
+            loc_dic (_type_): _description_
+            con (_type_): _description_
+
+        Returns:
+            _type_: _description_
+        """     
+        self.con = con
+         
+        dic = self.get_stop_dists(begin_loc, loc_dic)      
+        return max(dic, key=dic.get)
+
+    def get_line(self, stop_id):
+        """
+        get_line _summary_
+
+        _extended_summary_
+
+        Args:
+            stop_id (_type_): _description_
+
+        Returns:
+            _type_: _description_
+        """        
+        return self.con.busstop.getParameterWithKey(stop_id, "lines")

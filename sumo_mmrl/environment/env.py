@@ -82,13 +82,17 @@ class Basic:
         self.steps += 1
         vedge = self.vehicle.get_road()
         pedge = self.person.get_road()
+        p_destoination = self.person.get_destination()
         choices = self.vehicle.get_out_dict()
         self.destination_edge = pedge
         vedge_loc, dest_edge_loc, outmask, self.edge_distance = self.out_mask.get_outmask(vedge, self.destination_edge, choices, self.edge_position)
 
         new_dist_check = 1
-        stops = self.finder.find_end_stop( self.destination_edge, self.edge_position, self.sumo)
-        print(stops)
+        self.closest_end_stop = self.finder.find_end_stop( p_destoination, self.edge_position, self.sumo)
+        
+        self.closest_begin_stop = self.finder.find_begin_stop(pedge,  self.edge_position, self.sumo)
+
+        print(self.finder.get_line(self.closest_begin_stop))
 
         self.state = []
         self.state.extend(vedge_loc)

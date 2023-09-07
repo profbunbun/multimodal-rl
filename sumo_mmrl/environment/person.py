@@ -15,13 +15,13 @@ class Person:
         self.sumo = sumo
         self.index_dict = index_dict
         self.edge_position = edge_position
-        new_lane = random.choice(list(self.index_dict.keys()))
+        self.new_lane = random.choice(list(self.index_dict.keys()))
         # new_lane = list(self.index_dict.keys())[0]
-        destination = random.choice(list(self.index_dict.keys()))
+        self.destination = random.choice(list(self.index_dict.keys()))
         # self.sumo.person.add(person_id, "1w", 20)
         # self.sumo.person.appendDrivingStage(person_id, "24e", lines="taxi")
-        self.sumo.person.add(person_id, new_lane, 20)
-        self.sumo.person.appendDrivingStage(person_id, destination, lines="taxi")
+        self.sumo.person.add(person_id, self.new_lane, 20)
+        self.sumo.person.appendDrivingStage(person_id, self.destination, lines="taxi")
 
     def location(self):
         """
@@ -36,12 +36,14 @@ class Person:
 
         return ppos
 
-    def set_destination(self):
+    def get_destination(self):
         """
         set_destination _summary_
 
         _extended_summary_
         """
+
+        return self.destination
 
 
     def remove_person(self):

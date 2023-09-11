@@ -5,8 +5,12 @@
 
 <additional xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/additional_file.xsd">
     <!-- StoppingPlaces -->
-    <busStop id="bs_0" lane="15e_1" startPos="44.35" endPos="54.35" lines="64"/>
-    <busStop id="bs_1" lane="24e_1" startPos="49.87" endPos="59.87" lines="64"/>
+    <busStop id="bs_0" lane="15e_1" startPos="44.35" endPos="54.35" lines="64">
+    <param key="lines" value="64"/>
+    </busStop>
+    <busStop id="bs_1" lane="24e_1" startPos="49.87" endPos="59.87" lines="64">
+    <param key="lines" value="64"/>
+    </busStop>
     <parkingArea id="pa10e" lane="10e_1" roadsideCapacity="2" length="5.00"/>
     <parkingArea id="pa10w" lane="10w_1" roadsideCapacity="2" length="5.00"/>
     <!-- Other additionals -->

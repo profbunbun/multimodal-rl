@@ -46,6 +46,7 @@ class StopFinder:
         bus_stops = self.con.busstop.getIDList()
         bus_locs = []
         for stop in bus_stops:
+            # print(stop)
             stop_loc = [stop, self.con.busstop.getLaneID(stop)]
             bus_locs.append(stop_loc)
         return bus_locs
@@ -121,4 +122,9 @@ class StopFinder:
         Returns:
             _type_: _description_
         """        
-        return self.con.busstop.getParameterWithKey(stop_id, "lines")
+        # traci.busstop.getParameterWithKey()
+        return self.con.busstop.getParameter(stop_id,"lines") # getParameterWithKey(stop_id,"busStop")
+
+    def get_line_route(self,con):
+        # traci.route.getEdges()?
+        return self.con.route.getEdges("bus_1")

@@ -7,6 +7,7 @@ from .plot_util import Utility
 from .net_parser import NetParser
 from .outmask import OutMask
 from .findStop import StopFinder
+from .routemask import RouteMask
 
 class Basic:
     """
@@ -21,6 +22,7 @@ class Basic:
         self.sumo_con = SUMOConnection(path + sumocon)
         self.out_mask = OutMask()
         self.finder = StopFinder()
+        self.route_mask = RouteMask()
         self.sumo = None
         self.path = path
         self.steps_per_episode = steps_per_episode
@@ -46,6 +48,8 @@ class Basic:
         self.edge_distance = None
 
         self.destination_edge = None
+
+        self.route_flag = 0
 
     def reset(self):
         """
@@ -81,18 +85,23 @@ class Basic:
         self.sumo.simulationStep()
         self.steps += 1
         vedge = self.vehicle.get_road()
+        
         pedge = self.person.get_road()
-        p_destoination = self.person.get_destination()
+        p_destination = self.person.get_destination()
+        
         choices = self.vehicle.get_out_dict()
         self.destination_edge = pedge
         vedge_loc, dest_edge_loc, outmask, self.edge_distance = self.out_mask.get_outmask(vedge, self.destination_edge, choices, self.edge_position)
 
+
         new_dist_check = 1
-        self.closest_end_stop = self.finder.find_end_stop( p_destoination, self.edge_position, self.sumo)
+        self.closest_end_stop = self.finder.find_end_stop(p_destination, self.edge_position, self.sumo)
         
         self.closest_begin_stop = self.finder.find_begin_stop(pedge,  self.edge_position, self.sumo)
 
-        print(self.finder.get_line(self.closest_begin_stop))
+        # line=self.finder.get_line(self.closest_begin_stop)
+        lineroute = self.finder.get_line_route(self.sumo)
+        routemask = self.route_mask.get_route_mask(vedge, choices,self.route_flag ,lineroute)
 
         self.state = []
         self.state.extend(vedge_loc)
@@ -100,6 +109,8 @@ class Basic:
         self.state.append(self.steps)
         self.state.append(new_dist_check)
         self.state.extend(outmask)
+        self.state.append(self.route_flag)
+        self.state.extend(routemask)
 
         self.old_edge = vedge
         return self.state, self.done, choices
@@ -174,7 +185,8 @@ class Basic:
                 reward += 0.1
 
             if vedge == self.destination_edge:
-                self.done = True
+                # self.done = True
+               
 
                 # self.vehicle.pickup()
                 # print(self.sumo_con.busstopCheck())
@@ -187,12 +199,19 @@ class Basic:
                 self.done = True
                 reward += -10
             self.accumulated_reward += reward
+
+
+            lineroute = self.finder.get_line_route(self.sumo)
+            routemask = self.route_mask.get_route_mask(vedge, choices,self.route_flag ,lineroute)
+            
             self.state = []
             self.state.extend(vedge_loc)
             self.state.extend(dest_edge_loc)
             self.state.append(self.steps)
             self.state.append(new_dist_check)
             self.state.extend(outmask)
+            self.state.append(self.route_flag)
+            self.state.extend(routemask)
 
             self.old_edge = vedge
             while not self.make_choice_flag and not self.done:

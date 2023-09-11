@@ -17,7 +17,7 @@ def main():
     """
     
     env = Basic(EXPERIMENT_PATH, SUMOCONFIG, STEPS)
-    agent = Agent(10, 4, EXPERIMENT_PATH)
+    agent = Agent(15, 4, EXPERIMENT_PATH)
 
     for episode in range(EPISODES + 1):
 

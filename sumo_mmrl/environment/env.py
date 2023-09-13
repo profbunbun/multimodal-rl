@@ -6,8 +6,9 @@ from .connect import SUMOConnection
 from .plot_util import Utility
 from .net_parser import NetParser
 from .outmask import OutMask
-from .findStop import StopFinder
+from .find_stop import StopFinder
 from .routemask import RouteMask
+
 
 class Basic:
     """
@@ -71,37 +72,51 @@ class Basic:
 
         vehicles = []
         people = []
-        
 
         for v_id in range(1):
-            vehicles.append(Vehicle(str(v_id), out_dict, index_dict, self.edge_position, self.sumo))
+            vehicles.append(
+                Vehicle(str(v_id), out_dict, index_dict,
+                        self.edge_position, self.sumo)
+            )
         self.vehicle = vehicles[0]
 
         for p_id in range(1):
-            people.append(Person(str(p_id), self.sumo, self.edge_position, index_dict))
+            people.append(Person(str(p_id), self.sumo,
+                                 self.edge_position, index_dict))
         self.person = people[0]
 
         self.vehicle.random_relocate()
         self.sumo.simulationStep()
         self.steps += 1
         vedge = self.vehicle.get_road()
-        
+
         pedge = self.person.get_road()
         p_destination = self.person.get_destination()
-        
+
         choices = self.vehicle.get_out_dict()
         self.destination_edge = pedge
-        vedge_loc, dest_edge_loc, outmask, self.edge_distance = self.out_mask.get_outmask(vedge, self.destination_edge, choices, self.edge_position)
-
+        (
+            vedge_loc,
+            dest_edge_loc,
+            outmask,
+            self.edge_distance,
+        ) = self.out_mask.get_outmask(
+            vedge, self.destination_edge, choices, self.edge_position
+        )
 
         new_dist_check = 1
-        self.closest_end_stop = self.finder.find_end_stop(p_destination, self.edge_position, self.sumo)
-        
-        self.closest_begin_stop = self.finder.find_begin_stop(pedge,  self.edge_position, self.sumo)
+        closest_end_stop = self.finder.find_end_stop(
+            p_destination, self.edge_position, self.sumo
+        )
 
+        closest_begin_stop = self.finder.find_begin_stop(
+            pedge, self.edge_position, self.sumo
+        )
         # line=self.finder.get_line(self.closest_begin_stop)
         lineroute = self.finder.get_line_route(self.sumo)
-        routemask = self.route_mask.get_route_mask(vedge, choices,self.route_flag ,lineroute)
+        routemask = self.route_mask.get_route_mask(
+            vedge, choices, self.route_flag, lineroute
+        )
 
         self.state = []
         self.state.extend(vedge_loc)
@@ -125,7 +140,6 @@ class Basic:
         self.steps += 1
 
         vedge = self.vehicle.get_road()
-
 
         if ":" in vedge or self.old_edge == vedge:
             self.make_choice_flag = False
@@ -154,7 +168,6 @@ class Basic:
         choices = self.vehicle.get_out_dict()
 
         if validator != -1:
-
             if self.make_choice_flag:
                 self.vehicle.set_destination(action)
                 reward += -0.1
@@ -165,19 +178,23 @@ class Basic:
             self.sumo.simulationStep()
             self.steps += 1
             vedge = self.vehicle.get_road()
-            pedge = self.person.get_road()
-            
+
             choices = self.vehicle.get_out_dict()
-            vedge_loc, dest_edge_loc, outmask, self.edge_distance = self.out_mask.get_outmask(vedge, self.destination_edge, choices, self.edge_position)
+            (
+                vedge_loc,
+                dest_edge_loc,
+                outmask,
+                self.edge_distance,
+            ) = self.out_mask.get_outmask(
+                vedge, self.destination_edge, choices, self.edge_position
+            )
 
             if old_dist > self.edge_distance:
                 new_dist_check = 1
             else:
                 new_dist_check = -1
-            
 
             vedge = self.vehicle.get_road()
-            pedge = self.person.get_road()
 
             self.done = False
 
@@ -186,7 +203,6 @@ class Basic:
 
             if vedge == self.destination_edge:
                 self.done = True
-               
 
                 # self.vehicle.pickup()
                 # print(self.sumo_con.busstopCheck())
@@ -200,10 +216,11 @@ class Basic:
                 reward += -10
             self.accumulated_reward += reward
 
-
             lineroute = self.finder.get_line_route(self.sumo)
-            routemask = self.route_mask.get_route_mask(vedge, choices,self.route_flag ,lineroute)
-            
+            routemask = self.route_mask.get_route_mask(
+                vedge, choices, self.route_flag, lineroute
+            )
+
             self.state = []
             self.state.extend(vedge_loc)
             self.state.extend(dest_edge_loc)
@@ -243,7 +260,6 @@ class Basic:
         elif mode == "no_gui":
             self.sumo = self.sumo_con.connect_no_gui()
 
- 
     def close(self, episode, epsilon):
         """
         close _summary_
@@ -268,7 +284,7 @@ class Basic:
             f" **** step: {self.steps}",
             f"*** Agent steps: {self.agent_step}",
         )
-        
+
         x = [i + 1 for i in range(len(self.rewards))]
         file_name = self.path + "/Graphs/sumo-agent.png"
 

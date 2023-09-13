@@ -185,7 +185,7 @@ class Basic:
                 reward += 0.1
 
             if vedge == self.destination_edge:
-                # self.done = True
+                self.done = True
                
 
                 # self.vehicle.pickup()

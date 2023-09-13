@@ -26,7 +26,7 @@
     "pylint.args": [
         "--extension-pkg-whitelist=pytorch.*,torch.*",
         "--generated-members=torch",
-        "--good-names=x,y,t,df"
+        "--good-names=x,y,t,df,x1,y1,x2,y2"
     ],
     "cSpell.words": [
         "SUMOCONFIG"

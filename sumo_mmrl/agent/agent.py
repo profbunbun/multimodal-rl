@@ -8,6 +8,7 @@ from torch import nn
 from torch import optim
 import numpy as np
 from . import dqn
+
 random.seed(0)
 
 
@@ -48,9 +49,8 @@ class Agent:
             self.policy_net = nn.DataParallel(self.policy_net)
         self.policy_net.to(device)
         self.loss = nn.HuberLoss()
-        self.optimizer = optim.Adam(
-                self.policy_net.parameters(), lr=self.learning_rate
-            )
+        self.optimizer = optim.Adam(self.policy_net.parameters(),
+                                    lr=self.learning_rate)
 
         if os.path.exists(path + PATH):
             self.policy_net = dqn.DQN(state_size, action_size)
@@ -58,7 +58,6 @@ class Agent:
             self.policy_net.eval()
         else:
             self.policy_net = dqn.DQN(state_size, action_size)
-
 
     def remember(self, state, action, reward, next_state, done):
         """
@@ -73,8 +72,7 @@ class Agent:
             next_state (_type_): _description_
             done (function): _description_
         """
-        self.memory.append((state,
-                            action, reward, next_state, done))
+        self.memory.append((state, action, reward, next_state, done))
 
     def explore(self, options):
         """
@@ -96,8 +94,8 @@ class Agent:
 
         act_values = self.policy_net(state)
 
-        action = (self.direction_choices
-                  [T.argmax(act_values)])
+        action = self.direction_choices[
+            T.argmax(act_values)]  # pylint: disable=E1101
 
         if action in options:
             return action, 1
@@ -142,13 +140,10 @@ class Agent:
         minibatch = random.sample(self.memory, batch_size)
 
         for state, action, reward, new_state, done in minibatch:
-
             if not done:
-                new_state_policy = (self.policy_net(new_state)
-                                    )
+                new_state_policy = self.policy_net(new_state)
 
-                adjusted_reward = (
-                    reward + self.gamma * max(new_state_policy))
+                adjusted_reward = reward + self.gamma * max(new_state_policy)
 
                 output = self.policy_net(state)
                 target = output.detach().clone()
@@ -158,6 +153,7 @@ class Agent:
                 output = self.policy_net(state)
                 target = output.detach().clone()
                 target[action] = reward
+
                 out = self.loss(output, target)
                 self.optimizer.zero_grad()
                 out.mean().backward()

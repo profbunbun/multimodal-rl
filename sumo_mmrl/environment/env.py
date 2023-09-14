@@ -8,6 +8,7 @@ from .net_parser import NetParser
 from .outmask import OutMask
 from .find_stop import StopFinder
 from .routemask import RouteMask
+from .stage1 import Stage1
 
 
 class Basic:
@@ -24,6 +25,8 @@ class Basic:
         self.out_mask = OutMask()
         self.finder = StopFinder()
         self.route_mask = RouteMask()
+        self.edge_position = self.parser.get_edge_pos_dic()
+        self.stage_1 = Stage1(self.edge_position)
         self.sumo = None
         self.path = path
         self.steps_per_episode = steps_per_episode
@@ -45,7 +48,6 @@ class Basic:
 
         self.p_index = 0
 
-        self.edge_position = self.parser.get_edge_pos_dic()
         self.edge_distance = None
 
         self.destination_edge = None
@@ -117,11 +119,11 @@ class Basic:
         routemask = self.route_mask.get_route_mask(
             vedge, choices, self.route_flag, lineroute
         )
-
+        print(self.sumo.simulation.getTime())
         self.state = []
         self.state.extend(vedge_loc)
         self.state.extend(dest_edge_loc)
-        self.state.append(self.steps)
+        self.state.append(self.sumo.simulation.getTime())
         self.state.append(new_dist_check)
         self.state.extend(outmask)
         self.state.append(self.route_flag)
@@ -220,11 +222,12 @@ class Basic:
             routemask = self.route_mask.get_route_mask(
                 vedge, choices, self.route_flag, lineroute
             )
+            print(self.sumo.simulation.getTime())
 
             self.state = []
             self.state.extend(vedge_loc)
             self.state.extend(dest_edge_loc)
-            self.state.append(self.steps)
+            self.state.append(self.sumo.simulation.getTime())
             self.state.append(new_dist_check)
             self.state.extend(outmask)
             self.state.append(self.route_flag)

@@ -26,7 +26,6 @@ class Stage1:
         self.done = False
         self.old_edge = None
         self.agent_step = 0
-        self.edge_distance = None
         self.edge_position_dic = edge_position_dic
         self.route_flag = 0
         self.state = []
@@ -59,7 +58,14 @@ class Stage1:
         Returns:
             _description_
         """
-        old_dist = self.edge_distance
+        vedge = vehicle.get_road()
+        pedge = person.get_road()
+        vedge_loc = self.edge_position_dic[vedge]
+        pedge_loc = self.edge_position_dic[pedge]
+        edge_distance = self.manhat_dist(
+            vedge_loc[0], vedge_loc[1], pedge_loc[0], pedge_loc[1]
+        )
+        old_dist = edge_distance
         reward = 0
         choices = vehicle.get_out_dict()
 
@@ -69,7 +75,7 @@ class Stage1:
                 reward += -0.1
                 self.agent_step += 1
                 self.make_choice_flag = False
-           
+
             vedge = vehicle.get_road()
             pedge = person.get_road()
             choices = vehicle.get_out_dict()
@@ -77,12 +83,12 @@ class Stage1:
                 vedge_loc,
                 dest_edge_loc,
                 outmask,
-                self.edge_distance,
+                edge_distance,
             ) = self.out_mask.get_outmask(
                 vedge, pedge, choices, self.edge_position_dic
             )
 
-            if old_dist > self.edge_distance:
+            if old_dist > edge_distance:
                 new_dist_check = 1
             else:
                 new_dist_check = -1
@@ -119,3 +125,20 @@ class Stage1:
         self.make_choice_flag = False
 
         return self.state, reward, self.done, choices
+
+    def manhat_dist(self, x1, y1, x2, y2):
+        """
+        manhat_dist _summary_
+
+        _extended_summary_
+
+        Args:
+            x1 (_type_): _description_
+            y1 (_type_): _description_
+            x2 (_type_): _description_
+            y2 (_type_): _description_
+
+        Returns:
+            _type_: _description_
+        """
+        return abs(x1 - x2) + abs(y1 - y2)

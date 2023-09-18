@@ -68,6 +68,7 @@ class Basic:
         self.accumulated_reward = 0
         self.done = False
         self.make_choice_flag = True
+        self.stage_1.agent_step = 0
 
         out_dict = self.parser.get_out_dic()
         index_dict = self.parser.get_edge_index()
@@ -89,7 +90,7 @@ class Basic:
 
         self.vehicle.random_relocate()
         self.sumo.simulationStep()
-        self.steps += 1
+        # self.steps += 1
         vedge = self.vehicle.get_road()
 
         pedge = self.person.get_road()
@@ -119,7 +120,7 @@ class Basic:
         routemask = self.route_mask.get_route_mask(
             vedge, choices, self.route_flag, lineroute
         )
-        print(self.sumo.simulation.getTime())
+        # print(self.sumo.simulation.getTime())
         self.state = []
         self.state.extend(vedge_loc)
         self.state.extend(dest_edge_loc)
@@ -132,26 +133,27 @@ class Basic:
         self.old_edge = vedge
         return self.state, self.done, choices
 
-    def nullstep(self):
-        """
-        nullstep _summary_
+    # def nullstep(self):
+    #     """
+    #     nullstep _summary_
 
-        _extended_summary_
-        """
-        self.sumo.simulationStep()
-        self.steps += 1
+    #     _extended_summary_
+    #     """
+        
+    #     self.sumo.simulationStep()
+    #     # self.steps += 1
 
-        vedge = self.vehicle.get_road()
+    #     vedge = self.vehicle.get_road()
 
-        if ":" in vedge or self.old_edge == vedge:
-            self.make_choice_flag = False
-        else:
-            self.make_choice_flag = True
+    #     if ":" in vedge or self.old_edge == vedge:
+    #         self.make_choice_flag = False
+    #     else:
+    #         self.make_choice_flag = True
 
-        if self.steps >= self.steps_per_episode:
-            self.done = True
+    #     if self.steps >= self.steps_per_episode:
+    #         self.done = True
 
-        self.old_edge = vedge
+    #     self.old_edge = vedge
 
     def step(self, action, validator):
         """
@@ -165,85 +167,97 @@ class Basic:
         Returns:
             _description_
         """
-        old_dist = self.edge_distance
-        reward = 0
-        choices = self.vehicle.get_out_dict()
+        # old_dist = self.edge_distance
+        # reward = 0
+        # choices = self.vehicle.get_out_dict()
+        
+        (self.state,
+         reward,
+         self.done,
+         choices) = self.stage_1.step(action,
+                                            validator,
+                                            self.vehicle,
+                                            self.person,
+                                            self.sumo)
+        self.agent_step = self.stage_1.agent_step
+        self.steps = int(self.sumo.simulation.getTime())
 
-        if validator != -1:
-            if self.make_choice_flag:
-                self.vehicle.set_destination(action)
-                reward += -0.1
-                self.accumulated_reward += reward
-                self.agent_step += 1
-                self.make_choice_flag = False
+        # if validator != -1:
+        #     if self.make_choice_flag:
+        #         self.vehicle.set_destination(action)
+        #         reward += -0.1
+        #         self.accumulated_reward += reward
+        #         self.agent_step += 1
+        #         self.make_choice_flag = False
 
-            self.sumo.simulationStep()
-            self.steps += 1
-            vedge = self.vehicle.get_road()
+        #     self.sumo.simulationStep()
+        #     self.steps += 1
+        #     vedge = self.vehicle.get_road()
 
-            choices = self.vehicle.get_out_dict()
-            (
-                vedge_loc,
-                dest_edge_loc,
-                outmask,
-                self.edge_distance,
-            ) = self.out_mask.get_outmask(
-                vedge, self.destination_edge, choices, self.edge_position
-            )
+        #     choices = self.vehicle.get_out_dict()
+        #     (
+        #         vedge_loc,
+        #         dest_edge_loc,
+        #         outmask,
+        #         self.edge_distance,
+        #     ) = self.out_mask.get_outmask(
+        #         vedge, self.destination_edge, choices, self.edge_position
+        #     )
 
-            if old_dist > self.edge_distance:
-                new_dist_check = 1
-            else:
-                new_dist_check = -1
+        #     if old_dist > self.edge_distance:
+        #         new_dist_check = 1
+        #     else:
+        #         new_dist_check = -1
 
-            vedge = self.vehicle.get_road()
+        #     vedge = self.vehicle.get_road()
 
-            self.done = False
+        #     self.done = False
 
-            if new_dist_check == 1:
-                reward += 0.1
+        #     if new_dist_check == 1:
+        #         reward += 0.1
 
-            if vedge == self.destination_edge:
-                self.done = True
+        #     if vedge == self.destination_edge:
+        #         self.done = True
 
-                # self.vehicle.pickup()
-                # print(self.sumo_con.busstopCheck())
-                # print("Pickup ", self.p_index)
-                reward += 45
-                # self.vehicle.set_destination(self.sumo_con.busstopCheck()[0])
+        #         # self.vehicle.pickup()
+        #         # print(self.sumo_con.busstopCheck())
+        #         # print("Pickup ", self.p_index)
+        #         reward += 45
+        #         # self.vehicle.set_destination(self.sumo_con.busstopCheck()[0])
 
-                self.accumulated_reward += reward
-            if self.steps >= self.steps_per_episode:
-                self.done = True
-                reward += -10
-            self.accumulated_reward += reward
+        #         self.accumulated_reward += reward
+        #     if self.steps >= self.steps_per_episode:
+        #         self.done = True
+        #         reward += -10
+        #     self.accumulated_reward += reward
 
-            lineroute = self.finder.get_line_route(self.sumo)
-            routemask = self.route_mask.get_route_mask(
-                vedge, choices, self.route_flag, lineroute
-            )
-            print(self.sumo.simulation.getTime())
+        #     lineroute = self.finder.get_line_route(self.sumo)
+        #     routemask = self.route_mask.get_route_mask(
+        #         vedge, choices, self.route_flag, lineroute
+        #     )
+        #     print(self.sumo.simulation.getTime())
 
-            self.state = []
-            self.state.extend(vedge_loc)
-            self.state.extend(dest_edge_loc)
-            self.state.append(self.sumo.simulation.getTime())
-            self.state.append(new_dist_check)
-            self.state.extend(outmask)
-            self.state.append(self.route_flag)
-            self.state.extend(routemask)
+        #     self.state = []
+        #     self.state.extend(vedge_loc)
+        #     self.state.extend(dest_edge_loc)
+        #     self.state.append(self.sumo.simulation.getTime())
+        #     self.state.append(new_dist_check)
+        #     self.state.extend(outmask)
+        #     self.state.append(self.route_flag)
+        #     self.state.extend(routemask)
 
-            self.old_edge = vedge
-            while not self.make_choice_flag and not self.done:
-                self.nullstep()
-            return self.state, reward, self.done, choices
-        else:
-            self.done = True
-            reward += -15
-            self.accumulated_reward += reward
-            self.make_choice_flag = False
+        #     self.old_edge = vedge
+        #     while not self.make_choice_flag and not self.done:
+        #         self.nullstep()
+        #     return self.state, reward, self.done, choices
+        # else:
+        #     self.done = True
+        #     reward += -15
+        self.accumulated_reward += reward
+        self.steps = int(self.sumo.simulation.getTime())
+        #     self.make_choice_flag = False
 
-            return self.state, reward, self.done, choices
+        return self.state, reward, self.done, choices
 
     def render(self, mode):
         """
@@ -269,6 +283,7 @@ class Basic:
 
         _extended_summary_
         """
+        
         self.sumo.close()
         acc_r = self.accumulated_reward
         acc_r = float(self.accumulated_reward)
@@ -285,7 +300,7 @@ class Basic:
             f" Average Reward  {avg_reward:.3}",
             f"epsilon {epsilon:.5}",
             f" **** step: {self.steps}",
-            f"*** Agent steps: {self.agent_step}",
+            f"*** Agent steps: {self.stage_1.agent_step}",
         )
 
         x = [i + 1 for i in range(len(self.rewards))]

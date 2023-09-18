@@ -2,7 +2,7 @@
 from sumo_mmrl import Basic, Agent
 
 # import time
-EPISODES = 10_000
+EPISODES = 5_000
 STEPS = 1000
 BATCH_SIZE = 64
 MIN_MEMORY = 1000

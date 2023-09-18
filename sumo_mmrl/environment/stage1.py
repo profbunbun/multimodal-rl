@@ -106,6 +106,7 @@ class Stage1:
 
             route_flag = 0
             routemask = [0, 0, 0, 0]
+            self.state = []
 
             self.state.extend(vedge_loc)
             self.state.extend(dest_edge_loc)

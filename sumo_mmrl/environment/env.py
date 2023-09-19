@@ -9,7 +9,7 @@ from .outmask import OutMask
 from .find_stop import StopFinder
 from .routemask import RouteMask
 from .stage1 import Stage1
-
+from .stage_reset import StageReset
 
 class Basic:
     """
@@ -25,6 +25,9 @@ class Basic:
         self.out_mask = OutMask()
         self.finder = StopFinder()
         self.route_mask = RouteMask()
+        self.stage_reset = StageReset(self.parser.get_out_dic(),
+                                      self.parser.get_edge_index())
+
         self.edge_position = self.parser.get_edge_pos_dic()
         self.stage_1 = Stage1(self.edge_position)
         self.sumo = None
@@ -133,28 +136,6 @@ class Basic:
         self.old_edge = vedge
         return self.state, self.done, choices
 
-    # def nullstep(self):
-    #     """
-    #     nullstep _summary_
-
-    #     _extended_summary_
-    #     """
-        
-    #     self.sumo.simulationStep()
-    #     # self.steps += 1
-
-    #     vedge = self.vehicle.get_road()
-
-    #     if ":" in vedge or self.old_edge == vedge:
-    #         self.make_choice_flag = False
-    #     else:
-    #         self.make_choice_flag = True
-
-    #     if self.steps >= self.steps_per_episode:
-    #         self.done = True
-
-    #     self.old_edge = vedge
-
     def step(self, action, validator):
         """
         step _summary_
@@ -167,96 +148,25 @@ class Basic:
         Returns:
             _description_
         """
-        # old_dist = self.edge_distance
-        # reward = 0
-        # choices = self.vehicle.get_out_dict()
         
         (self.state,
          reward,
          self.done,
          choices) = self.stage_1.step(action,
-                                            validator,
-                                            self.vehicle,
-                                            self.person,
-                                            self.sumo)
+                                      validator,
+                                      self.vehicle,
+                                      self.person,
+                                      self.sumo)
+         
         self.agent_step = self.stage_1.agent_step
+        
         self.steps = int(self.sumo.simulation.getTime())
 
-        # if validator != -1:
-        #     if self.make_choice_flag:
-        #         self.vehicle.set_destination(action)
-        #         reward += -0.1
-        #         self.accumulated_reward += reward
-        #         self.agent_step += 1
-        #         self.make_choice_flag = False
+        if self.steps >= self.steps_per_episode:
+            reward += -45
+            self.done = True
 
-        #     self.sumo.simulationStep()
-        #     self.steps += 1
-        #     vedge = self.vehicle.get_road()
-
-        #     choices = self.vehicle.get_out_dict()
-        #     (
-        #         vedge_loc,
-        #         dest_edge_loc,
-        #         outmask,
-        #         self.edge_distance,
-        #     ) = self.out_mask.get_outmask(
-        #         vedge, self.destination_edge, choices, self.edge_position
-        #     )
-
-        #     if old_dist > self.edge_distance:
-        #         new_dist_check = 1
-        #     else:
-        #         new_dist_check = -1
-
-        #     vedge = self.vehicle.get_road()
-
-        #     self.done = False
-
-        #     if new_dist_check == 1:
-        #         reward += 0.1
-
-        #     if vedge == self.destination_edge:
-        #         self.done = True
-
-        #         # self.vehicle.pickup()
-        #         # print(self.sumo_con.busstopCheck())
-        #         # print("Pickup ", self.p_index)
-        #         reward += 45
-        #         # self.vehicle.set_destination(self.sumo_con.busstopCheck()[0])
-
-        #         self.accumulated_reward += reward
-        #     if self.steps >= self.steps_per_episode:
-        #         self.done = True
-        #         reward += -10
-        #     self.accumulated_reward += reward
-
-        #     lineroute = self.finder.get_line_route(self.sumo)
-        #     routemask = self.route_mask.get_route_mask(
-        #         vedge, choices, self.route_flag, lineroute
-        #     )
-        #     print(self.sumo.simulation.getTime())
-
-        #     self.state = []
-        #     self.state.extend(vedge_loc)
-        #     self.state.extend(dest_edge_loc)
-        #     self.state.append(self.sumo.simulation.getTime())
-        #     self.state.append(new_dist_check)
-        #     self.state.extend(outmask)
-        #     self.state.append(self.route_flag)
-        #     self.state.extend(routemask)
-
-        #     self.old_edge = vedge
-        #     while not self.make_choice_flag and not self.done:
-        #         self.nullstep()
-        #     return self.state, reward, self.done, choices
-        # else:
-        #     self.done = True
-        #     reward += -15
         self.accumulated_reward += reward
-        self.steps = int(self.sumo.simulation.getTime())
-        #     self.make_choice_flag = False
-
         return self.state, reward, self.done, choices
 
     def render(self, mode):

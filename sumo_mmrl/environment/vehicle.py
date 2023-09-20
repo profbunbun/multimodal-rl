@@ -16,7 +16,7 @@ class Vehicle:
     _extended_summary_
     """
 
-    def __init__(self, vehicle_id, out_dict, index_dict, edge_position, sumo) -> None:
+    def __init__(self, vehicle_id, out_dict, index_dict, edge_position, sumo, i) -> None:
         """
         __init__ _summary_
 
@@ -35,6 +35,12 @@ class Vehicle:
         self.sumo = sumo
         self.edge_position = edge_position
         self.sumo.vehicle.add(self.vehicle_id, "r_0", typeID="taxi")
+        self.sumo.vehicle.setParameter(vehicle_id,
+                                       "type",
+                                       str(random.randint(1, i)))
+
+
+        
         # self.random_relocate()
         self.current_lane = self.sumo.vehicle.getLaneID(self.vehicle_id)
         self.cur_loc = self.current_lane.partition("_")[0]

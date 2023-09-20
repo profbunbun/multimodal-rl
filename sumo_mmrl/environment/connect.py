@@ -4,6 +4,7 @@ import os
 import traci
 import libsumo
 
+
 if "SUMO_HOME" in os.environ:
     tools = os.path.join(os.environ["SUMO_HOME"], "tools")
     sys.path.append(tools)
@@ -17,7 +18,9 @@ class SUMOConnection:
     Returns:
         _type_: _description_
     """
-
+    # traci.person.setParameter("0","fart","poop")
+    # traci.person.getParameter("fart")
+    # traci.person.getParameterWithKey("fart")
     CONNECTION_LABEL = 0
 
     def __init__(self, sumocfg: str) -> None:

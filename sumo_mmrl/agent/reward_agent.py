@@ -20,7 +20,7 @@ RIGHT = "r"
 PATH = "/Models/model.pt"
 
 
-class Agent:
+class Ragent:
 
     """
      _summary_
@@ -31,7 +31,7 @@ class Agent:
     def __init__(self, state_size, action_size, path) -> None:
         self.path = path
         self.direction_choices = [STRAIGHT, TURN_AROUND, RIGHT, LEFT]
-        self.memory = deque(maxlen=50000)
+        self.memory = deque(maxlen=20000)
         self.gamma = 0.95
         self.epsilon = 0.997
         self.epsilon_max = 0.9997

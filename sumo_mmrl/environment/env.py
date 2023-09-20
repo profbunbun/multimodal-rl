@@ -11,6 +11,7 @@ from .routemask import RouteMask
 from .stage1 import Stage1
 from .stage_reset import StageReset
 
+
 class Basic:
     """
      _summary_
@@ -18,7 +19,7 @@ class Basic:
     _extended_summary_
     """
 
-    def __init__(self, path, sumocon, steps_per_episode) -> None:
+    def __init__(self, path, sumocon, steps_per_episode, num_of_vehic, types) -> None:
         self.util = Utility()
         self.parser = NetParser(path + sumocon)
         self.sumo_con = SUMOConnection(path + sumocon)
@@ -57,6 +58,9 @@ class Basic:
 
         self.route_flag = 0
 
+        self.num_of_vehicles = num_of_vehic
+        self.types = types
+        
     def reset(self):
         """
         reset _summary_
@@ -78,51 +82,37 @@ class Basic:
 
         vehicles = []
         people = []
-
-        for v_id in range(1):
+        
+        for v_id in range(self.num_of_vehicles):
             vehicles.append(
                 Vehicle(str(v_id), out_dict, index_dict,
-                        self.edge_position, self.sumo)
+                        self.edge_position, self.sumo, self.types)
             )
         self.vehicle = vehicles[0]
 
         for p_id in range(1):
             people.append(Person(str(p_id), self.sumo,
-                                 self.edge_position, index_dict))
-        self.person = people[0]
+                                 self.edge_position, index_dict, self.types))
 
+        self.person = people[0]
         self.vehicle.random_relocate()
         self.sumo.simulationStep()
-        # self.steps += 1
         vedge = self.vehicle.get_road()
-
         pedge = self.person.get_road()
-        p_destination = self.person.get_destination()
-
         choices = self.vehicle.get_out_dict()
         self.destination_edge = pedge
-        (
-            vedge_loc,
-            dest_edge_loc,
-            outmask,
-            self.edge_distance,
-        ) = self.out_mask.get_outmask(
-            vedge, self.destination_edge, choices, self.edge_position
-        )
+        
+        (vedge_loc,
+         dest_edge_loc,
+         outmask,
+         self.edge_distance
+         ) = self.out_mask.get_outmask(vedge,
+                                       self.destination_edge,
+                                       choices,
+                                       self.edge_position)
 
         new_dist_check = 1
-        closest_end_stop = self.finder.find_end_stop(
-            p_destination, self.edge_position, self.sumo
-        )
-
-        closest_begin_stop = self.finder.find_begin_stop(
-            pedge, self.edge_position, self.sumo
-        )
-        # line=self.finder.get_line(self.closest_begin_stop)
-        lineroute = self.finder.get_line_route(self.sumo)
-        routemask = self.route_mask.get_route_mask(
-            vedge, choices, self.route_flag, lineroute
-        )
+        
         # print(self.sumo.simulation.getTime())
         self.state = []
         self.state.extend(vedge_loc)
@@ -130,9 +120,7 @@ class Basic:
         self.state.append(self.sumo.simulation.getTime())
         self.state.append(new_dist_check)
         self.state.extend(outmask)
-        self.state.append(self.route_flag)
-        self.state.extend(routemask)
-
+        
         self.old_edge = vedge
         return self.state, self.done, choices
 

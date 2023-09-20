@@ -57,7 +57,9 @@ class Stage1:
 
         Returns:
             _description_
+            
         """
+        reward = -0.1
         vedge = vehicle.get_road()
         pedge = person.get_road()
         vedge_loc = self.edge_position_dic[vedge]
@@ -66,14 +68,13 @@ class Stage1:
             vedge_loc[0], vedge_loc[1], pedge_loc[0], pedge_loc[1]
         )
         old_dist = edge_distance
-        reward = 0
         choices = vehicle.get_out_dict()
 
         if validator != -1:
             if self.make_choice_flag:
-                vehicle.set_destination(action)
-                reward += -0.2
                 self.agent_step += 1
+                vehicle.set_destination(action)
+                reward += -0.1
                 self.make_choice_flag = False
 
             vedge = vehicle.get_road()
@@ -88,33 +89,27 @@ class Stage1:
                 vedge, pedge, choices, self.edge_position_dic
             )
 
-            if old_dist > edge_distance:
+            if old_dist >= edge_distance:
                 new_dist_check = 1
+                reward += 0.1
             else:
                 new_dist_check = -1
+                reward -= 0.1
 
             vedge = vehicle.get_road()
 
             self.done = False
 
-            if new_dist_check == 1:
-                reward += 0.1
-
             if vedge == pedge:
                 self.done = True
                 reward += 50
 
-            route_flag = 0
-            routemask = [0, 0, 0, 0]
             self.state = []
-
             self.state.extend(vedge_loc)
             self.state.extend(dest_edge_loc)
             self.state.append(sumo.simulation.getTime())
             self.state.append(new_dist_check)
             self.state.extend(outmask)
-            self.state.append(route_flag)
-            self.state.extend(routemask)
 
             self.old_edge = vedge
             while not self.make_choice_flag and not self.done:
@@ -124,6 +119,7 @@ class Stage1:
         self.done = True
         reward += -15
         self.make_choice_flag = False
+        self.agent_step += 1
 
         return self.state, reward, self.done, choices
 

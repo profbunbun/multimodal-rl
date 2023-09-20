@@ -2,7 +2,6 @@
 import random
 
 
-
 class Person:
     """
      _summary_
@@ -10,7 +9,7 @@ class Person:
     _extended_summary_
     """
 
-    def __init__(self, person_id, sumo, edge_position, index_dict) -> None:
+    def __init__(self, person_id, sumo, edge_position, index_dict, types) -> None:
         self.person_id = person_id
         self.sumo = sumo
         self.index_dict = index_dict
@@ -21,7 +20,15 @@ class Person:
         # self.sumo.person.add(person_id, "1w", 20)
         # self.sumo.person.appendDrivingStage(person_id, "24e", lines="taxi")
         self.sumo.person.add(person_id, self.new_lane, 20)
-        self.sumo.person.appendDrivingStage(person_id, self.destination, lines="taxi")
+        
+        self.sumo.person.appendDrivingStage(person_id,
+                                            self.destination,
+                                            lines="taxi")
+        
+        self.sumo.person.setParameter(person_id,
+                                      "type",
+                                      str(random.randint(1, types)))
+        # print(self.sumo.person.getParameter(person_id, "type"))
 
     def location(self):
         """

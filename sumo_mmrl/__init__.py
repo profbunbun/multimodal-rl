@@ -4,4 +4,6 @@ from .environment.env import Basic
 from .environment.connect import SUMOConnection
 from .environment.plot_util import Utility
 from .agent.dqn import DQN
-from .agent.agent import Agent
+from .agent.driver_agent import Dagent
+from .agent.reward_agent import Ragent
+from .agent.vehicle_agent import Vagent

@@ -2,7 +2,7 @@
 
 from .environment.env import Basic
 from .environment.connect import SUMOConnection
-from .environment.plot_util import Utility
+from .environment.plot_util import Plotter
 from .agent.dqn import DQN
 from .agent.driver_agent import Dagent
 from .agent.reward_agent import Ragent

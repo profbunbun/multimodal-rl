@@ -1,37 +1,9 @@
-"""
-    _summary_
-
-_extended_summary_
-
-:return: _description_
-:rtype: _type_
-"""
-
 
 class OutMask:
-    """
-    OutMask _summary_
 
-    _extended_summary_
-    """
 
     def get_outmask(self, vedge, pedge, choices, edge_position):
-        """
-        get_outmask _summary_
 
-        _extended_summary_
-
-        :param vedge: _description_
-        :type vedge: _type_
-        :param pedge: _description_
-        :type pedge: _type_
-        :param choices: _description_
-        :type choices: _type_
-        :param edge_position: _description_
-        :type edge_position: _type_
-        :return: _description_
-        :rtype: _type_
-        """
 
         vedge_loc = edge_position[vedge]
         pedge_loc = edge_position[pedge]
@@ -72,18 +44,5 @@ class OutMask:
         return vedge_loc, pedge_loc, outmask, edge_distance
 
     def manhat_dist(self, x1, y1, x2, y2):
-        """
-        manhat_dist _summary_
-
-        _extended_summary_
-
-        Args:
-            x1 (_type_): _description_
-            y1 (_type_): _description_
-            x2 (_type_): _description_
-            y2 (_type_): _description_
-
-        Returns:
-            _type_: _description_
-        """        
+      
         return abs(x1 - x2) + abs(y1 - y2)

@@ -1,6 +1,5 @@
 from .outmask import OutMask
 from .find_stop import StopFinder
-from .routemask import RouteMask
 
 
 class Stage1:
@@ -8,7 +7,6 @@ class Stage1:
     def __init__(self, edge_position_dic):
         self.out_mask = OutMask()
         self.finder = StopFinder()
-        self.route_mask = RouteMask()
         self.make_choice_flag = False
         self.done = False
         self.old_edge = None
@@ -94,5 +92,4 @@ class Stage1:
         return self.state, reward, self.done, choices
 
     def manhat_dist(self, x1, y1, x2, y2):
-        
         return abs(x1 - x2) + abs(y1 - y2)

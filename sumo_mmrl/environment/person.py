@@ -3,11 +3,6 @@ import random
 
 
 class Person:
-    """
-     _summary_
-
-    _extended_summary_
-    """
 
     def __init__(self, person_id, sumo, edge_position, index_dict, types) -> None:
         self.person_id = person_id
@@ -31,44 +26,21 @@ class Person:
         # print(self.sumo.person.getParameter(person_id, "type"))
 
     def location(self):
-        """
-        location _summary_
-
-        _extended_summary_
-
-        Returns:
-            _description_
-        """
+   
         ppos = self.sumo.person.getPosition(self.person_id)
 
         return ppos
 
     def get_destination(self):
-        """
-        set_destination _summary_
-
-        _extended_summary_
-        """
-
+   
         return self.destination
 
 
     def remove_person(self):
-        """
-        remove_person _summary_
 
-        _extended_summary_
-        """    
         self.sumo.person.remove(self.person_id)
         return
                 
     def get_road(self):
-        '''
-        get_road _summary_
-
-        _extended_summary_
-
-        :return: _description_
-        :rtype: _type_
-        '''        
+     
         return self.sumo.person.getRoadID(self.person_id)

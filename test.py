@@ -15,8 +15,7 @@ def main():
 
     env = Basic(EXPERIMENT_PATH, SUMOCONFIG, STEPS, NUM_VEHIC, TYPES)
     dagent = Dagent(10, 4, EXPERIMENT_PATH)
-    # vagent = Vagent(10, NUM_VEHIC, EXPERIMENT_PATH)
-
+    
     for episode in range(EPISODES + 1):
         accumulated_reward = 0
 
@@ -24,11 +23,10 @@ def main():
             env.render("gui")
         else:
             env.render("libsumo")
-        # env.render("libsumo")
 
         state, done, legal_actions = env.reset()
 
-        while not env.done:
+        while  env.done != True:
             (action, action_index, validator) = dagent.choose_action(
                 state, legal_actions
             )

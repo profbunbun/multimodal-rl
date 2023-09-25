@@ -8,6 +8,7 @@ from .net_parser import NetParser
 from .outmask import OutMask
 from .find_stop import StopFinder
 from .stage1 import Stage1
+from .stage2 import Stage2
 from .stage_reset import StageReset
 from .ride_select import RideSelect
 
@@ -19,15 +20,14 @@ class Basic:
         self.parser = NetParser(path + sumocon)
         self.sumo_con = SUMOConnection(path + sumocon)
         self.out_mask = OutMask()
-        self.finder = StopFinder()
         self.ruff_rider = RideSelect()
         self.edge_position = self.parser.get_edge_pos_dic()
-        
         self.stage_reset = StageReset(self.parser.get_out_dic(),
                                       self.parser.get_edge_index(),
                                       self.edge_position)
 
         self.stage_1 = Stage1(self.edge_position)
+        self.stage_2 = Stage2(self.edge_position)
         self.sumo = None
         self.path = path
         self.steps_per_episode = steps_per_episode
@@ -84,11 +84,9 @@ class Basic:
                                  self.edge_position, index_dict, p_id + 1))
 
         self.person = people[0]
-        ##
-
         vid_selected = self.ruff_rider.select(vehicles, self.person)
         self.vehicle = vehicles[int(vid_selected)]
-        ### put vehicle selection here
+
         self.vehicle.random_relocate()
         
         (self.state,
@@ -113,6 +111,17 @@ class Basic:
                                       self.sumo)
          
         self.agent_step = self.stage_1.agent_step
+        if self.done == "Pickup":
+            (self.state,
+             reward,
+             self.done,
+             choices) = self.stage_2.step(action,
+                                          validator,
+                                          self.vehicle,
+                                          self.person,
+                                          self.sumo)
+         
+            self.agent_step += self.stage_2.agent_step
         
         self.steps = int(self.sumo.simulation.getTime())
 

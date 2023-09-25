@@ -2,7 +2,7 @@ from .outmask import OutMask
 from .find_stop import StopFinder
 
 
-class Stage1:
+class Stage2:
  
     def __init__(self, edge_position_dic):
         self.out_mask = OutMask()
@@ -28,6 +28,7 @@ class Stage1:
         self.old_edge = vedge
 
     def step(self, action, validator, vehicle, person, sumo):
+        print("part 2")
 
         reward = -0.1
         vedge = vehicle.get_road()
@@ -71,8 +72,7 @@ class Stage1:
             self.done = False
 
             if vedge == pedge:
-                self.done = "Pickup"
-                print(self.done)
+                self.done = True
                 reward += 50
 
             self.state = []

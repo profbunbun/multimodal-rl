@@ -3,7 +3,7 @@ import numpy as np
 from .vehicle import Vehicle
 from .person import Person
 from .connect import SUMOConnection
-from .plot_util import Utility
+from .plot_util import Plotter
 from .net_parser import NetParser
 from .outmask import OutMask
 from .find_stop import StopFinder
@@ -20,7 +20,7 @@ class Basic:
     """
 
     def __init__(self, path, sumocon, steps_per_episode, num_of_vehic, types) -> None:
-        self.util = Utility()
+        self.plotter = Plotter()
         self.parser = NetParser(path + sumocon)
         self.sumo_con = SUMOConnection(path + sumocon)
         self.out_mask = OutMask()
@@ -204,7 +204,7 @@ class Basic:
         x = [i + 1 for i in range(len(self.rewards))]
         file_name = self.path + "/Graphs/sumo-agent.png"
 
-        self.util.plot_learning(x, self.rewards, self.epsilon_hist, file_name)
+        self.plotter.plot_learning(x, self.rewards, self.epsilon_hist, file_name)
         # print(len(self.best_route))
         # print(self.best_route)
         # print(len(self.route))

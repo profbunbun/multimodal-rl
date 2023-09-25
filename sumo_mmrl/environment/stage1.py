@@ -1,23 +1,10 @@
-"""
-     _summary_
-
-    _extended_summary_
-
-    Returns:
-        _type_: _description_
-    """
 from .outmask import OutMask
 from .find_stop import StopFinder
 from .routemask import RouteMask
 
 
 class Stage1:
-    """
-     _summary_
-
-    _extended_summary_
-    """
-
+ 
     def __init__(self, edge_position_dic):
         self.out_mask = OutMask()
         self.finder = StopFinder()
@@ -31,11 +18,7 @@ class Stage1:
         self.state = []
 
     def nullstep(self, vehicle, sumo):
-        """
-        nullstep _summary_
 
-        _extended_summary_
-        """
         sumo.simulationStep()
         vedge = vehicle.get_road()
 
@@ -47,18 +30,7 @@ class Stage1:
         self.old_edge = vedge
 
     def step(self, action, validator, vehicle, person, sumo):
-        """
-        step _summary_
 
-        _extended_summary_
-
-        Keyword Arguments:
-            action -- _description_ (default: {None})
-
-        Returns:
-            _description_
-            
-        """
         reward = -0.1
         vedge = vehicle.get_road()
         pedge = person.get_road()
@@ -110,7 +82,6 @@ class Stage1:
             self.state.append(sumo.simulation.getTime())
             self.state.append(new_dist_check)
             self.state.extend(outmask)
-
             self.old_edge = vedge
             while not self.make_choice_flag and not self.done:
                 self.nullstep(vehicle, sumo)
@@ -120,22 +91,8 @@ class Stage1:
         reward += -15
         self.make_choice_flag = False
         self.agent_step += 1
-
         return self.state, reward, self.done, choices
 
     def manhat_dist(self, x1, y1, x2, y2):
-        """
-        manhat_dist _summary_
-
-        _extended_summary_
-
-        Args:
-            x1 (_type_): _description_
-            y1 (_type_): _description_
-            x2 (_type_): _description_
-            y2 (_type_): _description_
-
-        Returns:
-            _type_: _description_
-        """
+        
         return abs(x1 - x2) + abs(y1 - y2)

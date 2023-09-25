@@ -1,5 +1,5 @@
 """ import stuff """
-from sumo_mmrl import Basic, Dagent, Vagent
+from sumo_mmrl import Basic, Dagent
 
 # import time
 EPISODES = 50_000

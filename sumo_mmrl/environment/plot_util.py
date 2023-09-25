@@ -1,35 +1,14 @@
-"""module stuff """
 import matplotlib.pyplot as plt
 import numpy as np
 
 
-
-class Utility:
-    """
-     _summary_
-
-    _extended_summary_
-    """
+class Plotter:
 
     def __init__(self) -> None:
         pass
 
-
     def plot_learning(self, x, scores, epsilons, filename):
-        """
-        plotLearning _summary_
 
-        _extended_summary_
-
-        Arguments:
-            x -- _description_
-            scores -- _description_
-            epsilons -- _description_
-            filename -- _description_
-
-        Keyword Arguments:
-            lines -- _description_ (default: {None})
-        """
         number_of_scores = len(scores)
         running_avg = np.empty(number_of_scores)
         # avg_score = np.mean(scores)

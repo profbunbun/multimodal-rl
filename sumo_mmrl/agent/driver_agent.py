@@ -22,12 +22,6 @@ PATH = "/Models/model.pt"
 
 class Dagent:
 
-    """
-     _summary_
-
-    _extended_summary_
-    """
-
     def __init__(self, state_size, action_size, path) -> None:
         self.path = path
         self.direction_choices = [STRAIGHT, TURN_AROUND, RIGHT, LEFT]
@@ -60,35 +54,17 @@ class Dagent:
             self.policy_net = dqn.DQN(state_size, action_size)
 
     def remember(self, state, action, reward, next_state, done):
-        """
-        remember _summary_
-        _extended_summary_
-        Args:
-            state (_type_): _description_
-            action (_type_): _description_
-            reward (_type_): _description_
-            next_state (_type_): _description_
-            done (function): _description_
-        """
+
         self.memory.append((state, action, reward, next_state, done))
 
     def explore(self, options):
-        """
-        explore _summary_
-        _extended_summary_
 
-        """
         action = np.random.choice(self.direction_choices)
         if action in options:
             return action, 1
         return action, -1
 
     def exploit(self, state, options):
-        """
-        exploit _summary_
-
-        _extended_summary_
-        """
 
         act_values = self.policy_net(state)
 
@@ -100,18 +76,7 @@ class Dagent:
         return action, -1
 
     def choose_action(self, state, options):
-        """
-        act _summary_
 
-        _extended_summary_
-
-        Args:
-            state (_type_): _description_
-            options (_type_): _description_
-
-        Returns:
-            _type_: _description_
-        """
         available_choices = list(options.keys())
         rando = np.random.rand()
 
@@ -126,14 +91,6 @@ class Dagent:
         return action, self.direction_choices.index(action), valid
 
     def replay(self, batch_size):
-        """
-        replay _summary_
-
-        _extended_summary_
-
-        Args:
-            batch_size (_type_): _description_
-        """
 
         minibatch = random.sample(self.memory, batch_size)
 
@@ -159,26 +116,14 @@ class Dagent:
                 T.save(self.policy_net.state_dict(), self.path + PATH)
 
     def epsilon_decay(self):
-        """
-        epsilon_decay _summary_
 
-        _extended_summary_
-        """
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.decay
         else:
             self.epsilon = self.epsilon_min
 
     def epsilon_decay_2(self, episode, episodes):
-        """
-        epsilon_decay_2 _summary_
 
-        _extended_summary_
-
-        Args:
-            episode (_type_): _description_
-            episodes (_type_): _description_
-        """
         if self.epsilon > self.epsilon_min:
             if episode > (5 / 10 * episodes):
                 self.epsilon *= self.decay
@@ -191,27 +136,15 @@ class Dagent:
             self.epsilon = self.epsilon_min
 
     def epsilon_decay_3(self, episode, episodes):
-        """
-        epsilon_decay_3 _summary_
 
-        _extended_summary_
-
-        Args:
-            episode (_type_): _description_
-            episodes (_type_): _description_
-        """
         if self.epsilon > self.epsilon_min:
             episode += 1
 
             self.epsilon = (1 / 9.5) * math.log(((-episode) + episodes + 1))
-            # self.epsilon_max-1.01**(10*episode-((4.4/10 * episodes)*10))
+            
         else:
             self.epsilon = self.epsilon_min
 
     def epsilon_null(self):
-        """
-        epsilon_null _summary_
 
-        _extended_summary_
-        """
         self.epsilon = self.epsilon_min

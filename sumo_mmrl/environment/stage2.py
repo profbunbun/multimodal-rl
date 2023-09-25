@@ -33,10 +33,14 @@ class Stage2:
         reward = -0.1
         vedge = vehicle.get_road()
         pedge = person.get_road()
+        dest = self.finder.find_begin_stop(pedge,
+                                               self.edge_position_dic,
+                                               sumo)
+                
         vedge_loc = self.edge_position_dic[vedge]
-        pedge_loc = self.edge_position_dic[pedge]
+        dest_loc = self.edge_position_dic[dest]
         edge_distance = self.manhat_dist(
-            vedge_loc[0], vedge_loc[1], pedge_loc[0], pedge_loc[1]
+            vedge_loc[0], vedge_loc[1], dest_loc[0], dest_loc[1]
         )
         old_dist = edge_distance
         choices = vehicle.get_out_dict()
@@ -50,6 +54,9 @@ class Stage2:
 
             vedge = vehicle.get_road()
             pedge = person.get_road()
+            dest = self.finder.find_begin_stop(pedge,
+                                               self.edge_position_dic,
+                                               sumo)
             choices = vehicle.get_out_dict()
             (
                 vedge_loc,
@@ -57,7 +64,7 @@ class Stage2:
                 outmask,
                 edge_distance,
             ) = self.out_mask.get_outmask(
-                vedge, pedge, choices, self.edge_position_dic
+                vedge, dest , choices, self.edge_position_dic
             )
 
             if old_dist >= edge_distance:
@@ -71,9 +78,9 @@ class Stage2:
 
             self.done = False
 
-            if vedge == pedge:
+            if vedge == dest :
                 self.done = True
-                reward += 50
+                reward += 100
 
             self.state = []
             self.state.extend(vedge_loc)

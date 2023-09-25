@@ -101,14 +101,15 @@ class Basic:
 
     def step(self, action, validator):
      
-        (self.state,
-         reward,
-         self.done,
-         choices) = self.stage_1.step(action,
-                                      validator,
-                                      self.vehicle,
-                                      self.person,
-                                      self.sumo)
+        if self.done is False:
+            (self.state,
+             reward,
+             self.done,
+             choices) = self.stage_1.step(action,
+                                          validator,
+                                          self.vehicle,
+                                          self.person,
+                                          self.sumo)
          
         self.agent_step = self.stage_1.agent_step
         if self.done == "Pickup":

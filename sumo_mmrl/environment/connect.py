@@ -18,6 +18,7 @@ class SUMOConnection:
     Returns:
         _type_: _description_
     """
+    
     # traci.person.setParameter("0","fart","poop")
     # traci.person.getParameter("fart")
     # traci.person.getParameterWithKey("fart")

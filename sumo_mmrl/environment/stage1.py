@@ -72,6 +72,18 @@ class Stage1:
 
             if vedge == pedge:
                 self.done = "Pickup"
+                new_dest = self.finder.find_begin_stop(vedge,
+                                                       self.edge_position_dic,
+                                                       sumo)
+                (
+                    vedge_loc,
+                    dest_edge_loc,
+                    outmask,
+                    edge_distance,
+                    ) = self.out_mask.get_outmask(
+                        vedge, new_dest, choices, self.edge_position_dic
+                        )
+                
                 print(self.done)
                 reward += 50
 

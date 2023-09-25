@@ -44,7 +44,9 @@ class StopFinder:
         self.con = con
 
         dic = self.get_stop_dists(begin_loc, loc_dic)
-        return max(dic, key=dic.get)
+        stop = max(dic, key=dic.get)
+        lane = con.busstop.getLaneID(stop)
+        return lane
 
     def get_line(self, stop_id):
   

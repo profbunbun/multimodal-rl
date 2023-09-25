@@ -21,8 +21,9 @@ class Vehicle:
         self.edge_position = edge_position
         self.sumo.vehicle.add(self.vehicle_id, "r_0", typeID="taxi")
         self.sumo.vehicle.setParameter(vehicle_id,
-                                       "type",
-                                       str(random.randint(1, i)))
+                                       "type", str(i)
+                                    #    str(random.randint(1, i))
+                                       )
 
 
         
@@ -70,3 +71,8 @@ class Vehicle:
         new_lane=random.choice(list(self.index_dict.keys()))      
         self.sumo.vehicle.changeTarget(self.vehicle_id,edgeID=new_lane)
         self.sumo.vehicle.moveTo(self.vehicle_id,new_lane+"_0",5)
+
+    def get_type(self):
+        return self.sumo.vehicle.getParameter(self.vehicle_id,
+                                              "type")
+        

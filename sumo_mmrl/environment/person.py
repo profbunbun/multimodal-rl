@@ -1,4 +1,3 @@
-"""module stuff"""
 import random
 
 
@@ -10,10 +9,8 @@ class Person:
         self.index_dict = index_dict
         self.edge_position = edge_position
         self.new_lane = random.choice(list(self.index_dict.keys()))
-        # new_lane = list(self.index_dict.keys())[0]
         self.destination = random.choice(list(self.index_dict.keys()))
-        # self.sumo.person.add(person_id, "1w", 20)
-        # self.sumo.person.appendDrivingStage(person_id, "24e", lines="taxi")
+
         self.sumo.person.add(person_id, self.new_lane, 20)
         
         self.sumo.person.appendDrivingStage(person_id,
@@ -21,9 +18,9 @@ class Person:
                                             lines="taxi")
         
         self.sumo.person.setParameter(person_id,
-                                      "type",
-                                      str(random.randint(1, types)))
-        # print(self.sumo.person.getParameter(person_id, "type"))
+                                      "type", str(types))
+                                    #   str(random.randint(1, types))
+                                    
 
     def location(self):
    
@@ -44,3 +41,7 @@ class Person:
     def get_road(self):
      
         return self.sumo.person.getRoadID(self.person_id)
+
+    def get_type(self):
+        return self.sumo.person.getParameter(self.person_id,
+                                              "type")

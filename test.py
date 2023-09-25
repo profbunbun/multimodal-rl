@@ -7,7 +7,7 @@ BATCH_SIZE = 64
 MIN_MEMORY = 1000
 EXPERIMENT_PATH = "Experiments/3x3"
 SUMOCONFIG = "/Nets/3x3b.sumocfg"
-NUM_VEHIC = 1
+NUM_VEHIC = 2
 TYPES = 2
 
 

@@ -9,6 +9,7 @@ from .outmask import OutMask
 from .find_stop import StopFinder
 from .stage1 import Stage1
 from .stage_reset import StageReset
+from .ride_select import RideSelect
 
 
 class Basic:
@@ -19,6 +20,7 @@ class Basic:
         self.sumo_con = SUMOConnection(path + sumocon)
         self.out_mask = OutMask()
         self.finder = StopFinder()
+        self.ruff_rider = RideSelect()
         self.edge_position = self.parser.get_edge_pos_dic()
         
         self.stage_reset = StageReset(self.parser.get_out_dic(),
@@ -74,15 +76,18 @@ class Basic:
         for v_id in range(self.num_of_vehicles):
             vehicles.append(
                 Vehicle(str(v_id), out_dict, index_dict,
-                        self.edge_position, self.sumo, self.types)
+                        self.edge_position, self.sumo, v_id + 1)
             )
-        self.vehicle = vehicles[0]
-
+        
         for p_id in range(1):
             people.append(Person(str(p_id), self.sumo,
-                                 self.edge_position, index_dict, self.types))
+                                 self.edge_position, index_dict, p_id + 1))
 
         self.person = people[0]
+        ##
+
+        vid_selected = self.ruff_rider.select(vehicles, self.person)
+        self.vehicle = vehicles[int(vid_selected)]
         ### put vehicle selection here
         self.vehicle.random_relocate()
         

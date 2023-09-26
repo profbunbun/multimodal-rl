@@ -36,7 +36,7 @@ class Basic:
         self.accumulated_reward = 0
         self.state = []
 
-        self.done = False
+        self.stage = "reset"
         self.make_choice_flag = False
 
         self.old_edge = None
@@ -63,7 +63,7 @@ class Basic:
         self.steps = 0
         self.agent_step = 0
         self.accumulated_reward = 0
-        self.done = False
+        self.stage = "reset"
         self.make_choice_flag = True
         self.stage_1.agent_step = 0
 
@@ -90,32 +90,33 @@ class Basic:
         self.vehicle.random_relocate()
         
         (self.state,
-         self.done,
+         self.stage,
          choices,
          vedge,
          self.edge_distance) = self.stage_reset.step(self.vehicle,
                                                      self.person,
                                                      self.sumo)
         self.old_edge = vedge
-        return self.state, self.done, choices
+        return self.state, self.stage, choices
 
     def step(self, action, validator):
      
-        if self.done is False:
+        if self.stage == "pickup":
             (self.state,
              reward,
-             self.done,
+             self.stage,
              choices) = self.stage_1.step(action,
                                           validator,
                                           self.vehicle,
                                           self.person,
                                           self.sumo)
          
-        self.agent_step = self.stage_1.agent_step
-        if self.done == "Pickup":
+            self.agent_step = self.stage_1.agent_step
+            self.accumulated_reward += reward
+        if self.stage == "dropoff":
             (self.state,
              reward,
-             self.done,
+             self.stage,
              choices) = self.stage_2.step(action,
                                           validator,
                                           self.vehicle,
@@ -123,15 +124,16 @@ class Basic:
                                           self.sumo)
          
             self.agent_step += self.stage_2.agent_step
+            self.accumulated_reward += reward
         
         self.steps = int(self.sumo.simulation.getTime())
 
         if self.steps >= self.steps_per_episode:
-            reward += -45
-            self.done = True
+            reward += -145
+            self.stage = "done"
 
-        self.accumulated_reward += reward
-        return self.state, reward, self.done, choices
+        # self.accumulated_reward += reward
+        return self.state, reward, self.stage, choices
 
     def render(self, mode):
      
@@ -145,6 +147,7 @@ class Basic:
             self.sumo = self.sumo_con.connect_no_gui()
 
     def close(self, episode, epsilon):
+        steps = self.sumo.simulation.getTime()
   
         self.sumo.close()
         acc_r = self.accumulated_reward
@@ -161,7 +164,7 @@ class Basic:
             f"Reward: {acc_r:.3}",
             f" Average Reward  {avg_reward:.3}",
             f"epsilon {epsilon:.5}",
-            f" **** step: {self.steps}",
+            f" **** step: {steps }",
             f"*** Agent steps: {self.stage_1.agent_step}",
         )
 

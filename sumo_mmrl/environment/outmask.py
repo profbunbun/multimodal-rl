@@ -4,9 +4,8 @@ class OutMask:
 
     def get_outmask(self, vedge, pedge, choices, edge_position):
 
-
         vedge_loc = edge_position[vedge]
-        pedge_loc = edge_position[pedge]
+        pedge_loc = edge_position[pedge.partition("_")[0]]
         edge_distance = self.manhat_dist(
             vedge_loc[0], vedge_loc[1], pedge_loc[0], pedge_loc[1]
         )

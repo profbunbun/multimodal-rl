@@ -8,7 +8,7 @@ class Stage1:
         self.out_mask = OutMask()
         self.finder = StopFinder()
         self.make_choice_flag = False
-        self.done = False
+        self.stage = "pickup"
         self.old_edge = None
         self.agent_step = 0
         self.edge_position_dic = edge_position_dic
@@ -28,6 +28,7 @@ class Stage1:
         self.old_edge = vedge
 
     def step(self, action, validator, vehicle, person, sumo):
+        self.make_choice_flag = True
 
         reward = -0.1
         vedge = vehicle.get_road()
@@ -40,10 +41,12 @@ class Stage1:
         old_dist = edge_distance
         choices = vehicle.get_out_dict()
 
-        if validator != -1:
+        if validator == 1:
             if self.make_choice_flag:
-                self.agent_step += 1
+                # self.agent_step += 1
+                
                 vehicle.set_destination(action)
+                sumo.simulationStep()
                 reward += -0.1
                 self.make_choice_flag = False
 
@@ -61,20 +64,22 @@ class Stage1:
 
             if old_dist >= edge_distance:
                 new_dist_check = 1
-                reward += 0.1
+                reward += 0.2
             else:
                 new_dist_check = -1
                 reward -= 0.1
 
             vedge = vehicle.get_road()
 
-            self.done = False
+            self.stage = "pickup"
 
             if vedge == pedge:
-                self.done = "Pickup"
+                self.stage = "dropoff"
+                print(sumo.simulation.getTime())
+                self.make_choice_flag = True
                 new_dest = self.finder.find_begin_stop(vedge,
                                                        self.edge_position_dic,
-                                                       sumo)
+                                                       sumo).partition("_")[0]
                 (
                     vedge_loc,
                     dest_edge_loc,
@@ -84,7 +89,7 @@ class Stage1:
                         vedge, new_dest, choices, self.edge_position_dic
                         )
                 
-                print(self.done)
+                print(self.stage)
                 reward += 50
 
             self.state = []
@@ -94,15 +99,18 @@ class Stage1:
             self.state.append(new_dist_check)
             self.state.extend(outmask)
             self.old_edge = vedge
-            while not self.make_choice_flag and not self.done:
+            while not self.make_choice_flag and not self.stage:
                 self.nullstep(vehicle, sumo)
-            return self.state, reward, self.done, choices
+            self.agent_step += 1
+            choices = vehicle.get_out_dict()
+            return self.state, reward, self.stage, choices
 
-        self.done = True
+        self.stage = "done"
         reward += -15
         self.make_choice_flag = False
         self.agent_step += 1
-        return self.state, reward, self.done, choices
+        choices = vehicle.get_out_dict()
+        return self.state, reward, self.stage, choices
 
     def manhat_dist(self, x1, y1, x2, y2):
         return abs(x1 - x2) + abs(y1 - y2)

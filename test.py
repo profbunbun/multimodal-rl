@@ -1,7 +1,7 @@
 from sumo_mmrl import Basic, Dagent
 
 # import time
-EPISODES = 1_000
+EPISODES = 10_000
 STEPS = 1000
 BATCH_SIZE = 64
 MIN_MEMORY = 1000
@@ -19,23 +19,24 @@ def main():
     for episode in range(EPISODES + 1):
         accumulated_reward = 0
 
-        if (episode) % 100 == 0:
-            env.render("gui")
-        else:
-            env.render("libsumo")
+        # if (episode) % 100 == 0:
+        #     env.render("gui")
+        # else:
+        #     env.render("libsumo")
+        env.render("libsumo")
 
-        state, done, legal_actions = env.reset()
+        state, stage, legal_actions = env.reset()
 
-        while  env.done != True:
+        while stage != "done":
             (action, action_index, validator) = dagent.choose_action(
                 state, legal_actions
             )
 
-            (next_state, new_reward, done, legal_actions) = env.step(action,
-                                                                     validator)
+            (next_state, new_reward, stage, legal_actions) = env.step(action,
+                                                                      validator)
 
             accumulated_reward += new_reward
-            dagent.remember(state, action_index, new_reward, next_state, done)
+            dagent.remember(state, action_index, new_reward, next_state, stage)
             state = next_state
             
             if len(dagent.memory) > BATCH_SIZE:

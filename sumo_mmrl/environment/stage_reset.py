@@ -11,7 +11,7 @@ class StageReset:
         self.steps = 0
         self.agent_step = 0
         self.accumulated_reward = 0
-        self.done = False
+        self.stage = "reset"
         self.make_choice_flag = True
         
     
@@ -43,7 +43,8 @@ class StageReset:
         state.append(sumo.simulation.getTime())
         state.append(new_dist_check)
         state.extend(outmask)
-        return state, self.done, choices, vedge, edge_distance
+        self.stage = "pickup"
+        return state, self.stage, choices, vedge, edge_distance
 
     def manhat_dist(self, x1, y1, x2, y2):
         return abs(x1 - x2) + abs(y1 - y2)

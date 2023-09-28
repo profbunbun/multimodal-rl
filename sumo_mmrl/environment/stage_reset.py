@@ -16,10 +16,7 @@ class StageReset:
         
     
     def step(self, vehicle, person, sumo):
-        
-        vehicle = vehicle
-        person = person
-        sumo = sumo
+    
         sumo.simulationStep()
         
         vedge = vehicle.get_road()
@@ -41,6 +38,7 @@ class StageReset:
         state.extend(vedge_loc)
         state.extend(dest_edge_loc)
         state.append(sumo.simulation.getTime())
+        state.append(edge_distance)
         state.append(new_dist_check)
         state.extend(outmask)
         self.stage = "pickup"

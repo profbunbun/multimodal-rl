@@ -14,7 +14,7 @@ TYPES = 2
 def main():
 
     env = Basic(EXPERIMENT_PATH, SUMOCONFIG, STEPS, NUM_VEHIC, TYPES)
-    dagent = Dagent(10, 4, EXPERIMENT_PATH)
+    dagent = Dagent(11, 4, EXPERIMENT_PATH)
     
     for episode in range(EPISODES + 1):
         accumulated_reward = 0
@@ -32,8 +32,10 @@ def main():
                 state, legal_actions
             )
 
-            (next_state, new_reward, stage, legal_actions) = env.step(action,
-                                                                      validator)
+            (next_state,
+             new_reward,
+             stage,
+             legal_actions) = env.step(action, validator)
 
             accumulated_reward += new_reward
             dagent.remember(state, action_index, new_reward, next_state, stage)

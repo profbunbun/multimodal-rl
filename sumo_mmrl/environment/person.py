@@ -8,8 +8,10 @@ class Person:
         self.sumo = sumo
         self.index_dict = index_dict
         self.edge_position = edge_position
-        self.new_lane = random.choice(list(self.index_dict.keys()))
-        self.destination = random.choice(list(self.index_dict.keys()))
+        self.new_lane = list(self.index_dict.keys())[5]
+        # self.new_lane = random.choice(list(self.index_dict.keys()))
+        self.destination = list(self.index_dict.keys())[10]
+        # self.destination = random.choice(list(self.index_dict.keys()))
 
         self.sumo.person.add(person_id, self.new_lane, 20)
         

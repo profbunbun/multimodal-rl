@@ -49,18 +49,14 @@ class Stage1:
         )
         if self.old_dist >= edge_distance:
             new_dist_check = 1
-            reward += 0.2
+            reward += -0.1
         else:
             new_dist_check = -1
-            reward -= 0.1
         
-        self.old_dist = edge_distance
         choices = vehicle.get_out_dict()
 
         if validator == 1:
             if self.make_choice_flag:
-                # self.agent_step += 1
-                
                 vehicle.set_destination(action)
                 sumo.simulationStep()
                 reward += -0.1
@@ -78,19 +74,15 @@ class Stage1:
                 vedge, pedge, choices, self.edge_position_dic
             )
 
-            if self.old_dist >= edge_distance:
-                new_dist_check = 1
-                reward += 0.2
-            else:
-                new_dist_check = -1
-                reward -= 0.1
-
             vedge = vehicle.get_road()
 
             self.stage = "pickup"
+            if new_dist_check == 1:
+                reward += 0.1
 
             if vedge == pedge:
-                self.stage = "dropoff"
+                self.stage = "done"
+                # self.stage = "dropoff"
                 
                 self.make_choice_flag = True
                 new_dest = self.finder.find_begin_stop(vedge,
@@ -104,19 +96,19 @@ class Stage1:
                     ) = self.out_mask.get_outmask(
                         vedge, new_dest, choices, self.edge_position_dic
                         )
-                
-                # print(self.stage)
-                reward += 50
+
+                reward += 90
 
             self.state = []
             self.state.extend(vedge_loc)
             self.state.extend(dest_edge_loc)
-            self.state.append(sumo.simulation.getTime())
-            self.state.append(edge_distance)
+            self.state.append(self.agent_step)
+            # self.state.append(sumo.simulation.getTime())
+            # self.state.append(edge_distance)
             self.state.append(new_dist_check)
             self.state.extend(outmask)
             self.old_edge = vedge
-            
+            self.old_dist = edge_distance
             self.agent_step += 1
             choices = vehicle.get_out_dict()
             return self.state, reward, self.stage, choices

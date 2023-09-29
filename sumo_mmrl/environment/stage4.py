@@ -50,11 +50,12 @@ class Stage2:
         )
         if self.old_dist >= edge_distance:
             new_dist_check = 1
-            reward += .1
-
+            reward += 0.1
         else:
             new_dist_check = -1
-
+            reward -= 0.2
+        
+        self.old_dist = edge_distance
         choices = vehicle.get_out_dict()
 
         if validator == 1:
@@ -77,6 +78,12 @@ class Stage2:
                 edge_distance,
             ) = self.out_mask.get_outmask(vedge, dest, choices, self.edge_position_dic)
 
+            # if self.old_dist >= edge_distance:
+            #     new_dist_check = 1
+            #     reward += 0.2
+            # else:
+            #     new_dist_check = -1
+            #     reward -= 0.1
 
             vedge = vehicle.get_road()
 
@@ -85,7 +92,8 @@ class Stage2:
 
             if vedge == dest:
                 self.stage = "done"
-                reward += 5
+                # print("drop off")
+                reward += 100
 
             self.state = []
             self.state.extend(vedge_loc)
@@ -95,13 +103,13 @@ class Stage2:
             self.state.append(new_dist_check)
             self.state.extend(outmask)
             self.old_edge = vedge
-            self.old_dist = edge_distance
+
             self.agent_step += 1
             choices = vehicle.get_out_dict()
             return self.state, reward, self.stage, choices
 
         self.stage = "done"
-        reward += -5
+        reward += -15
         self.make_choice_flag = False
         self.agent_step += 1
         choices = vehicle.get_out_dict()

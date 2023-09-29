@@ -3,7 +3,6 @@
 import numpy as np
 from .connect import SUMOConnection
 from .net_parser import NetParser
-from .outmask import OutMask
 from .person import Person
 from .plot_util import Plotter
 from .ride_select import RideSelect
@@ -14,18 +13,17 @@ from .vehicle import Vehicle
 
 
 class Basic:
-    def __init__(self, path, sumocon, steps_per_episode, num_of_vehic, types) -> None:
+    def __init__(self, path, sumocon, steps_per_episode, num_of_vehic, types, test) -> None:
         self.plotter = Plotter()  # for plotting results
 
         self.parser = NetParser(  # This is all the stuff to create the
             path + sumocon  # different map network dictionaries
         )
-
+        self.test=test
         self.sumo_con = SUMOConnection(
             path + sumocon
         )  # This handlies our communication
         # with the TRACI simulation interface (??REDUNDANT?)
-        self.out_mask = OutMask()  # create a mask setting illegal choices to -1
         self.ruff_rider = RideSelect()  # This is object to select the vehicle
         self.edge_position = (
             self.parser.get_edge_pos_dic()
@@ -119,7 +117,7 @@ class Basic:
         vid_selected = self.ruff_rider.select(vehicles, self.person)
         self.vehicle = vehicles[int(vid_selected)]
 
-        self.vehicle.random_relocate()
+        # self.vehicle.random_relocate()
 
         (
             self.state,
@@ -136,21 +134,20 @@ class Basic:
             (self.state, reward, self.stage, choices) = self.stage_1.step(
                 action, validator, self.vehicle, self.person, self.sumo
             )
-
             self.agent_step = self.stage_1.agent_step
             self.accumulated_reward += reward
+ 
         if self.stage == "dropoff":
             (self.state, reward, self.stage, choices) = self.stage_2.step(
                 action, validator, self.vehicle, self.person, self.sumo
             )
-
             self.agent_step += self.stage_2.agent_step
             self.accumulated_reward += reward
 
         self.steps = int(self.sumo.simulation.getTime())
 
         if self.steps >= self.steps_per_episode:
-            reward += -145
+            self.accumulated_reward += -15
             self.stage = "done"
 
         return self.state, self.accumulated_reward, self.stage, choices
@@ -180,7 +177,7 @@ class Basic:
         print(
             "EP: ",
             episode,
-            f"Reward: {acc_r:.3}",
+            f"Reward: {acc_r:.5}",
             f" Average Reward  {avg_reward:.3}",
             f"epsilon {epsilon:.5}",
             f" **** step: {steps }",
@@ -188,6 +185,6 @@ class Basic:
         )
 
         x = [i + 1 for i in range(len(self.rewards))]
-        file_name = self.path + "/Graphs/sumo-agent.png"
+        file_name = self.path + "/Graphs/sumo-agent"+self.test+".png"
 
         self.plotter.plot_learning(x, self.rewards, self.epsilon_hist, file_name)

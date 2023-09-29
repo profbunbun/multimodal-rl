@@ -8,6 +8,7 @@ from torch import nn
 from torch import optim
 import numpy as np
 from . import dqn
+import math
 
 random.seed(0)
 
@@ -25,33 +26,38 @@ class Dagent:
     def __init__(self, state_size, action_size, path) -> None:
         self.path = path
         self.direction_choices = [STRAIGHT, TURN_AROUND, RIGHT, LEFT]
-        self.memory = deque(maxlen=10000)
+        self.memory = deque(maxlen=50_000)
         self.gamma = 0.95
-        self.epsilon = 0.997
-        self.epsilon_max = 0.9997
-        self.decay = 0.99
+        self.epsilon = 0.9
+        self.epsilon_max = 0.9
+        self.decay = 0.9999
         self.epsilon_min = 0.01
         self.learning_rate = 0.001
+        
         device = T.device(  # pylint: disable=E1101
             "cuda" if T.cuda.is_available() else "cpu"
         )
+        # device = T.device(dev)
         # device = T.device("cuda:1")
-        self.policy_net = dqn.DQN(state_size, action_size)
+        # self.policy_net = dqn.DQN(state_size, action_size)
         # net = dqn.DQN(state_size, action_size)
-        if T.cuda.device_count() > 1:
-            # print("Let's use", T.cuda.device_count(), "GPUs!")
-            self.policy_net = nn.DataParallel(self.policy_net)
-        self.policy_net.to(device)
-        self.loss = nn.HuberLoss()
-        self.optimizer = optim.Adam(self.policy_net.parameters(),
-                                    lr=self.learning_rate)
+        # if T.cuda.device_count() > 1:
+        # #     # print("Let's use", T.cuda.device_count(), "GPUs!")
+        #     self.policy_net = nn.DataParallel(self.policy_net)
+        # self.policy_net.to(device)
+        
 
         if os.path.exists(path + PATH):
             self.policy_net = dqn.DQN(state_size, action_size)
             self.policy_net.load_state_dict(T.load(path + PATH))
             self.policy_net.eval()
+            # self.policy_net = nn.DataParallel(self.policy_net)
+            self.policy_net.to(device)
         else:
             self.policy_net = dqn.DQN(state_size, action_size)
+            # self.policy_net = nn.DataParallel(self.policy_net)
+            self.policy_net.to(device)
+        
 
     def remember(self, state, action, reward, next_state, done):
 
@@ -91,29 +97,39 @@ class Dagent:
         return action, self.direction_choices.index(action), valid
 
     def replay(self, batch_size):
+        
+        loss_fn = nn.HuberLoss()
+        optimizer = optim.RMSprop(self.policy_net.parameters(),
+                                  lr=self.learning_rate,)
+        # optimizer = optim.Adam(self.policy_net.parameters(),
+        #                        lr=self.learning_rate,)
 
         minibatch = random.sample(self.memory, batch_size)
 
         for state, action, reward, new_state, done in minibatch:
-            if not done:
+            
+            if done != "done":
                 new_state_policy = self.policy_net(new_state)
-
                 adjusted_reward = reward + self.gamma * max(new_state_policy)
-
-                output = self.policy_net(state)
-                target = output.detach().clone()
+                # output = self.policy_net(state)
+                output = new_state_policy
+                target = output.clone()
                 target[action] = adjusted_reward
+                T.save(self.policy_net.state_dict(), self.path + PATH)
 
             else:
                 output = self.policy_net(state)
-                target = output.detach().clone()
+                target = output
                 target[action] = reward
 
-                out = self.loss(output, target)
-                self.optimizer.zero_grad()
-                out.mean().backward()
-                self.optimizer.step()
-                T.save(self.policy_net.state_dict(), self.path + PATH)
+            optimizer.zero_grad()
+            loss = loss_fn(output, target)
+            loss.backward()
+            optimizer.step()
+            # print(self.policy_net.state_dict())
+            # net_state = self.policy_net.parameters()
+            net_state = self.policy_net.state_dict()
+            # T.save(net_state, self.path + PATH)
 
     def epsilon_decay(self):
 
@@ -147,4 +163,13 @@ class Dagent:
 
     def epsilon_null(self):
 
-        self.epsilon = self.epsilon_min
+        self.epsilon = 0.0
+
+    def eps_linear(self, episode):
+        
+        if self.epsilon >= self.epsilon_min:
+            
+            self.epsilon = 1 / math.log(episode + 0.00001)
+            
+        else:
+            self.epsilon = self.epsilon_min

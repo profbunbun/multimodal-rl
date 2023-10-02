@@ -16,6 +16,7 @@ class StageReset:
         
     
     def step(self, vehicle, person, sumo):
+        
     
         sumo.simulationStep()
         

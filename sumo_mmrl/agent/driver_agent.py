@@ -28,11 +28,11 @@ class Dagent:
         self.direction_choices = [STRAIGHT, TURN_AROUND, RIGHT, LEFT]
         self.memory = deque(maxlen=50_000)
         self.gamma = 0.95
-        self.epsilon = 0.9
+        self.epsilon = 0.997
         self.epsilon_max = 0.9
         self.decay = 0.9999
         self.epsilon_min = 0.01
-        self.learning_rate = 0.001
+        self.learning_rate = 0.0001
         
         device = T.device(  # pylint: disable=E1101
             "cuda" if T.cuda.is_available() else "cpu"
@@ -45,7 +45,6 @@ class Dagent:
         # #     # print("Let's use", T.cuda.device_count(), "GPUs!")
         #     self.policy_net = nn.DataParallel(self.policy_net)
         # self.policy_net.to(device)
-        
 
         if os.path.exists(path + PATH):
             self.policy_net = dqn.DQN(state_size, action_size)
@@ -58,7 +57,6 @@ class Dagent:
             # self.policy_net = nn.DataParallel(self.policy_net)
             self.policy_net.to(device)
         
-
     def remember(self, state, action, reward, next_state, done):
 
         self.memory.append((state, action, reward, next_state, done))
@@ -99,42 +97,44 @@ class Dagent:
     def replay(self, batch_size):
         
         loss_fn = nn.HuberLoss()
-        optimizer = optim.RMSprop(self.policy_net.parameters(),
-                                  lr=self.learning_rate,)
-        # optimizer = optim.Adam(self.policy_net.parameters(),
-        #                        lr=self.learning_rate,)
+        # optimizer = optim.RMSprop(self.policy_net.parameters(),
+        #                           lr=self.learning_rate,)
+        optimizer = optim.Adam(self.policy_net.parameters(),
+                               lr=self.learning_rate,)
 
         minibatch = random.sample(self.memory, batch_size)
 
-        for state, action, reward, new_state, done in minibatch:
+        for state, action, reward, new_state, stage in minibatch:
             
-            if done != "done":
+            if stage != "done":
                 new_state_policy = self.policy_net(new_state)
                 adjusted_reward = reward + self.gamma * max(new_state_policy)
-                # output = self.policy_net(state)
-                output = new_state_policy
+                output = self.policy_net(state)
+                # output = new_state_policy
                 target = output.clone()
                 target[action] = adjusted_reward
-                T.save(self.policy_net.state_dict(), self.path + PATH)
-
+                
             else:
                 output = self.policy_net(state)
-                target = output
+                target = output.clone()
                 target[action] = reward
 
-            optimizer.zero_grad()
             loss = loss_fn(output, target)
             loss.backward()
             optimizer.step()
+            optimizer.zero_grad()
             # print(self.policy_net.state_dict())
             # net_state = self.policy_net.parameters()
-            net_state = self.policy_net.state_dict()
+            # net_state = self.policy_net.state_dict()
             # T.save(net_state, self.path + PATH)
+
+    def save(self):
+        T.save(self.policy_net.state_dict(), self.path + PATH)
 
     def epsilon_decay(self):
 
         if self.epsilon > self.epsilon_min:
-            self.epsilon *= self.decay
+            self.epsilon = self.epsilon * self.decay
         else:
             self.epsilon = self.epsilon_min
 

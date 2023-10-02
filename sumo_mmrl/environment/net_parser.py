@@ -106,3 +106,11 @@ class NetParser:
             else:
                 length_dict[current_edge_id] = current_edge.getLength()
         return length_dict
+
+    def get_route_edges(self):
+        edge_ids = []
+        for route in sumolib.xml.parse_fast("Experiments/3x3/Nets/3x3_2.rou.xml", 'route', ['id','edges']):
+            if 'bus' in route.id:
+                edge_ids = route.edges.split()
+        # print (edge_ids)
+        return edge_ids

@@ -1,13 +1,13 @@
 from .outmask import OutMask
-from .find_stop import StopFinder
+from .bus_stop import StopFinder
 
 
-class Stage2:
+class Stage4:
     def __init__(self, edge_position_dic):
         self.out_mask = OutMask()
         self.finder = StopFinder()
         self.make_choice_flag = False
-        self.stage = "dropoff"
+        self.stage = "final"
         self.old_edge = None
         self.agent_step = 0
         self.edge_position_dic = edge_position_dic
@@ -36,9 +36,7 @@ class Stage2:
         reward = 0
         vedge = vehicle.get_road()
         pedge = person.get_road()
-        dest = self.finder.find_begin_stop(
-            pedge, self.edge_position_dic, sumo
-        ).partition("_")[0]
+        dest = person.destination
         
         while not self.make_choice_flag and self.stage != "done":
             self.nullstep(vehicle, dest,  sumo)
@@ -50,10 +48,11 @@ class Stage2:
         )
         if self.old_dist >= edge_distance:
             new_dist_check = 1
-            reward += 0.1
+            reward += 1
         else:
             new_dist_check = -1
-            reward -= 0.2
+            reward += -1
+         
         
         self.old_dist = edge_distance
         choices = vehicle.get_out_dict()
@@ -63,12 +62,10 @@ class Stage2:
                 # self.agent_step += 1
                 vehicle.set_destination(action)
                 sumo.simulationStep()
-                reward += -0.1
+                reward += -1
                 self.make_choice_flag = False
 
             vedge = vehicle.get_road()  # repeat
-            pedge = person.get_road()  # repeat
-            dest = self.finder.find_begin_stop(pedge, self.edge_position_dic, sumo)
             choices = vehicle.get_out_dict()
             
             (
@@ -87,10 +84,11 @@ class Stage2:
 
             vedge = vehicle.get_road()
 
-            self.stage = "dropoff"
+            self.stage = "final"
             dest = dest.partition("_")[0]
 
             if vedge == dest:
+                print(self.stage+' ',)
                 self.stage = "done"
                 # print("drop off")
                 reward += 100
@@ -98,8 +96,9 @@ class Stage2:
             self.state = []
             self.state.extend(vedge_loc)
             self.state.extend(dest_edge_loc)
-            self.state.append(sumo.simulation.getTime())
-            self.state.append(edge_distance)
+            self.state.append(self.agent_step)
+            # self.state.append(sumo.simulation.getTime())
+            # self.state.append(edge_distance)
             self.state.append(new_dist_check)
             self.state.extend(outmask)
             self.old_edge = vedge

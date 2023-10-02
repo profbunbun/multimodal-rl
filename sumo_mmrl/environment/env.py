@@ -8,6 +8,8 @@ from .plot_util import Plotter
 from .ride_select import RideSelect
 from .stage1 import Stage1
 from .stage2 import Stage2
+from .stage3 import Stage3
+from .stage4 import Stage4
 from .stage_reset import StageReset
 from .vehicle import Vehicle
 
@@ -19,6 +21,7 @@ class Basic:
         self.parser = NetParser(  # This is all the stuff to create the
             path + sumocon  # different map network dictionaries
         )
+        
         self.test=test
         self.sumo_con = SUMOConnection(
             path + sumocon
@@ -38,6 +41,13 @@ class Basic:
             self.edge_position
         )  # this stage does to pic the person up
         self.stage_2 = Stage2(
+            self.edge_position
+        )  # this stage drops them of at the bus stop
+        self.stage_3 = Stage3(
+            self.edge_position,
+            self.parser.get_route_edges()
+        )  # this stage drops them of at the bus stop
+        self.stage_4 = Stage4(
             self.edge_position
         )  # this stage drops them of at the bus stop
         self.sumo = None  # this becomes the sumo conection used after GUI or command line is decided
@@ -76,6 +86,7 @@ class Basic:
 
         self.types = types  # types of passangers
         # and vehicles to pair for a trip
+        self.parser.get_route_edges()
 
     def reset(self):
         self.steps = 0
@@ -144,6 +155,20 @@ class Basic:
             self.agent_step += self.stage_2.agent_step
             self.accumulated_reward += reward
 
+        if self.stage == "onbus":
+            (self.state, reward, self.stage, choices) = self.stage_3.step(
+                action, validator, self.vehicle, self.person, self.sumo
+            )
+            self.agent_step += self.stage_3.agent_step
+            self.accumulated_reward += reward
+
+        if self.stage == "final":
+            (self.state, reward, self.stage, choices) = self.stage_4.step(
+                action, validator, self.vehicle, self.person, self.sumo
+            )
+            self.agent_step += self.stage_4.agent_step
+            self.accumulated_reward += reward
+
         self.steps = int(self.sumo.simulation.getTime())
 
         if self.steps >= self.steps_per_episode:
@@ -181,7 +206,7 @@ class Basic:
             f" Average Reward  {avg_reward:.3}",
             f"epsilon {epsilon:.5}",
             f" **** step: {steps }",
-            f"*** Agent steps: {self.stage_1.agent_step}",
+            f"*** Agent steps: {self.agent_step}",
         )
 
         x = [i + 1 for i in range(len(self.rewards))]

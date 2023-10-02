@@ -1,5 +1,5 @@
 from .outmask import OutMask
-from .find_stop import StopFinder
+from .bus_stop import StopFinder
 
 
 class Stage1:
@@ -49,9 +49,10 @@ class Stage1:
         )
         if self.old_dist >= edge_distance:
             new_dist_check = 1
-            reward += -0.1
+            reward += .5
         else:
             new_dist_check = -1
+            reward += -1
         
         choices = vehicle.get_out_dict()
 
@@ -59,7 +60,7 @@ class Stage1:
             if self.make_choice_flag:
                 vehicle.set_destination(action)
                 sumo.simulationStep()
-                reward += -0.1
+                # reward += -1
                 self.make_choice_flag = False
 
             vedge = vehicle.get_road()
@@ -77,12 +78,11 @@ class Stage1:
             vedge = vehicle.get_road()
 
             self.stage = "pickup"
-            if new_dist_check == 1:
-                reward += 0.1
 
             if vedge == pedge:
-                self.stage = "done"
-                # self.stage = "dropoff"
+                print(self.stage+' ', end='')
+                # self.stage = "done"
+                self.stage = "dropoff"
                 
                 self.make_choice_flag = True
                 new_dest = self.finder.find_begin_stop(vedge,

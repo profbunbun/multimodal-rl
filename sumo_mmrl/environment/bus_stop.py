@@ -37,14 +37,16 @@ class StopFinder:
         self.con = con
 
         dic = self.get_stop_dists(end_loc, loc_dic)
-        return max(dic, key=dic.get)
+        stop = min(dic, key=dic.get)
+        lane = con.busstop.getLaneID(stop)
+        return lane
 
     def find_begin_stop(self, begin_loc, loc_dic, con):
 
         self.con = con
 
         dic = self.get_stop_dists(begin_loc, loc_dic)
-        stop = max(dic, key=dic.get)
+        stop = min(dic, key=dic.get)
         lane = con.busstop.getLaneID(stop)
         return lane
 
@@ -60,3 +62,7 @@ class StopFinder:
         self.con = con
         # traci.route.getEdges()?
         return self.con.route.getEdges("bus_1")
+
+def set_bus_line(self):
+    
+    return

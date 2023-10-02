@@ -12,9 +12,9 @@ class DQN(nn.Module):
         self.device = T.device(  # pylint: disable=E1101
             "cuda" if T.cuda.is_available() else "cpu"
         )
-        self.layer1 = nn.Linear(state_size, 16)
+        self.layer1 = nn.Linear(state_size, 32)
 
-        self.layer2 = nn.Linear(16, 8)
+        self.layer2 = nn.Linear(32, 8)
         # self.layer2b = nn.Linear(64, 32)
 
         self.layer3 = nn.Linear(8, action_size)

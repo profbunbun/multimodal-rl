@@ -76,3 +76,6 @@ class Vehicle:
         return self.sumo.vehicle.getParameter(self.vehicle_id,
                                               "type")
         
+    def teleport(self, dest):
+        self.sumo.vehicle.changeTarget(self.vehicle_id, edgeID=dest)
+        self.sumo.vehicle.moveTo(self.vehicle_id, dest+"_0", 5)

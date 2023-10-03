@@ -30,32 +30,21 @@ class Dagent:
         self.gamma = 0.95
         self.epsilon = 0.997
         self.epsilon_max = 0.9
-        self.decay = 0.9999
+        self.decay = 0.999
         self.epsilon_min = 0.01
-        self.learning_rate = 0.0001
+        self.learning_rate = 0.001
         
         device = T.device(  # pylint: disable=E1101
             "cuda" if T.cuda.is_available() else "cpu"
         )
-        # device = T.device(dev)
-        # device = T.device("cuda:1")
-        # self.policy_net = dqn.DQN(state_size, action_size)
-        # net = dqn.DQN(state_size, action_size)
-        # if T.cuda.device_count() > 1:
-        # #     # print("Let's use", T.cuda.device_count(), "GPUs!")
-        #     self.policy_net = nn.DataParallel(self.policy_net)
-        # self.policy_net.to(device)
 
         if os.path.exists(path + PATH):
             self.policy_net = dqn.DQN(state_size, action_size)
             self.policy_net.load_state_dict(T.load(path + PATH))
             self.policy_net.eval()
-            # self.policy_net = nn.DataParallel(self.policy_net)
-            self.policy_net.to(device)
         else:
             self.policy_net = dqn.DQN(state_size, action_size)
-            # self.policy_net = nn.DataParallel(self.policy_net)
-            self.policy_net.to(device)
+        self.policy_net.to(device)
         
     def remember(self, state, action, reward, next_state, done):
 
@@ -123,10 +112,6 @@ class Dagent:
             loss.backward()
             optimizer.step()
             optimizer.zero_grad()
-            # print(self.policy_net.state_dict())
-            # net_state = self.policy_net.parameters()
-            # net_state = self.policy_net.state_dict()
-            # T.save(net_state, self.path + PATH)
 
     def save(self):
         T.save(self.policy_net.state_dict(), self.path + PATH)

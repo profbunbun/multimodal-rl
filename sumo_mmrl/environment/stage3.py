@@ -7,18 +7,16 @@ class Stage3:
         
         self.out_mask = OutMask()
         self.finder = StopFinder()
+        self.agent_step = 0
         self.bus_route = bus_route
         self.make_choice_flag = True
         self.stage = "onbus"
-        self.old_edge = None
-        self.agent_step = 0
         self.edge_position_dic = edge_position_dic
         self.route_flag = 0
-        self.old_dist = None
-        self.state = []
 
     def step(self, action, validator, vehicle, person, sumo):
-        self.agent_step = 0
+
+        self.agent_step += 1
         reward = 0
         vedge = vehicle.get_road()
         begin_stop = self.finder.find_begin_stop(
@@ -54,40 +52,30 @@ class Stage3:
                 if choice_edge == next_route_edge:
                     print(self.stage+' ', end='')
                     self.stage = "final"
-                    # self.stage = "done"
                     vehicle.teleport(end_stop.partition("_")[0])
                     sumo.simulationStep()
-                    # print("drop off")
-                    reward += 90
+                    reward += 35
 
-                    self.state = []
-                    self.state.extend(vedge_loc)
-                    self.state.extend(dest_edge_loc)
-                    self.state.append(self.agent_step)
-                    # self.state.append(sumo.simulation.getTime())
-                    # self.state.append(edge_distance)
-                    self.state.append(1)
-                    self.state.extend(outmask)
-                    self.old_edge = vedge
-
-                    self.agent_step += 1
+                    state = []
+                    state.extend(vedge_loc)
+                    state.extend(dest_edge_loc)
+                    state.append(sumo.simulation.getTime())
+                    state.append(1)
+                    state.extend(outmask)
                     choices = vehicle.get_out_dict()
-                    return self.state, reward, self.stage, choices
+                    
+                    return state, reward, self.stage, choices
 
         self.stage = "done"
         reward += -15
-        self.state = []
-        self.state.extend(vedge_loc)
-        self.state.extend(dest_edge_loc)
-        self.state.append(self.agent_step)
-        # self.state.append(sumo.simulation.getTime())
-        # self.state.append(edge_distance)
-        self.state.append(1)
-        self.state.extend(outmask)
-
-        self.agent_step += 1
+        state = []
+        state.extend(vedge_loc)
+        state.extend(dest_edge_loc)
+        state.append(sumo.simulation.getTime())
+        state.append(1)
+        state.extend(outmask)
         choices = vehicle.get_out_dict()
-        return self.state, reward, self.stage, choices
+        return state, reward, self.stage, choices
 
     def manhat_dist(self, x1, y1, x2, y2):
         return abs(x1 - x2) + abs(y1 - y2)

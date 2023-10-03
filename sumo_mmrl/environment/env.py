@@ -95,6 +95,9 @@ class Basic:
         self.stage = "reset"
         self.make_choice_flag = True
         self.stage_1.agent_step = 0
+        self.stage_2.agent_step = 0
+        self.stage_3.agent_step = 0
+        self.stage_4.agent_step = 0
 
         out_dict = self.parser.get_out_dic()
         index_dict = self.parser.get_edge_index()
@@ -141,6 +144,10 @@ class Basic:
         return self.state, self.stage, choices
 
     def step(self, action, validator):
+
+        self.stage_2.agent_step = 0
+        self.stage_3.agent_step = 0
+        self.stage_4.agent_step = 0
         if self.stage == "pickup":
             (self.state, reward, self.stage, choices) = self.stage_1.step(
                 action, validator, self.vehicle, self.person, self.sumo
@@ -148,21 +155,21 @@ class Basic:
             self.agent_step = self.stage_1.agent_step
             self.accumulated_reward += reward
  
-        if self.stage == "dropoff":
+        elif self.stage == "dropoff":
             (self.state, reward, self.stage, choices) = self.stage_2.step(
                 action, validator, self.vehicle, self.person, self.sumo
             )
             self.agent_step += self.stage_2.agent_step
             self.accumulated_reward += reward
 
-        if self.stage == "onbus":
+        elif self.stage == "onbus":
             (self.state, reward, self.stage, choices) = self.stage_3.step(
                 action, validator, self.vehicle, self.person, self.sumo
             )
             self.agent_step += self.stage_3.agent_step
             self.accumulated_reward += reward
 
-        if self.stage == "final":
+        elif self.stage == "final":
             (self.state, reward, self.stage, choices) = self.stage_4.step(
                 action, validator, self.vehicle, self.person, self.sumo
             )

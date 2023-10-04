@@ -55,7 +55,7 @@ class Stage2:
         edge_distance = self.manhat_dist(
             vedge_loc[0], vedge_loc[1], dest_loc[0], dest_loc[1]
         )
-        if self.old_dist >= edge_distance:
+        if self.old_dist > edge_distance:
             new_dist_check = 1
             reward += 1
 
@@ -91,7 +91,7 @@ class Stage2:
             if vedge == dest:
                 print(self.stage+' ', end='')
                 self.stage = "onbus"
-                reward += 25
+                reward += 30
 
             self.state = []
             self.state.extend(vedge_loc)

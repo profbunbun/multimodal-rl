@@ -48,12 +48,12 @@ class Stage1:
         edge_distance = self.manhat_dist(
             vedge_loc[0], vedge_loc[1], pedge_loc[0], pedge_loc[1]
         )
-        if self.old_dist >= edge_distance:
+        if self.old_dist > edge_distance:
             new_dist_check = 1
-            reward += .5
+            reward += 1
         else:
             new_dist_check = -1
-            reward += -1
+            reward -= 1
 
         if validator == 1:
             if self.make_choice_flag:
@@ -79,7 +79,7 @@ class Stage1:
                 print(self.stage+' ', end='')
                 self.stage = "dropoff"
                 self.make_choice_flag = True
-                reward += 15
+                reward += 20
 
             self.state = []
             self.state.extend(vedge_loc)

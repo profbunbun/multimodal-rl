@@ -45,7 +45,7 @@ class Stage4:
         edge_distance = self.manhat_dist(
             vedge_loc[0], vedge_loc[1], dest_loc[0], dest_loc[1]
         )
-        if self.old_dist >= edge_distance:
+        if self.old_dist > edge_distance:
             new_dist_check = 1
             reward += 2
         else:

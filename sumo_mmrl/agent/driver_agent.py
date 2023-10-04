@@ -30,7 +30,7 @@ class Dagent:
         self.gamma = 0.95
         self.epsilon = 0.997
         self.epsilon_max = 0.9
-        self.decay = 0.999
+        self.decay = 0.9999
         self.epsilon_min = 0.01
         self.learning_rate = 0.001
         

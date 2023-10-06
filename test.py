@@ -1,7 +1,7 @@
 from sumo_mmrl import Basic, Dagent
 
 # import time
-EPISODES = 5_000
+EPISODES = 1_000
 STEPS = 1000
 BATCH_SIZE = 32
 MIN_MEMORY = 1000
@@ -44,7 +44,7 @@ def main():
             if len(dagent.memory) > BATCH_SIZE:
                 dagent.replay(BATCH_SIZE)
 
-        dagent.epsilon_decay()
+        dagent.eps_linear(EPISODES)
 
         # if episode < (0.5 * EPISODES):
         #     dagent.epsilon_decay_3(episode, (0.5 * EPISODES))

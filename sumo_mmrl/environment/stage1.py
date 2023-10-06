@@ -16,29 +16,32 @@ class Stage1:
         self.state = []
         self.old_dist = None
 
-    def nullstep(self, vehicle, person, sumo):
-
-        sumo.simulationStep()
+    def nullstep(self, vehicle, sumo):
         vedge = vehicle.get_road()
-        
-        if ":" in vedge or self.old_edge == vedge:
-            self.make_choice_flag = False
-        else:
-            self.make_choice_flag = True
-            pedge = person.get_road()
-            vedge_loc = self.edge_position_dic[vedge]
-            pedge_loc = self.edge_position_dic[pedge]
-            self.old_dist = self.manhat_dist(
-                vedge_loc[0], vedge_loc[1], pedge_loc[0], pedge_loc[1]
-                )
+
+        while not self.make_choice_flag and self.stage != "done":
+            sumo.simulationStep()
+            vedge = vehicle.get_road()
+            
+            if ":" in vedge or self.old_edge == vedge:
+                self.make_choice_flag = False
+            else:
+                self.make_choice_flag = True
 
         self.old_edge = vedge
 
     def step(self, action, validator, vehicle, person, sumo):
 
         self.agent_step += 1
-        while not self.make_choice_flag and self.stage != "done":
-            self.nullstep(vehicle, person,  sumo)
+        pedge = person.get_road()
+        vedge = vehicle.get_road()
+        vedge_loc = self.edge_position_dic[vedge]
+        pedge_loc = self.edge_position_dic[pedge]
+        self.old_dist = self.manhat_dist(
+            vedge_loc[0], vedge_loc[1], pedge_loc[0], pedge_loc[1]
+            )
+        
+        self.nullstep(vehicle, sumo)
 
         reward = 0
         vedge = vehicle.get_road()
@@ -51,9 +54,12 @@ class Stage1:
         if self.old_dist > edge_distance:
             new_dist_check = 1
             reward += 1
-        else:
+        elif self.old_dist < edge_distance:
             new_dist_check = -1
-            reward -= 1
+            reward += -1.5
+        else:
+            new_dist_check = 0
+            reward += -1
 
         if validator == 1:
             if self.make_choice_flag:
@@ -94,7 +100,7 @@ class Stage1:
             return self.state, reward, self.stage, choices
 
         self.stage = "done"
-        reward += -15
+        reward += -10
         self.make_choice_flag = False
         
         choices = vehicle.get_out_dict()

@@ -28,9 +28,9 @@ class Dagent:
         self.direction_choices = [STRAIGHT, TURN_AROUND, RIGHT, LEFT]
         self.memory = deque(maxlen=50_000)
         self.gamma = 0.95
-        self.epsilon = 0.997
-        self.epsilon_max = 0.9
-        self.decay = 0.9999
+        self.epsilon = 1
+        self.epsilon_max = 1
+        self.decay = 0.999
         self.epsilon_min = 0.01
         self.learning_rate = 0.001
         
@@ -150,11 +150,11 @@ class Dagent:
 
         self.epsilon = 0.0
 
-    def eps_linear(self, episode):
+    def eps_linear(self, episodes):
         
         if self.epsilon >= self.epsilon_min:
             
-            self.epsilon = 1 / math.log(episode + 0.00001)
+            self.epsilon = self.epsilon - 1/episodes
             
         else:
             self.epsilon = self.epsilon_min

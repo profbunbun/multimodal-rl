@@ -15,19 +15,17 @@ class Stage4:
         self.old_dist = None
         self.state = []
 
-    def nullstep(self, vehicle, dest, sumo):
-        sumo.simulationStep()
+    def nullstep(self, vehicle, sumo):
         vedge = vehicle.get_road()
 
-        if ":" in vedge or self.old_edge == vedge:
-            self.make_choice_flag = False
-        else:
-            self.make_choice_flag = True
-            vedge_loc = self.edge_position_dic[vedge]
-            dest_loc = self.edge_position_dic[dest]
-            self.old_dist = self.manhat_dist(
-                vedge_loc[0], vedge_loc[1], dest_loc[0], dest_loc[1]
-                )
+        while not self.make_choice_flag and self.stage != "done":
+            sumo.simulationStep()
+            vedge = vehicle.get_road()
+            
+            if ":" in vedge or self.old_edge == vedge:
+                self.make_choice_flag = False
+            else:
+                self.make_choice_flag = True
 
         self.old_edge = vedge
 
@@ -36,9 +34,15 @@ class Stage4:
         reward = 0
         vedge = vehicle.get_road()
         dest = person.destination
+
+        vedge_loc = self.edge_position_dic[vedge]
+        dest_loc = self.edge_position_dic[dest]
+        self.old_dist = self.manhat_dist(
+            vedge_loc[0], vedge_loc[1], dest_loc[0], dest_loc[1]
+        )
         
-        while not self.make_choice_flag and self.stage != "done":
-            self.nullstep(vehicle, dest,  sumo)
+        
+        self.nullstep(vehicle, sumo)
 
         vedge_loc = self.edge_position_dic[vedge]
         dest_loc = self.edge_position_dic[dest]
@@ -47,9 +51,12 @@ class Stage4:
         )
         if self.old_dist > edge_distance:
             new_dist_check = 1
-            reward += 2
-        else:
+            reward += 1
+        elif self.old_dist < edge_distance:
             new_dist_check = -1
+            reward += -1.5
+        else:
+            new_dist_check = 0
             reward += -1
          
         

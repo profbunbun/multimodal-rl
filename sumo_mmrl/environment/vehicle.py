@@ -21,13 +21,13 @@ class Vehicle:
         self.edge_position = edge_position
         self.sumo.vehicle.add(self.vehicle_id, "r_0", typeID="taxi")
         self.sumo.vehicle.setParameter(vehicle_id,
-                                       "type", str(i)
+                                       "type", str(2)
                                     #    str(random.randint(1, i))
                                        )
 
 
         
-        # self.random_relocate()
+        self.random_relocate()
         self.current_lane = self.sumo.vehicle.getLaneID(self.vehicle_id)
         self.cur_loc = self.current_lane.partition("_")[0]
 

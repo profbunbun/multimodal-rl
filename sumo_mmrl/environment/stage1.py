@@ -3,6 +3,8 @@ from .bus_stop import StopFinder
 
 
 class Stage1:
+
+    
  
     def __init__(self, edge_position_dic):
         self.out_mask = OutMask()
@@ -15,6 +17,7 @@ class Stage1:
         self.route_flag = 0
         self.state = []
         self.old_dist = None
+    
 
     def nullstep(self, vehicle, sumo):
         vedge = vehicle.get_road()
@@ -85,7 +88,7 @@ class Stage1:
                 print(self.stage+' ', end='')
                 self.stage = "dropoff"
                 self.make_choice_flag = True
-                reward += 20
+                reward += 100
 
             self.state = []
             self.state.extend(vedge_loc)

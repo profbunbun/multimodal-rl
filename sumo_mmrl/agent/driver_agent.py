@@ -32,7 +32,7 @@ class Dagent:
         self.epsilon_max = 1
         self.decay = 0.999
         self.epsilon_min = 0.01
-        self.learning_rate = 0.001
+        self.learning_rate = 0.0001
         
         device = T.device(  # pylint: disable=E1101
             "cuda" if T.cuda.is_available() else "cpu"
@@ -86,10 +86,10 @@ class Dagent:
     def replay(self, batch_size):
         
         loss_fn = nn.HuberLoss()
-        # optimizer = optim.RMSprop(self.policy_net.parameters(),
-        #                           lr=self.learning_rate,)
-        optimizer = optim.Adam(self.policy_net.parameters(),
-                               lr=self.learning_rate,)
+        optimizer = optim.RMSprop(self.policy_net.parameters(),
+                                  lr=self.learning_rate,)
+        # optimizer = optim.Adam(self.policy_net.parameters(),
+        #                        lr=self.learning_rate,)
 
         minibatch = random.sample(self.memory, batch_size)
 
@@ -154,7 +154,7 @@ class Dagent:
         
         if self.epsilon >= self.epsilon_min:
             
-            self.epsilon = self.epsilon - 1/episodes
+            self.epsilon = self.epsilon - 1/(episodes)
             
         else:
             self.epsilon = self.epsilon_min

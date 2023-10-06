@@ -20,7 +20,7 @@ class Person:
                                             lines="taxi")
         
         self.sumo.person.setParameter(person_id,
-                                      "type", str(types))
+                                      "type", str(2))
                                     #   str(random.randint(1, types))
                                     
 

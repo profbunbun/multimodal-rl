@@ -1,13 +1,13 @@
 from sumo_mmrl import Basic, Dagent
 
 # import time
-EPISODES = 1_000
+EPISODES = 10_000
 STEPS = 1000
 BATCH_SIZE = 32
 MIN_MEMORY = 1000
 EXPERIMENT_PATH = "Experiments/3x3"
 SUMOCONFIG = "/Nets/3x3b.sumocfg"
-NUM_VEHIC = 2
+NUM_VEHIC = 1
 TYPES = 2
 
 
@@ -44,7 +44,7 @@ def main():
             if len(dagent.memory) > BATCH_SIZE:
                 dagent.replay(BATCH_SIZE)
 
-        dagent.eps_linear(EPISODES)
+        dagent.eps_linear(EPISODES-100)
 
         # if episode < (0.5 * EPISODES):
         #     dagent.epsilon_decay_3(episode, (0.5 * EPISODES))

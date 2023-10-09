@@ -103,7 +103,7 @@ class Stage1:
             return self.state, reward, self.stage, choices
 
         self.stage = "done"
-        reward += -50
+        reward += -100
         self.make_choice_flag = False
         
         choices = vehicle.get_out_dict()

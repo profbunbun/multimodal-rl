@@ -87,8 +87,10 @@ class Dagent:
         loss_fn = nn.HuberLoss()
         # optimizer = optim.RMSprop(self.policy_net.parameters(),
         #                           lr=self.learning_rate,)
-        optimizer = optim.Adam(self.policy_net.parameters(),
-                               lr=self.learning_rate,)
+        # optimizer = optim.Adam(self.policy_net.parameters(),
+        #                        lr=self.learning_rate,)
+        optimizer = optim.AdamW(self.policy_net.parameters(),
+                                lr=self.learning_rate, amsgrad=True)
 
         minibatch = random.sample(self.memory, batch_size)
 
@@ -114,6 +116,12 @@ class Dagent:
 
     def save(self):
         T.save(self.policy_net.state_dict(), self.path + PATH)
+
+
+
+
+
+        
 
     def epsilon_decay(self):
 

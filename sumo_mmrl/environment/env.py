@@ -148,6 +148,11 @@ class Basic:
         self.stage_2.agent_step = 0
         self.stage_3.agent_step = 0
         self.stage_4.agent_step = 0
+        self.steps = int(self.sumo.simulation.getTime())
+
+        if self.steps >= self.steps_per_episode:
+            self.accumulated_reward += -150
+            self.stage = "done"
         if self.stage == "pickup":
             (self.state, reward, self.stage, choices) = self.stage_1.step(
                 action, validator, self.vehicle, self.person, self.sumo
@@ -176,11 +181,6 @@ class Basic:
             self.agent_step += self.stage_4.agent_step
             self.accumulated_reward += reward
 
-        self.steps = int(self.sumo.simulation.getTime())
-
-        if self.steps >= self.steps_per_episode:
-            self.accumulated_reward += -15
-            self.stage = "done"
 
         return self.state, self.accumulated_reward, self.stage, choices
 

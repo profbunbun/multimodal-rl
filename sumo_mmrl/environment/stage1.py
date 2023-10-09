@@ -56,7 +56,7 @@ class Stage1:
         )
         if self.old_dist > edge_distance:
             new_dist_check = 1
-            reward += 1
+            reward += 2
         elif self.old_dist < edge_distance:
             new_dist_check = -1
             reward += -1.5
@@ -103,7 +103,7 @@ class Stage1:
             return self.state, reward, self.stage, choices
 
         self.stage = "done"
-        reward += -10
+        reward += -50
         self.make_choice_flag = False
         
         choices = vehicle.get_out_dict()

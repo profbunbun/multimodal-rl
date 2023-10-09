@@ -8,7 +8,6 @@ from torch import nn
 from torch import optim
 import numpy as np
 from . import dqn
-import math
 
 random.seed(0)
 
@@ -32,7 +31,7 @@ class Dagent:
         self.epsilon_max = 1
         self.decay = 0.999
         self.epsilon_min = 0.01
-        self.learning_rate = 0.0001
+        self.learning_rate = 0.001
         
         device = T.device(  # pylint: disable=E1101
             "cuda" if T.cuda.is_available() else "cpu"
@@ -86,10 +85,10 @@ class Dagent:
     def replay(self, batch_size):
         
         loss_fn = nn.HuberLoss()
-        optimizer = optim.RMSprop(self.policy_net.parameters(),
-                                  lr=self.learning_rate,)
-        # optimizer = optim.Adam(self.policy_net.parameters(),
-        #                        lr=self.learning_rate,)
+        # optimizer = optim.RMSprop(self.policy_net.parameters(),
+        #                           lr=self.learning_rate,)
+        optimizer = optim.Adam(self.policy_net.parameters(),
+                               lr=self.learning_rate,)
 
         minibatch = random.sample(self.memory, batch_size)
 
@@ -98,8 +97,8 @@ class Dagent:
             if stage != "done":
                 new_state_policy = self.policy_net(new_state)
                 adjusted_reward = reward + self.gamma * max(new_state_policy)
-                output = self.policy_net(state)
-                # output = new_state_policy
+                # output = self.policy_net(state)
+                output = new_state_policy
                 target = output.clone()
                 target[action] = adjusted_reward
                 

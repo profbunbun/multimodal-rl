@@ -6,23 +6,24 @@ from .net_parser import NetParser
 from .person import Person
 from .plot_util import Plotter
 from .ride_select import RideSelect
-from .stage1 import Stage1
-from .stage2 import Stage2
-from .stage3 import Stage3
-from .stage4 import Stage4
-from .stage_reset import StageReset
+from .outmask import OutMask
+from .bus_stop import StopFinder
 from .vehicle import Vehicle
 
 
-class Basic:
-    def __init__(self, path, sumocon, steps_per_episode, num_of_vehic, types, test) -> None:
+class Env:
+    def __init__(
+        self, path, sumocon, steps_per_episode, num_of_vehic, types, test
+    ) -> None:
         self.plotter = Plotter()  # for plotting results
+        self.out_mask = OutMask()
+        self.finder = StopFinder()
 
         self.parser = NetParser(  # This is all the stuff to create the
             path + sumocon  # different map network dictionaries
         )
-        
-        self.test=test
+
+        self.test = test
         self.sumo_con = SUMOConnection(
             path + sumocon
         )  # This handlies our communication
@@ -31,49 +32,31 @@ class Basic:
         self.edge_position = (
             self.parser.get_edge_pos_dic()
         )  # This creates the x y positions of all the lanes
-        self.stage_reset = StageReset(
-            self.parser.get_out_dic(),  # Reset stage sets everything to zero and starts simulation
-            self.parser.get_edge_index(),  # Takes the different network dictionaries
-            self.edge_position,
-        )
 
-        self.stage_1 = Stage1(
-            self.edge_position
-        )  # this stage does to pic the person up
-        self.stage_2 = Stage2(
-            self.edge_position
-        )  # this stage drops them of at the bus stop
-        self.stage_3 = Stage3(
-            self.edge_position,
-            self.parser.get_route_edges()
-        )  # this stage drops them of at the bus stop
-        self.stage_4 = Stage4(
-            self.edge_position
-        )  # this stage drops them of at the bus stop
-        self.sumo = None  # this becomes the sumo conection used after GUI or command line is decided
+        self.sumo = None  # this becomes the sumo conection used after GUI 
+        # or command line is decided
         self.path = path  # path to the experiment folder  for simulation data
         self.steps_per_episode = steps_per_episode  # you get it
         self.steps = 0
         self.agent_step = 0
         self.accumulated_reward = 0
+        self.reward = 0
         self.state = []
-
-        self.stage = "reset"  # Stage flag changes as agent
-        # succeeds in each stach.
-        # reset is start and changes automatic
 
         self.make_choice_flag = False  # changes if agent is in a valid
         # state to make a decison:
         # not an intersection,
         # one choice on new lane
 
-        self.old_edge = None  # location variable to check  # against new position. For make choice flag
-
+        self.old_edge = None  # location variable to check
+        # against new position. For make choice flag
+        self.old_dist = None
         self.rewards = []
         self.epsilon_hist = []
 
         self.vehicle = None
         self.person = None
+        self.pedge = None
 
         self.p_index = 0
 
@@ -86,25 +69,20 @@ class Basic:
 
         self.types = types  # types of passangers
         # and vehicles to pair for a trip
-        self.parser.get_route_edges()
+        # self.parser.get_route_edges()
+        self.stage = "reset"
+        self.bussroute = self.parser.get_route_edges()
 
     def reset(self):
         self.steps = 0
         self.agent_step = 0
         self.accumulated_reward = 0
-        self.stage = "reset"
         self.make_choice_flag = True
-        self.stage_1.agent_step = 0
-        self.stage_2.agent_step = 0
-        self.stage_3.agent_step = 0
-        self.stage_4.agent_step = 0
-
         out_dict = self.parser.get_out_dic()
         index_dict = self.parser.get_edge_index()
+        self.reward = 0
 
         vehicles = []
-        people = []
-
         for v_id in range(self.num_of_vehicles):
             vehicles.append(
                 Vehicle(
@@ -117,72 +95,180 @@ class Basic:
                 )
             )
 
+        people = []
         for p_id in range(1):
             people.append(
-                Person(str(p_id),
-                       self.sumo,
-                       self.edge_position,
-                       index_dict,
-                       p_id + 1,
-                       )
+                Person(
+                    str(p_id),
+                    self.sumo,
+                    self.edge_position,
+                    index_dict,
+                    p_id + 1,
+                )
             )
 
         self.person = people[0]
         vid_selected = self.ruff_rider.select(vehicles, self.person)
         self.vehicle = vehicles[int(vid_selected)]
+        self.sumo.simulationStep()
+        self.old_dist = 0
 
-        # self.vehicle.random_relocate()
-
-        (
-            self.state,
-            self.stage,
-            choices,
-            vedge,
-            self.edge_distance,
-        ) = self.stage_reset.step(self.vehicle, self.person, self.sumo)
+        vedge = self.vehicle.get_road()
         self.old_edge = vedge
+        self.pedge = self.person.get_road()
+        choices = self.vehicle.get_out_dict()
+        self.destination_edge = self.pedge
+
+        (vedge_loc,
+         dest_edge_loc,
+         outmask,
+         edge_distance) = self.out_mask.get_outmask(
+            vedge, self.destination_edge, choices, self.edge_position
+        )
+
+        new_dist_check = 1
+        state = []
+        state.extend(vedge_loc)
+        state.extend(dest_edge_loc)
+        state.append(self.sumo.simulation.getTime())
+        state.append(new_dist_check)
+        state.extend(outmask)
+        self.stage = "pickup"
+
         return self.state, self.stage, choices
 
-    def step(self, action, validator):
-
-        self.stage_2.agent_step = 0
-        self.stage_3.agent_step = 0
-        self.stage_4.agent_step = 0
-        self.steps = int(self.sumo.simulation.getTime())
-
-        if self.stage == "pickup":
-            (self.state, reward, self.stage, choices) = self.stage_1.step(
-                action, validator, self.vehicle, self.person, self.sumo
-            )
-            self.agent_step = self.stage_1.agent_step
-            self.accumulated_reward += reward
- 
-        elif self.stage == "dropoff":
-            (self.state, reward, self.stage, choices) = self.stage_2.step(
-                action, validator, self.vehicle, self.person, self.sumo
-            )
-            self.agent_step += self.stage_2.agent_step
-            self.accumulated_reward += reward
-
-        elif self.stage == "onbus":
-            (self.state, reward, self.stage, choices) = self.stage_3.step(
-                action, validator, self.vehicle, self.person, self.sumo
-            )
-            self.agent_step += self.stage_3.agent_step
-            self.accumulated_reward += reward
-
-        elif self.stage == "final":
-            (self.state, reward, self.stage, choices) = self.stage_4.step(
-                action, validator, self.vehicle, self.person, self.sumo
-            )
-            self.agent_step += self.stage_4.agent_step
-            self.accumulated_reward += reward
-
+    def nullstep(self):
+        vedge = self.vehicle.get_road()
         if self.steps >= self.steps_per_episode:
-            self.accumulated_reward += -150
+            self.accumulated_reward += -10
             self.stage = "done"
 
-        return self.state, self.accumulated_reward, self.stage, choices
+        while not self.make_choice_flag and self.stage != "done":
+            self.sumo.simulationStep()
+            vedge = self.vehicle.get_road()
+
+            if ":" in vedge or self.old_edge == vedge:
+                self.make_choice_flag = False
+            else:
+                self.make_choice_flag = True
+        self.old_edge = vedge
+
+    def step(self, action, validator):
+        
+        self.reward = 0
+        self.steps = int(self.sumo.simulation.getTime())        
+        self.agent_step += 1
+
+        self.nullstep()
+        vedge = self.vehicle.get_road()
+        vedge_loc = self.edge_position[vedge]
+        dest_edge_loc = self.edge_position[self.destination_edge]
+        edge_distance = self.manhat_dist(
+            vedge_loc[0], vedge_loc[1], dest_edge_loc[0], dest_edge_loc[1]
+        )
+
+        if self.old_dist > edge_distance:
+            new_dist_check = 1
+            self.reward += 0.1
+            # self.reward += 2
+        elif self.old_dist < edge_distance:
+            new_dist_check = -1
+            # self.reward += -1.5
+        else:
+            new_dist_check = 0
+            # self.reward += -1
+
+        if validator == 1:
+            if self.make_choice_flag:
+                self.reward += -0.2
+                self.vehicle.set_destination(action)
+                self.sumo.simulationStep()
+                self.make_choice_flag = False
+
+            choices = self.vehicle.get_out_dict()
+            (
+                vedge_loc,
+                dest_edge_loc,
+                outmask,
+                edge_distance,
+            ) = self.out_mask.get_outmask(
+                vedge, self.destination_edge, choices, self.edge_position
+            )
+            if vedge == self.destination_edge:
+                self.reward += 45
+                match self.stage:
+                    case "pickup":
+                        print(self.stage + " ", end="")
+                        self.stage = "dropoff"
+                        self.make_choice_flag = True
+                        self.destination_edge = self.finder.find_begin_stop(
+                            self.pedge, self.edge_position, self.sumo
+                            ).partition("_")[0]
+
+                    case "dropoff":
+                        print(self.stage + " ", end="")
+                        self.stage = "onbus"  # for test. change back to onbus
+                        next_route_edge = self.bussroute[1].partition("_")[0]
+                        self.destination_edge = next_route_edge
+                        self.make_choice_flag = True
+
+                    case "onbus":
+                        print(self.stage + " ", end="")
+                        self.stage = "final"
+                        self.make_choice_flag = True
+                        end_stop = self.finder.find_end_stop(
+                            self.person.destination,
+                            self.edge_position,
+                            self.sumo).partition("_")[0]
+                        self.vehicle.teleport(end_stop.partition("_")[0])
+                        dest = self.person.destination
+                        dest_loc = self.edge_position[dest]
+                        self.sumo.simulationStep()
+                        self.old_dist = self.manhat_dist(
+                            vedge_loc[0], vedge_loc[1], dest_loc[0],
+                            dest_loc[1])
+
+                    case "final":
+                        print(self.stage + " ", end="")
+                        self.stage = "done"
+                        self.make_choice_flag = True
+                        self.reward += 100
+
+            self.state = []
+            self.state.extend(vedge_loc)
+            self.state.extend(dest_edge_loc)
+            self.state.append(self.sumo.simulation.getTime())
+            self.state.append(new_dist_check)
+            self.state.extend(outmask)
+            self.old_edge = vedge
+            self.old_dist = edge_distance
+            return self.state, self.reward, self.stage, choices
+    
+        choices = self.vehicle.get_out_dict()
+        (
+            vedge_loc,
+            dest_edge_loc,
+            outmask,
+            edge_distance,
+        ) = self.out_mask.get_outmask(
+            vedge, self.destination_edge, choices, self.edge_position
+        )
+
+        self.stage = "done"
+        self.reward += -15
+        self.make_choice_flag = False
+
+        self.state = []
+        self.state.extend(vedge_loc)
+        self.state.extend(dest_edge_loc)
+        self.state.append(self.sumo.simulation.getTime())
+        self.state.append(new_dist_check)
+        self.state.extend(outmask)
+        self.old_edge = vedge
+        self.old_dist = edge_distance
+        self.accumulated_reward += self.reward
+
+        return self.state, self.reward, self.stage, choices
 
     def render(self, mode):
         if mode == "gui":
@@ -194,12 +280,13 @@ class Basic:
         elif mode == "no_gui":
             self.sumo = self.sumo_con.connect_no_gui()
 
-    def close(self, episode, epsilon):
+    def close(self, episode, epsilon, accu):
         steps = self.sumo.simulation.getTime()
 
         self.sumo.close()
-        acc_r = self.accumulated_reward
-        acc_r = float(self.accumulated_reward)
+        # acc_r = self.accumulated_reward
+        acc_r = accu
+        acc_r = float(acc_r)
 
         self.rewards.append(acc_r)
 
@@ -217,6 +304,10 @@ class Basic:
         )
 
         x = [i + 1 for i in range(len(self.rewards))]
-        file_name = self.path + "/Graphs/sumo-agent"+self.test+".png"
+        file_name = self.path + "/Graphs/sumo-agent" + self.test + ".png"
 
-        self.plotter.plot_learning(x, self.rewards, self.epsilon_hist, file_name)
+        self.plotter.plot_learning(x, self.rewards,
+                                   self.epsilon_hist, file_name)
+
+    def manhat_dist(self, x1, y1, x2, y2):
+        return abs(x1 - x2) + abs(y1 - y2)

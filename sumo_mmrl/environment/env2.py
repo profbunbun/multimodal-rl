@@ -71,6 +71,7 @@ class Env:
         # and vehicles to pair for a trip
         # self.parser.get_route_edges()
         self.stage = "reset"
+        self.bussroute = self.parser.get_route_edges()
 
     def reset(self):
         self.steps = 0
@@ -114,9 +115,9 @@ class Env:
 
         vedge = self.vehicle.get_road()
         self.old_edge = vedge
-        pedge = self.person.get_road()
+        self.pedge = self.person.get_road()
         choices = self.vehicle.get_out_dict()
-        self.destination_edge = pedge
+        self.destination_edge = self.pedge
 
         (vedge_loc,
          dest_edge_loc,
@@ -141,7 +142,7 @@ class Env:
     def nullstep(self):
         vedge = self.vehicle.get_road()
         if self.steps >= self.steps_per_episode:
-            self.accumulated_reward += -15
+            self.accumulated_reward += -10
             self.stage = "done"
 
         while not self.make_choice_flag and self.stage != "done":
@@ -156,12 +157,9 @@ class Env:
 
     def step(self, action, validator):
         
-        self.steps = int(self.sumo.simulation.getTime())
-        if self.steps >= self.steps_per_episode:
-            self.accumulated_reward += -15
-            self.stage = "done"
-        self.agent_step += 1
         self.reward = 0
+        self.steps = int(self.sumo.simulation.getTime())        
+        self.agent_step += 1
 
         self.nullstep()
         vedge = self.vehicle.get_road()
@@ -173,16 +171,18 @@ class Env:
 
         if self.old_dist > edge_distance:
             new_dist_check = 1
-            self.reward += 2
+            self.reward += 0.1
+            # self.reward += 2
         elif self.old_dist < edge_distance:
             new_dist_check = -1
-            self.reward += -1.5
+            # self.reward += -1.5
         else:
-            new_dist_check = 0
-            self.reward += -1
+            new_dist_check = -1
+            # self.reward += -1
 
         if validator == 1:
             if self.make_choice_flag:
+                self.reward += 0.1
                 self.vehicle.set_destination(action)
                 self.sumo.simulationStep()
                 self.make_choice_flag = False
@@ -197,27 +197,45 @@ class Env:
                 vedge, self.destination_edge, choices, self.edge_position
             )
             if vedge == self.destination_edge:
+                self.reward += 45
                 match self.stage:
                     case "pickup":
                         print(self.stage + " ", end="")
                         self.stage = "dropoff"
                         self.make_choice_flag = True
-                        self.reward += 100
+                        # self.reward += 100
                         self.destination_edge = self.finder.find_begin_stop(
                             self.pedge, self.edge_position, self.sumo
                             ).partition("_")[0]
 
                     case "dropoff":
                         print(self.stage + " ", end="")
-                        self.stage = "done"  # for test. change back to onbus
+                        self.stage = "onbus"  # for test. change back to onbus
+                        
+                        next_route_edge = self.bussroute[1].partition("_")[0]
+                        
+                        self.destination_edge = next_route_edge
+                        
                         self.make_choice_flag = True
-                        self.reward += 100
+
+                                
+                        # self.reward += 100
 
                     case "onbus":
                         print(self.stage + " ", end="")
                         self.stage = "final"
                         self.make_choice_flag = True
-                        self.reward += 100
+                        end_stop = self.finder.find_end_stop(self.person.destination,
+                                                                 self.edge_position,
+                                                                 self.sumo).partition("_")[0]
+                        self.vehicle.teleport(end_stop.partition("_")[0])
+                        dest = self.person.destination
+                        dest_loc = self.edge_position[dest]
+                        self.sumo.simulationStep()
+                        self.old_dist = self.manhat_dist(
+                            vedge_loc[0], vedge_loc[1], dest_loc[0],
+                            dest_loc[1])
+                        # self.reward += 100
 
                     case "final":
                         print(self.stage + " ", end="")
@@ -233,7 +251,6 @@ class Env:
             self.state.extend(outmask)
             self.old_edge = vedge
             self.old_dist = edge_distance
-            choices = self.vehicle.get_out_dict()
             return self.state, self.reward, self.stage, choices
     
         choices = self.vehicle.get_out_dict()
@@ -247,7 +264,7 @@ class Env:
         )
 
         self.stage = "done"
-        self.reward += -50
+        self.reward += -15
         self.make_choice_flag = False
 
         self.state = []
@@ -258,7 +275,6 @@ class Env:
         self.state.extend(outmask)
         self.old_edge = vedge
         self.old_dist = edge_distance
-        choices = self.vehicle.get_out_dict()
         self.accumulated_reward += self.reward
 
         return self.state, self.reward, self.stage, choices
@@ -273,12 +289,13 @@ class Env:
         elif mode == "no_gui":
             self.sumo = self.sumo_con.connect_no_gui()
 
-    def close(self, episode, epsilon):
+    def close(self, episode, epsilon, accu):
         steps = self.sumo.simulation.getTime()
 
         self.sumo.close()
-        acc_r = self.accumulated_reward
-        acc_r = float(self.accumulated_reward)
+        # acc_r = self.accumulated_reward
+        acc_r = accu
+        acc_r = float(acc_r)
 
         self.rewards.append(acc_r)
 

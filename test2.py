@@ -2,9 +2,9 @@ from sumo_mmrl import Dagent
 from sumo_mmrl.environment.env2 import Env
 
 # import time
-EPISODES = 1_000
+EPISODES = 10_000
 STEPS = 1000
-BATCH_SIZE = 32
+BATCH_SIZE = 64
 MIN_MEMORY = 1000
 EXPERIMENT_PATH = "Experiments/3x3"
 SUMOCONFIG = "/Nets/3x3b.sumocfg"
@@ -44,13 +44,13 @@ def main():
 
         # dagent.epsilon_decay()
 
-        if episode < (0.5 * EPISODES):
-            dagent.epsilon_decay_3(episode, (0.5 * EPISODES))
+        if episode < (0.1 * EPISODES):
+            dagent.epsilon_decay_3(episode, (0.1 * EPISODES))
 
         else:
-            dagent.epsilon_decay_2(episode, (0.5 * EPISODES))
+            dagent.epsilon_decay_2(episode, (0.1 * EPISODES))
 
-        env.close(episode, dagent.epsilon)
+        env.close(episode, dagent.epsilon, accumulated_reward)
         dagent.save()
 
 

@@ -31,7 +31,7 @@ class Dagent:
         self.epsilon_max = 1
         self.decay = 0.999
         self.epsilon_min = 0.01
-        self.learning_rate = 0.001
+        self.learning_rate = 0.0001
         
         device = T.device(  # pylint: disable=E1101
             "cuda" if T.cuda.is_available() else "cpu"
@@ -95,7 +95,7 @@ class Dagent:
         minibatch = random.sample(self.memory, batch_size)
 
         for state, action, reward, new_state, stage in minibatch:
-            
+            optimizer.zero_grad(set_to_none=True)
             if stage != "done":
                 new_state_policy = self.policy_net(new_state)
                 adjusted_reward = reward + self.gamma * max(new_state_policy)

@@ -2,10 +2,10 @@ from sumo_mmrl import Dagent
 from sumo_mmrl.environment.env import Env
 
 # import time
-EPISODES = 2_000
+EPISODES = 5_000
 STEPS = 1000
 BATCH_SIZE = 64
-MIN_MEMORY = 1000
+MIN_MEMORY = 2000
 EXPERIMENT_PATH = "Experiments/3x3"
 SUMOCONFIG = "/Nets/3x3b.sumocfg"
 NUM_VEHIC = 1
@@ -31,7 +31,6 @@ def main():
             (action, action_index, validator) = dagent.choose_action(
                 state, legal_actions)
         
-
             (next_state, new_reward, stage,
              legal_actions) = env.step(action, validator)
 
@@ -39,17 +38,19 @@ def main():
             dagent.remember(state, action_index, new_reward, next_state, stage)
             state = next_state
 
-            if len(dagent.memory) > BATCH_SIZE:
+            if len(dagent.memory) > MIN_MEMORY:
                 dagent.replay(BATCH_SIZE)
+            if EPISODES % 10 == 0:
+                dagent.soft_update()
 
         # dagent.eps_linear(EPISODES)
-        dagent.epsilon_null()
+        # dagent.epsilon_null()
 
-        # if episode < (0.5 * EPISODES):
-        #     dagent.epsilon_decay_3(episode, (0.5 * EPISODES))
+        if episode < (0.5 * EPISODES):
+            dagent.epsilon_decay_3(episode, (0.5 * EPISODES))
 
-        # else:
-        #     dagent.epsilon_decay_2(episode, (0.5 * EPISODES))
+        else:
+            dagent.epsilon_decay_2(episode, (0.5 * EPISODES))
 
         env.close(episode, dagent.epsilon,
                   accumulated_reward)

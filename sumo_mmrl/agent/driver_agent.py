@@ -19,13 +19,15 @@ RIGHT = "r"
 
 PATH = "/Models/model.pt"
 
+TAU = 0.005
+
 
 class Dagent:
 
     def __init__(self, state_size, action_size, path) -> None:
         self.path = path
         self.direction_choices = [STRAIGHT, TURN_AROUND, RIGHT, LEFT]
-        self.memory = deque(maxlen=50_000)
+        self.memory = deque(maxlen=20_000)
         self.gamma = 0.95
         self.epsilon = 1
         self.epsilon_max = 1
@@ -37,13 +39,26 @@ class Dagent:
             "cuda" if T.cuda.is_available() else "cpu"
         )
 
+        self.policy_net = dqn.DQN(state_size, action_size)
+        self.target_net = dqn.DQN(state_size, action_size)
+        
         if os.path.exists(path + PATH):
-            self.policy_net = dqn.DQN(state_size, action_size)
-            self.policy_net.load_state_dict(T.load(path + PATH))
-            self.policy_net.eval()
-        else:
-            self.policy_net = dqn.DQN(state_size, action_size)
+            self.target_net.load_state_dict(T.load(path + PATH))
+            # self.policy_net.eval()
+
+        # self.policy_net = dqn.DQN(state_size, action_size)
+        # self.target_net = dqn.DQN(state_size, action_size)
         self.policy_net.to(device)
+        self.target_net.to(device)
+
+        
+        self.loss_fn = nn.HuberLoss()
+        self.optimizer = optim.RMSprop(self.policy_net.parameters(),
+                                  lr=self.learning_rate,)
+        # self.optimizer = optim.Adam(self.policy_net.parameters(),
+        #                        lr=self.learning_rate,)
+        # # optimizer = optim.AdamW(self.policy_net.parameters(),
+        #                         lr=self.learning_rate, amsgrad=True)
         
     def remember(self, state, action, reward, next_state, done):
 
@@ -83,45 +98,42 @@ class Dagent:
         return action, self.direction_choices.index(action), valid
 
     def replay(self, batch_size):
-        
-        loss_fn = nn.HuberLoss()
-        # optimizer = optim.RMSprop(self.policy_net.parameters(),
-        #                           lr=self.learning_rate,)
-        # optimizer = optim.Adam(self.policy_net.parameters(),
-        #                        lr=self.learning_rate,)
-        optimizer = optim.AdamW(self.policy_net.parameters(),
-                                lr=self.learning_rate, amsgrad=True)
 
         minibatch = random.sample(self.memory, batch_size)
 
         for state, action, reward, new_state, stage in minibatch:
-            optimizer.zero_grad(set_to_none=True)
+            self.optimizer.zero_grad(set_to_none=True)
             if stage != "done":
-                new_state_policy = self.policy_net(new_state)
+                new_state_policy = self.target_net(new_state)
                 adjusted_reward = reward + self.gamma * max(new_state_policy)
-                # output = self.policy_net(state)
-                output = new_state_policy
-                target = output.clone()
+                output = self.policy_net(state)
+                # output = new_state_policy
+                target = new_state_policy
                 target[action] = adjusted_reward
-                
+
             else:
                 output = self.policy_net(state)
-                target = output.clone()
+                # target = output.clone()
+                target = self.target_net(state)
                 target[action] = reward
 
-            loss = loss_fn(output, target)
+            loss = self.loss_fn(output, target)
             loss.backward()
-            optimizer.step()
-            optimizer.zero_grad()
+            # T.nn.utils.clip_grad_value_(self.policy_net.parameters(), 100)
+            self.optimizer.step()
+            # self.optimizer.zero_grad()
+
+    def soft_update(self):
+        target_net_state_dict = self.target_net.state_dict()
+        policy_net_state_dict = self.policy_net.state_dict()
+        for key in policy_net_state_dict:
+            target_net_state_dict[key] = policy_net_state_dict[key]*TAU + target_net_state_dict[key]*(1-TAU)
+        self.target_net.load_state_dict(target_net_state_dict)
+        
 
     def save(self):
         T.save(self.policy_net.state_dict(), self.path + PATH)
 
-
-
-
-
-        
 
     def epsilon_decay(self):
 

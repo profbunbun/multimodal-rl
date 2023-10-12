@@ -41,7 +41,7 @@ class Env:
         self.agent_step = 0
         self.accumulated_reward = 0
         self.reward = 0
-        self.state = []
+
 
         self.make_choice_flag = False  # changes if agent is in a valid
         # state to make a decison:
@@ -135,7 +135,7 @@ class Env:
         state.extend(outmask)
         self.stage = "pickup"
 
-        return self.state, self.stage, choices
+        return state, self.stage, choices
 
     def nullstep(self):
         vedge = self.vehicle.get_road()
@@ -173,10 +173,10 @@ class Env:
             # self.reward += 2
         elif self.old_dist < edge_distance:
             new_dist_check = -1
-            # self.reward += -1.5
+            self.reward += -0.2
         else:
-            new_dist_check = 0
-            # self.reward += -1
+            new_dist_check = -1
+            self.reward += -0.15
 
         if validator == 1:
             if self.make_choice_flag:
@@ -234,15 +234,16 @@ class Env:
                         self.make_choice_flag = True
                         self.reward += 100
 
-            self.state = []
-            self.state.extend(vedge_loc)
-            self.state.extend(dest_edge_loc)
-            self.state.append(self.sumo.simulation.getTime())
-            self.state.append(new_dist_check)
-            self.state.extend(outmask)
+            state = []
+            state.extend(vedge_loc)
+            state.extend(dest_edge_loc)
+            state.append(self.sumo.simulation.getTime())
+            state.append(edge_distance)
+            # state.append(new_dist_check)
+            state.extend(outmask)
             self.old_edge = vedge
             self.old_dist = edge_distance
-            return self.state, self.reward, self.stage, choices
+            return state, self.reward, self.stage, choices
     
         choices = self.vehicle.get_out_dict()
         (
@@ -258,17 +259,18 @@ class Env:
         self.reward += -15
         self.make_choice_flag = False
 
-        self.state = []
-        self.state.extend(vedge_loc)
-        self.state.extend(dest_edge_loc)
-        self.state.append(self.sumo.simulation.getTime())
-        self.state.append(new_dist_check)
-        self.state.extend(outmask)
+        state = []
+        state.extend(vedge_loc)
+        state.extend(dest_edge_loc)
+        state.append(self.sumo.simulation.getTime())
+        state.append(edge_distance)
+        # state.append(new_dist_check)
+        state.extend(outmask)
         self.old_edge = vedge
         self.old_dist = edge_distance
         self.accumulated_reward += self.reward
 
-        return self.state, self.reward, self.stage, choices
+        return state, self.reward, self.stage, choices
 
     def render(self, mode):
         if mode == "gui":

@@ -139,8 +139,10 @@ class Env:
 
     def nullstep(self):
         vedge = self.vehicle.get_road()
+
+
         if self.steps >= self.steps_per_episode:
-            self.accumulated_reward += -10
+            self.accumulated_reward += -1
             self.stage = "done"
 
         while not self.make_choice_flag and self.stage != "done":
@@ -180,7 +182,7 @@ class Env:
 
         if validator == 1:
             if self.make_choice_flag:
-                self.reward += -0.2
+                # self.reward += -0.2
                 self.vehicle.set_destination(action)
                 self.sumo.simulationStep()
                 self.make_choice_flag = False
@@ -195,7 +197,7 @@ class Env:
                 vedge, self.destination_edge, choices, self.edge_position
             )
             if vedge == self.destination_edge:
-                self.reward += 45
+                self.reward += 1
                 match self.stage:
                     case "pickup":
                         print(self.stage + " ", end="")
@@ -256,7 +258,7 @@ class Env:
         )
 
         self.stage = "done"
-        self.reward += -15
+        self.reward += -1.5
         self.make_choice_flag = False
 
         state = []

@@ -142,7 +142,7 @@ class Env:
 
 
         if self.steps >= self.steps_per_episode:
-            self.accumulated_reward += -1
+            self.accumulated_reward += -.3
             self.stage = "done"
 
         while not self.make_choice_flag and self.stage != "done":
@@ -261,7 +261,7 @@ class Env:
         )
 
         self.stage = "done"
-        self.reward += -1
+        self.reward += -.3
         self.make_choice_flag = False
 
         state = []

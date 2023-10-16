@@ -258,7 +258,7 @@ class Env:
         )
 
         self.stage = "done"
-        self.reward += -1.5
+        self.reward += -1
         self.make_choice_flag = False
 
         state = []

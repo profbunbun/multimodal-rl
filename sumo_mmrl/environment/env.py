@@ -200,6 +200,7 @@ class Env:
                 self.reward += 1
                 match self.stage:
                     case "pickup":
+                        self.reward += 1
                         print(self.stage + " ", end="")
                         self.stage = "dropoff"
                         self.make_choice_flag = True
@@ -208,6 +209,7 @@ class Env:
                             ).partition("_")[0]
 
                     case "dropoff":
+                        self.reward += 1
                         print(self.stage + " ", end="")
                         self.stage = "onbus"  # for test. change back to onbus
                         next_route_edge = self.bussroute[1].partition("_")[0]
@@ -215,6 +217,7 @@ class Env:
                         self.make_choice_flag = True
 
                     case "onbus":
+                        self.reward += 1
                         print(self.stage + " ", end="")
                         self.stage = "final"
                         self.make_choice_flag = True
@@ -234,7 +237,7 @@ class Env:
                         print(self.stage + " ", end="")
                         self.stage = "done"
                         self.make_choice_flag = True
-                        self.reward += 100
+                        self.reward += 1
 
             state = []
             state.extend(vedge_loc)

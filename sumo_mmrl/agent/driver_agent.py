@@ -27,13 +27,13 @@ class Dagent:
     def __init__(self, state_size, action_size, path) -> None:
         self.path = path
         self.direction_choices = [STRAIGHT, TURN_AROUND, RIGHT, LEFT]
-        self.memory = deque(maxlen=20_000)
-        self.gamma = 0.95
+        self.memory = deque(maxlen=10_000)
+        self.gamma = 0.98
         self.epsilon = 1
         self.epsilon_max = 1
         self.decay = 0.999
         self.epsilon_min = 0.01
-        self.learning_rate = 0.01
+        self.learning_rate = 0.001
         
         device = T.device(  # pylint: disable=E1101
             "cuda" if T.cuda.is_available() else "cpu"
@@ -53,12 +53,12 @@ class Dagent:
 
         
         self.loss_fn = nn.HuberLoss()
-        self.optimizer = optim.RMSprop(self.policy_net.parameters(),
-                                  lr=self.learning_rate,)
+        # self.optimizer = optim.RMSprop(self.policy_net.parameters(),
+        #                           lr=self.learning_rate,)
         # self.optimizer = optim.Adam(self.policy_net.parameters(),
         #                        lr=self.learning_rate,)
-        # # optimizer = optim.AdamW(self.policy_net.parameters(),
-        #                         lr=self.learning_rate, amsgrad=True)
+        self.optimizer = optim.AdamW(self.policy_net.parameters(),
+                                     lr=self.learning_rate, amsgrad=True)
         
     def remember(self, state, action, reward, next_state, done):
 
@@ -129,11 +129,15 @@ class Dagent:
         for key in policy_net_state_dict:
             target_net_state_dict[key] = policy_net_state_dict[key]*TAU + target_net_state_dict[key]*(1-TAU)
         self.target_net.load_state_dict(target_net_state_dict)
-        
 
+    def hard_update(self):
+       
+        policy_net_state_dict = self.policy_net.state_dict()
+        
+        self.target_net.load_state_dict(policy_net_state_dict)
+        
     def save(self):
         T.save(self.policy_net.state_dict(), self.path + PATH)
-
 
     def epsilon_decay(self):
 

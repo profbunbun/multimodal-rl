@@ -131,6 +131,7 @@ class Env:
         state.extend(vedge_loc)
         state.extend(dest_edge_loc)
         state.append(self.sumo.simulation.getTime())
+        state.append(edge_distance)
         state.append(new_dist_check)
         state.extend(outmask)
         self.stage = "pickup"
@@ -140,9 +141,8 @@ class Env:
     def nullstep(self):
         vedge = self.vehicle.get_road()
 
-
         if self.steps >= self.steps_per_episode:
-            self.accumulated_reward += -.3
+            self.reward += -10
             self.stage = "done"
 
         while not self.make_choice_flag and self.stage != "done":
@@ -173,12 +173,12 @@ class Env:
             new_dist_check = 1
             self.reward += 0.1
             # self.reward += 2
-        elif self.old_dist < edge_distance:
-            new_dist_check = -1
-            self.reward += -0.2
         else:
             new_dist_check = -1
-            self.reward += -0.15
+            # self.reward += -0.01
+        # else:
+        #     new_dist_check = -1
+        #     self.reward += -0.15
 
         if validator == 1:
             if self.make_choice_flag:
@@ -197,7 +197,7 @@ class Env:
                 vedge, self.destination_edge, choices, self.edge_position
             )
             if vedge == self.destination_edge:
-                self.reward += 1
+                self.reward += 10
                 match self.stage:
                     case "pickup":
                         self.reward += 1
@@ -244,7 +244,7 @@ class Env:
             state.extend(dest_edge_loc)
             state.append(self.sumo.simulation.getTime())
             state.append(edge_distance)
-            # state.append(new_dist_check)
+            state.append(new_dist_check)
             state.extend(outmask)
             self.old_edge = vedge
             self.old_dist = edge_distance
@@ -261,7 +261,7 @@ class Env:
         )
 
         self.stage = "done"
-        self.reward += -.3
+        self.reward += -5
         self.make_choice_flag = False
 
         state = []
@@ -269,7 +269,7 @@ class Env:
         state.extend(dest_edge_loc)
         state.append(self.sumo.simulation.getTime())
         state.append(edge_distance)
-        # state.append(new_dist_check)
+        state.append(new_dist_check)
         state.extend(outmask)
         self.old_edge = vedge
         self.old_dist = edge_distance

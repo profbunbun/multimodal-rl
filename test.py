@@ -2,7 +2,7 @@ from sumo_mmrl import Dagent
 from sumo_mmrl.environment.env import Env
 
 # import time
-EPISODES = 10_000
+EPISODES = 50_000
 STEPS = 1000
 BATCH_SIZE = 32
 MIN_MEMORY = 2000
@@ -14,7 +14,7 @@ TYPES = 1
 
 def main():
     env = Env(EXPERIMENT_PATH, SUMOCONFIG, STEPS, NUM_VEHIC, TYPES, "A")
-    dagent = Dagent(10, 4, EXPERIMENT_PATH)
+    dagent = Dagent(11, 4, EXPERIMENT_PATH)
 
     for episode in range(EPISODES + 1):
         accumulated_reward = 0
@@ -36,12 +36,17 @@ def main():
 
             accumulated_reward += new_reward
             dagent.remember(state, action_index, new_reward, next_state, stage)
+            # dagent.remember(state, action_index, new_reward, next_state, stage)
             state = next_state
 
             if len(dagent.memory) > BATCH_SIZE:
                 dagent.replay(BATCH_SIZE)
                 if episode % 2 == 0:
                     dagent.soft_update()
+                    # dagent.hard_update()
+                if episode % 10 == 0:
+                    # dagent.soft_update()
+                    dagent.hard_update()
 
         # dagent.eps_linear(EPISODES)
 

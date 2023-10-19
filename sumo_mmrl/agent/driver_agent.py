@@ -27,7 +27,7 @@ class Dagent:
     def __init__(self, state_size, action_size, path) -> None:
         self.path = path
         self.direction_choices = [STRAIGHT, TURN_AROUND, RIGHT, LEFT]
-        self.memory = deque(maxlen=10_000)
+        self.memory = deque(maxlen=100_000)
         self.gamma = 0.98
         self.epsilon = 1
         self.epsilon_max = 1

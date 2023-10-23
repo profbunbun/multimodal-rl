@@ -42,7 +42,6 @@ class Env:
         self.accumulated_reward = 0
         self.reward = 0
 
-
         self.make_choice_flag = False  # changes if agent is in a valid
         # state to make a decison:
         # not an intersection,
@@ -132,9 +131,11 @@ class Env:
         state.extend(dest_edge_loc)
         state.append(self.sumo.simulation.getTime())
         state.append(edge_distance)
+        state = self.normalize(state, 0, 1)
         state.append(new_dist_check)
         state.extend(outmask)
         self.stage = "pickup"
+
 
         return state, self.stage, choices
 
@@ -244,6 +245,7 @@ class Env:
             state.extend(dest_edge_loc)
             state.append(self.sumo.simulation.getTime())
             state.append(edge_distance)
+            state = self.normalize(state, 0, 1)
             state.append(new_dist_check)
             state.extend(outmask)
             self.old_edge = vedge
@@ -269,12 +271,12 @@ class Env:
         state.extend(dest_edge_loc)
         state.append(self.sumo.simulation.getTime())
         state.append(edge_distance)
+        state = self.normalize(state, 0, 1)
         state.append(new_dist_check)
         state.extend(outmask)
         self.old_edge = vedge
         self.old_dist = edge_distance
         self.accumulated_reward += self.reward
-
         return state, self.reward, self.stage, choices
 
     def render(self, mode):
@@ -318,3 +320,13 @@ class Env:
 
     def manhat_dist(self, x1, y1, x2, y2):
         return abs(x1 - x2) + abs(y1 - y2)
+
+
+    def normalize(self, arr, t_min, t_max):
+        norm_arr = []
+        diff = t_max - t_min
+        diff_arr = max(arr) - min(arr)
+        for i in arr:
+            temp = (((i - min(arr))*diff)/diff_arr) + t_min
+            norm_arr.append(temp)
+        return norm_arr

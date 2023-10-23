@@ -13,11 +13,14 @@ class DQN(nn.Module):
             "cuda" if T.cuda.is_available() else "cpu"
         )
         self.layer1 = nn.Linear(state_size, 16)
+        nn.init.uniform_(self.layer1.weight, 0, 1)
 
         self.layer2 = nn.Linear(16, 8)
+        nn.init.uniform_(self.layer2.weight, 0, 1)
         # self.layer2b = nn.Linear(64, 32)
 
         self.layer3 = nn.Linear(8, action_size)
+        nn.init.uniform_(self.layer3.weight, 0, 1)
 
     def forward(self, x_net):
 

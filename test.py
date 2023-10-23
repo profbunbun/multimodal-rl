@@ -2,7 +2,7 @@ from sumo_mmrl import Dagent
 from sumo_mmrl.environment.env import Env
 
 # import time
-EPISODES = 10_000
+EPISODES = 1_000
 STEPS = 1000
 BATCH_SIZE = 32
 MIN_MEMORY = 2000

@@ -1,5 +1,6 @@
 """  """
 
+import math
 import numpy as np
 from .connect import SUMOConnection
 from .net_parser import NetParser
@@ -130,8 +131,8 @@ class Env:
         state.extend(vedge_loc)
         state.extend(dest_edge_loc)
         state.append(self.sumo.simulation.getTime())
-        state.append(edge_distance)
-        state = self.normalize(state, 0, 1)
+        state.append(math.log(edge_distance+1))
+        # state = self.normalize(state, 0, 1)
         state.append(new_dist_check)
         state.extend(outmask)
         self.stage = "pickup"
@@ -143,7 +144,7 @@ class Env:
         vedge = self.vehicle.get_road()
 
         if self.steps >= self.steps_per_episode:
-            self.reward += -10
+            self.reward += -100
             self.stage = "done"
 
         while not self.make_choice_flag and self.stage != "done":
@@ -201,7 +202,7 @@ class Env:
                 self.reward += 10
                 match self.stage:
                     case "pickup":
-                        self.reward += 1
+                        self.reward += 10
                         print(self.stage + " ", end="")
                         self.stage = "dropoff"
                         self.make_choice_flag = True
@@ -210,7 +211,7 @@ class Env:
                             ).partition("_")[0]
 
                     case "dropoff":
-                        self.reward += 1
+                        self.reward += 10
                         print(self.stage + " ", end="")
                         self.stage = "onbus"  # for test. change back to onbus
                         next_route_edge = self.bussroute[1].partition("_")[0]
@@ -218,7 +219,7 @@ class Env:
                         self.make_choice_flag = True
 
                     case "onbus":
-                        self.reward += 1
+                        self.reward += 10
                         print(self.stage + " ", end="")
                         self.stage = "final"
                         self.make_choice_flag = True
@@ -235,17 +236,18 @@ class Env:
                             dest_loc[1])
 
                     case "final":
+                        self.reward += 100
                         print(self.stage + " ", end="")
                         self.stage = "done"
                         self.make_choice_flag = True
-                        self.reward += 1
+                       
 
             state = []
             state.extend(vedge_loc)
             state.extend(dest_edge_loc)
             state.append(self.sumo.simulation.getTime())
-            state.append(edge_distance)
-            state = self.normalize(state, 0, 1)
+            state.append(math.log(edge_distance+1))
+            # state = self.normalize(state, 0, 1)
             state.append(new_dist_check)
             state.extend(outmask)
             self.old_edge = vedge
@@ -263,15 +265,15 @@ class Env:
         )
 
         self.stage = "done"
-        self.reward += -5
+        self.reward += -10
         self.make_choice_flag = False
 
         state = []
         state.extend(vedge_loc)
         state.extend(dest_edge_loc)
         state.append(self.sumo.simulation.getTime())
-        state.append(edge_distance)
-        state = self.normalize(state, 0, 1)
+        state.append(math.log(edge_distance+1))
+        # state = self.normalize(state, 0, 1)
         state.append(new_dist_check)
         state.extend(outmask)
         self.old_edge = vedge
@@ -320,7 +322,6 @@ class Env:
 
     def manhat_dist(self, x1, y1, x2, y2):
         return abs(x1 - x2) + abs(y1 - y2)
-
 
     def normalize(self, arr, t_min, t_max):
         norm_arr = []

@@ -34,6 +34,8 @@ class Env:
             self.parser.get_edge_pos_dic()
         )  # This creates the x y positions of all the lanes
 
+        self.max = self.parser.get_max_manhattan()
+
         self.sumo = None  # this becomes the sumo conection used after GUI 
         # or command line is decided
         self.path = path  # path to the experiment folder  for simulation data
@@ -131,12 +133,11 @@ class Env:
         state.extend(vedge_loc)
         state.extend(dest_edge_loc)
         state.append(self.sumo.simulation.getTime())
-        state.append(math.log(edge_distance+1))
-        # state = self.normalize(state, 0, 1)
+        # state.append(math.log(edge_distance+1))
+        state = self.new_range(edge_distance, self.max, 10)
         state.append(new_dist_check)
         state.extend(outmask)
         self.stage = "pickup"
-
 
         return state, self.stage, choices
 
@@ -246,8 +247,9 @@ class Env:
             state.extend(vedge_loc)
             state.extend(dest_edge_loc)
             state.append(self.sumo.simulation.getTime())
-            state.append(math.log(edge_distance+1))
-            # state = self.normalize(state, 0, 1)
+            # state.append(math.log(edge_distance+1))
+            # state = self.normalize(state, 0, self.max)
+            state = self.new_range(edge_distance, self.max, 10)
             state.append(new_dist_check)
             state.extend(outmask)
             self.old_edge = vedge
@@ -272,8 +274,8 @@ class Env:
         state.extend(vedge_loc)
         state.extend(dest_edge_loc)
         state.append(self.sumo.simulation.getTime())
-        state.append(math.log(edge_distance+1))
-        # state = self.normalize(state, 0, 1)
+        # state.append(math.log(edge_distance+1))
+        state = self.new_range(edge_distance, self.max, 10)
         state.append(new_dist_check)
         state.extend(outmask)
         self.old_edge = vedge
@@ -331,3 +333,11 @@ class Env:
             temp = (((i - min(arr))*diff)/diff_arr) + t_min
             norm_arr.append(temp)
         return norm_arr
+
+    def new_range(self, old_val, old_max, new_max):
+        old_min = 0
+        new_min = 0
+        return (
+            ((old_val - old_min) * (new_max - new_min))
+            / (old_max - old_min)) + new_min
+        

@@ -9,6 +9,7 @@ class NetParser:
         self.sumocfg = sumocfg
 
     def parse_net_files(self):
+        '''get net file from the sumo config file '''
 
         tree = ET.parse(self.sumocfg)
         root = tree.getroot()
@@ -18,6 +19,7 @@ class NetParser:
             return network_file
 
     def _clean_path(self):
+        '''clean file path '''
 
         net_file = self.parse_net_files()
         path_ = self.sumocfg.rsplit("/")
@@ -26,6 +28,7 @@ class NetParser:
         return sumolib.net.readNet(path_b + "/" + net_file)
 
     def get_edges_info(self):
+        ''' gets list of edges'''
 
         net = self._clean_path()
         edge_list = []
@@ -36,6 +39,7 @@ class NetParser:
         return edge_list
 
     def get_edge_pos_dic(self):
+        ''' gets xy coords of the center of the edge'''
 
         net = self._clean_path()
         edge_position_dict = {}
@@ -55,6 +59,7 @@ class NetParser:
         return edge_position_dict
 
     def get_out_dic(self):
+        ''' gets dic of connecting edges for each edge'''
 
         net = self._clean_path()
         out_dict = {}
@@ -78,6 +83,7 @@ class NetParser:
         return out_dict
 
     def get_edge_index(self):
+        '''indexed dic of edge ids'''
 
         net = self._clean_path()
         index_dict = {}
@@ -114,3 +120,26 @@ class NetParser:
                 edge_ids = route.edges.split()
         # print (edge_ids)
         return edge_ids
+
+    def get_max_manhattan(self):
+        a=self.get_edge_pos_dic()
+        a=list(a.values())
+        n=len(a)
+        
+        V = [0 for i in range(n)]
+        V1 = [0 for i in range(n)]
+ 
+        for i in range(n):
+            V[i] = a[i][0] + a[i][1]
+            V1[i] = [i][0] - a[i][1]
+ 
+        # Sorting both the vectors
+        V.sort()
+        V1.sort()
+    
+        maximum = max(V[-1] - V[0],
+                    V1[-1] - V1[0])
+ 
+        print(maximum)
+
+        return maximum

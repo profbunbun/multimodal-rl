@@ -12,10 +12,7 @@ from . import dqn
 random.seed(0)
 
 
-STRAIGHT = "s"
-TURN_AROUND = "t"
-LEFT = "l"
-RIGHT = "r"
+
 
 PATH = "/Models/model.pt"
 
@@ -26,7 +23,7 @@ class Dagent:
 
     def __init__(self, state_size, action_size, path) -> None:
         self.path = path
-        self.direction_choices = [STRAIGHT, TURN_AROUND, RIGHT, LEFT]
+        self.direction_choices = ['s', 't', 'l', 'r']
         self.memory = deque(maxlen=100_000)
         self.gamma = 0.98
         self.epsilon = 1

@@ -12,15 +12,18 @@ class DQN(nn.Module):
         self.device = T.device(  # pylint: disable=E1101
             "cuda" if T.cuda.is_available() else "cpu"
         )
-        self.layer1 = nn.Linear(state_size, 16)
-        nn.init.uniform_(self.layer1.weight, 0, 1)
+        self.layer1 = nn.Linear(state_size, 64)
+        # nn.init.uniform_(self.layer1.weight, 0, 1)
+        nn.init.zeros_(self.layer1.weight)
 
-        self.layer2 = nn.Linear(16, 8)
-        nn.init.uniform_(self.layer2.weight, 0, 1)
+        self.layer2 = nn.Linear(64, 64)
+        # nn.init.uniform_(self.layer2.weight, 0, 1)
+        nn.init.zeros_(self.layer2.weight)
         # self.layer2b = nn.Linear(64, 32)
 
-        self.layer3 = nn.Linear(8, action_size)
-        nn.init.uniform_(self.layer3.weight, 0, 1)
+        self.layer3 = nn.Linear(64, action_size)
+        # nn.init.uniform_(self.layer3.weight, 0, 1)
+        nn.init.zeros_(self.layer3.weight)
 
     def forward(self, x_net):
 

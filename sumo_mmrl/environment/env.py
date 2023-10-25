@@ -144,7 +144,7 @@ class Env:
         vedge = self.vehicle.get_road()
 
         if self.steps >= self.steps_per_episode:
-            self.reward += -100
+            self.reward += -10
             self.stage = "done"
 
         while not self.make_choice_flag and self.stage != "done":
@@ -173,7 +173,7 @@ class Env:
 
         if self.old_dist > edge_distance:
             new_dist_check = 1
-            self.reward += 0.1
+            self.reward += 1
             # self.reward += 2
         else:
             new_dist_check = -1
@@ -199,7 +199,7 @@ class Env:
                 vedge, self.destination_edge, choices, self.edge_position
             )
             if vedge == self.destination_edge:
-                self.reward += 10
+                self.reward += 20
                 match self.stage:
                     case "pickup":
                         self.reward += 10

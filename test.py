@@ -2,8 +2,8 @@ from sumo_mmrl import Dagent
 from sumo_mmrl.environment.env import Env
 
 # import time
-EPISODES = 1_000
-STEPS = 1000
+EPISODES = 20_000
+STEPS = 500
 BATCH_SIZE = 32
 MIN_MEMORY = 2000
 EXPERIMENT_PATH = "Experiments/3x3"
@@ -39,7 +39,7 @@ def main():
             # dagent.remember(state, action_index, new_reward, next_state, stage)
             state = next_state
 
-            if len(dagent.memory) > BATCH_SIZE:
+            if len(dagent.memory) > MIN_MEMORY:
                 dagent.replay(BATCH_SIZE)
                 if episode % 2 == 0:
                     dagent.soft_update()

@@ -8,11 +8,11 @@ from torch import nn
 from torch import optim
 import numpy as np
 from . import dqn
+from torch.utils.tensorboard import SummaryWriter
+
+writer = SummaryWriter()
 
 random.seed(0)
-
-
-
 
 PATH = "/Models/model.pt"
 
@@ -30,7 +30,7 @@ class Dagent:
         self.epsilon_max = 1
         self.decay = 0.999
         self.epsilon_min = 0.01
-        self.learning_rate = 0.0001
+        self.learning_rate = 0.001
         
         device = T.device(  # pylint: disable=E1101
             "cuda" if T.cuda.is_available() else "cpu"
@@ -48,7 +48,6 @@ class Dagent:
         self.policy_net.to(device)
         self.target_net.to(device)
 
-        
         self.loss_fn = nn.HuberLoss()
         # self.optimizer = optim.RMSprop(self.policy_net.parameters(),
         #                           lr=self.learning_rate,)
@@ -97,10 +96,17 @@ class Dagent:
     def replay(self, batch_size):
 
         minibatch = random.sample(self.memory, batch_size)
+        step = 1
 
-        for state, action, reward, new_state, stage in minibatch:
+        # for state, action, reward, new_state, done in minibatch:
+        for i in minibatch:
+            state = i[0]
+            action = i[1]
+            reward = i[2]
+            new_state = i[3]
+            done = i[4]
             self.optimizer.zero_grad(set_to_none=True)
-            if stage != "done":
+            if done != "1":
                 new_state_policy = self.target_net(new_state)
                 adjusted_reward = reward + self.gamma * max(new_state_policy)
                 output = self.policy_net(state)
@@ -117,8 +123,10 @@ class Dagent:
             loss = self.loss_fn(output, target)
             loss.backward()
             # T.nn.utils.clip_grad_value_(self.policy_net.parameters(), 100)
+            self.optimizer.zero_grad()
+            writer.add_scalar("Loss/train", loss, step)
             self.optimizer.step()
-            # self.optimizer.zero_grad()
+            step += 1
 
     def soft_update(self):
         target_net_state_dict = self.target_net.state_dict()

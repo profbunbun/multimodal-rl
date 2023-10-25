@@ -2,7 +2,7 @@ from sumo_mmrl import Dagent
 from sumo_mmrl.environment.env import Env
 
 # import time
-EPISODES = 20_000
+EPISODES = 2_000
 STEPS = 500
 BATCH_SIZE = 32
 MIN_MEMORY = 2000
@@ -35,8 +35,9 @@ def main():
              legal_actions) = env.step(action, validator)
 
             accumulated_reward += new_reward
-            dagent.remember(state, action_index, new_reward, next_state, stage)
-            # dagent.remember(state, action_index, new_reward, next_state, stage)
+            
+            dagent.remember(state, action_index, new_reward, next_state, done=0)
+           
             state = next_state
 
             if len(dagent.memory) > MIN_MEMORY:
@@ -47,9 +48,9 @@ def main():
                 if episode % 10 == 0:
                     # dagent.soft_update()
                     dagent.hard_update()
+        dagent.remember(state, action_index, new_reward, next_state, done=1)
 
         # dagent.eps_linear(EPISODES)
-
         
         # dagent.epsilon_null()
 

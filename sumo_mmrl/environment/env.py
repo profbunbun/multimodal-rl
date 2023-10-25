@@ -134,7 +134,7 @@ class Env:
         state.extend(dest_edge_loc)
         state.append(self.sumo.simulation.getTime())
         # state.append(math.log(edge_distance+1))
-        state = self.new_range(edge_distance, self.max, 10)
+        state.append(self.new_range(edge_distance, self.max, 10))
         state.append(new_dist_check)
         state.extend(outmask)
         self.stage = "pickup"
@@ -249,7 +249,7 @@ class Env:
             state.append(self.sumo.simulation.getTime())
             # state.append(math.log(edge_distance+1))
             # state = self.normalize(state, 0, self.max)
-            state = self.new_range(edge_distance, self.max, 10)
+            state.append(self.new_range(edge_distance, self.max, 10))
             state.append(new_dist_check)
             state.extend(outmask)
             self.old_edge = vedge
@@ -275,7 +275,7 @@ class Env:
         state.extend(dest_edge_loc)
         state.append(self.sumo.simulation.getTime())
         # state.append(math.log(edge_distance+1))
-        state = self.new_range(edge_distance, self.max, 10)
+        state.append(self.new_range(edge_distance, self.max, 10))
         state.append(new_dist_check)
         state.extend(outmask)
         self.old_edge = vedge

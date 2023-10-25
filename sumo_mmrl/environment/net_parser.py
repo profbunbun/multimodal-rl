@@ -140,6 +140,6 @@ class NetParser:
         maximum = max(V[-1] - V[0],
                     V1[-1] - V1[0])
  
-        print(maximum)
+        # print(maximum)
 
         return maximum

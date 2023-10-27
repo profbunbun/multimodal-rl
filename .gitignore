@@ -1,4 +1,7 @@
 .vscode/settings.json
 runs
 Experiments/old
-
+__pycache__
+sumo_mmrl/__pycache__
+sumo_mmrl/agent/__pycache__
+sumo_mmrl/enviroment/__pycache__

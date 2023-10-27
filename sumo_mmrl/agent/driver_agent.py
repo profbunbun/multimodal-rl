@@ -6,9 +6,9 @@ import math
 import torch as T
 from torch import nn
 from torch import optim
+from torch.utils.tensorboard import SummaryWriter
 import numpy as np
 from . import dqn
-from torch.utils.tensorboard import SummaryWriter
 
 writer = SummaryWriter()
 
@@ -30,7 +30,7 @@ class Dagent:
         self.epsilon_max = 1
         self.decay = 0.999
         self.epsilon_min = 0.01
-        self.learning_rate = 0.001
+        self.learning_rate = 0.01
         
         device = T.device(  # pylint: disable=E1101
             "cuda" if T.cuda.is_available() else "cpu"

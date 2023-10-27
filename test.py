@@ -42,14 +42,14 @@ def main():
 
             if len(dagent.memory) > MIN_MEMORY:
                 dagent.replay(BATCH_SIZE)
-                if episode % 2 == 0:
-                    dagent.soft_update()
-                    # dagent.hard_update()
-                if episode % 10 == 0:
-                    # dagent.soft_update()
-                    dagent.hard_update()
+                
         dagent.remember(state, action_index, new_reward, next_state, done=1)
-
+        if episode % 2 == 0:
+            dagent.soft_update()
+                # dagent.hard_update()
+        if episode % 10 == 0:
+            # dagent.soft_update()
+            dagent.hard_update()
         # dagent.eps_linear(EPISODES)
         
         # dagent.epsilon_null()

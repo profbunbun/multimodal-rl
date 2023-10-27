@@ -1,71 +1,69 @@
-import gymnasium as gym
-import torch as T
-import numpy as np
-from Env.env import Basic
+from sumo_mmrl import Dagent
+from sumo_mmrl.environment.env import Env
 
-from Util.utility import Utility
-from Agent.agent import Agent
+# import time
+EPISODES = 2_000
+STEPS = 500
+BATCH_SIZE = 32
+MIN_MEMORY = 2000
+EXPERIMENT_PATH = "Experiments/3x3"
+SUMOCONFIG = "/Nets/3x3b.sumocfg"
+NUM_VEHIC = 1
+TYPES = 1
 
 
-EPISODES=1000
-STEPS=3000
-batch_size=32
-env = Basic("Nets/3x3.net.xml","Nets/S3x3.rou.xml",False)
-agent = Agent(4,3)
-util=Utility()
+def main():
+    env = Env(EXPERIMENT_PATH, SUMOCONFIG, STEPS, NUM_VEHIC, TYPES, "A")
+    dagent = Dagent(11, 4, EXPERIMENT_PATH)
 
-rewards,eps_history=[],[]
-for episode in range(EPISODES):
-    done=False
-    state ,reward,no_choice,lane, out_dict= env.reset()
-    state=T.from_numpy(state)
-    step=0
-    agent_step=0
-    episode_reward=0
-    
-    # fix render
-    # env.render('human')
-    while not done:
-             
-             if not env.no_choice:
-                action=agent.act(state)
-                next_state,new_reward, done = env.step(action) 
-                next_state,new_reward=T.from_numpy(next_state),T.from_numpy(new_reward)
-                agent_step+=1
-                agent.remember(state,action,new_reward,next_state,done)
-                state=next_state
-                episode_reward+=new_reward
-                # if (len(agent.memory)> 1000) :
-                #         agent.replay(batch_size)
-                
-                
-             else:
-                 env.nullstep()
+    for episode in range(EPISODES + 1):
+        accumulated_reward = 0
+
+        # if (episode) % 100 == 0:
+        #     env.render("gui")
+        # else:
+        #     env.render("libsumo")
+        env.render("libsumo")
+
+        state, stage, legal_actions = env.reset()
+
+        while stage != "done":
+            (action, action_index, validator) = dagent.choose_action(
+                state, legal_actions)
+        
+            (next_state, new_reward, stage,
+             legal_actions) = env.step(action, validator)
+
+            accumulated_reward += new_reward
             
-             if (len(agent.memory)> batch_size) and (step % batch_size == 0):
-                        agent.replay(batch_size)
-                        
-             step+=1
-             
-    # if (len(agent.memory)> batch_size) :
-    #                     agent.replay(batch_size)         
-    
-    agent.epsilon_decay_2(episode,EPISODES)   
-    
-          
-    r = float(episode_reward)  
-    # r = float(new_reward)   
-    rewards.append(r)
-    
-    eps_history.append(agent.epsilon)
-    avg_reward = np.mean(rewards[-100:])
-    # avg_reward = np.mean(rewards)   
-       
-    print('EP: ', episode,'Reward: %.3f' % r,
-            ' Average Reward %.3f' % avg_reward  ,
-            'epsilon %.5f' % agent.epsilon," **** step: ",step,"*** Agent steps: ", agent_step)
-    x = [i+1 for i in range(len(rewards))]
-    filename = 'sumo-agent.png'
-    
-    util.plotLearning(x, rewards, eps_history, filename)              
-    env.close()
+            dagent.remember(state, action_index, new_reward, next_state, done=0)
+           
+            state = next_state
+
+            if len(dagent.memory) > MIN_MEMORY:
+                dagent.replay(BATCH_SIZE)
+                if episode % 2 == 0:
+                    dagent.soft_update()
+                    # dagent.hard_update()
+                if episode % 10 == 0:
+                    # dagent.soft_update()
+                    dagent.hard_update()
+        dagent.remember(state, action_index, new_reward, next_state, done=1)
+
+        # dagent.eps_linear(EPISODES)
+        
+        # dagent.epsilon_null()
+
+        if episode < (0.8 * EPISODES):
+            dagent.eps_linear(0.8 * EPISODES)
+
+        else:
+            dagent.epsilon_decay_2(episode, (0.2 * EPISODES))
+
+        env.close(episode, dagent.epsilon,
+                  accumulated_reward)
+        dagent.save()
+
+
+if __name__ == "__main__":
+    main()

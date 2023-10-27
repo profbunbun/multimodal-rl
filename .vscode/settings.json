@@ -1,4 +1,7 @@
 {
+    "json.schemaDownload.enable": true,
+
+   
     "python.autoComplete.extraPaths": [
        "/usr/share/sumo/bin","/usr/share/sumo/tools" 
     ],
@@ -7,10 +10,30 @@
         "/usr/share/sumo/tools"
     ],
     "python.analysis.typeCheckingMode": "off",
+    // "[python]": {
+    //     "editor.defaultFormatter": "ms-python.python"
+    // },
+    // "python.formatting.provider": "black",
+    "workbench.settings.openDefaultSettings": false,
+    "workbench.commandPalette.experimental.suggestCommands": true,
+    "python.linting.pylintEnabled": true,
+    "python.linting.enabled": true,
+    "python.createEnvironment.contentButton": "show",
     "[python]": {
-        "editor.defaultFormatter": "ms-python.autopep8"
+        "editor.defaultFormatter": "ms-python.python"
     },
-    "python.formatting.provider": "none"
+    "python.formatting.provider": "black",
+    "pylint.args": [
+        "--extension-pkg-whitelist=pytorch.*,torch.*",
+        "--generated-members=torch",
+        "--good-names=x,y,t,df,x1,y1,x2,y2"
+    ],
+    "cSpell.words": [
+        "SUMOCONFIG"
+    ],
+  
+    // "workbench.settings.editor": "json"
+   
     
     
 }

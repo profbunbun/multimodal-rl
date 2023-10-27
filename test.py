@@ -2,7 +2,7 @@ from sumo_mmrl import Dagent
 from sumo_mmrl.environment.env import Env
 
 # import time
-EPISODES = 2_000
+EPISODES = 1_000
 STEPS = 500
 BATCH_SIZE = 32
 MIN_MEMORY = 2000
@@ -50,6 +50,8 @@ def main():
         if episode % 10 == 0:
             # dagent.soft_update()
             dagent.hard_update()
+
+            
         # dagent.eps_linear(EPISODES)
         
         # dagent.epsilon_null()

@@ -1,6 +1,5 @@
 """  """
 
-import math
 import numpy as np
 from .connect import SUMOConnection
 from .net_parser import NetParser
@@ -33,7 +32,7 @@ class Env:
         self.edge_position = (
             self.parser.get_edge_pos_dic()
         )  # This creates the x y positions of all the lanes
-
+        
         self.max = self.parser.get_max_manhattan()
 
         self.sumo = None  # this becomes the sumo conection used after GUI 
@@ -76,6 +75,7 @@ class Env:
         self.bussroute = self.parser.get_route_edges()
 
     def reset(self):
+        
         self.steps = 0
         self.agent_step = 0
         self.accumulated_reward = 0
@@ -130,9 +130,20 @@ class Env:
 
         new_dist_check = 1
         state = []
-        state.extend(vedge_loc)
-        state.extend(dest_edge_loc)
-        state.append(self.sumo.simulation.getTime())
+        xmin = self.parser.net_minmax()[0][0]
+        xmax = self.parser.net_minmax()[1][0]
+        ymin = self.parser.net_minmax()[0][1]
+        ymax = self.parser.net_minmax()[1][1]
+        vx = self.scale_xy(vedge_loc[0], xmin, xmax, 0, 1)
+        vy = self.scale_xy(vedge_loc[1], ymin, ymax, 0, 1)
+        destx = self.scale_xy(dest_edge_loc[0], xmin, xmax, 0, 1)
+        desty = self.scale_xy(dest_edge_loc[1], ymin, ymax, 0, 1)
+        state.append(vx)
+        state.append(vy)
+        state.append(destx)
+        state.append(desty)
+        state.append(self.agent_step)
+        # state.append(self.sumo.simulation.getTime())
         # state.append(math.log(edge_distance+1))
         state.append(self.new_range(edge_distance, self.max, 10))
         state.append(new_dist_check)
@@ -244,9 +255,19 @@ class Env:
                        
 
             state = []
-            state.extend(vedge_loc)
-            state.extend(dest_edge_loc)
-            state.append(self.sumo.simulation.getTime())
+            xmin = self.parser.net_minmax()[0][0]
+            xmax = self.parser.net_minmax()[1][0]
+            ymin = self.parser.net_minmax()[0][1]
+            ymax = self.parser.net_minmax()[1][1]
+            vx = self.scale_xy(vedge_loc[0], xmin, xmax, 0, 1)
+            vy = self.scale_xy(vedge_loc[1], ymin, ymax, 0, 1)
+            destx = self.scale_xy(dest_edge_loc[0], xmin, xmax, 0, 1)
+            desty = self.scale_xy(dest_edge_loc[1], ymin, ymax, 0, 1)
+            state.append(vx)
+            state.append(vy)
+            state.append(destx)
+            state.append(desty)
+            state.append(self.agent_step)
             # state.append(math.log(edge_distance+1))
             # state = self.normalize(state, 0, self.max)
             state.append(self.new_range(edge_distance, self.max, 10))
@@ -271,9 +292,19 @@ class Env:
         self.make_choice_flag = False
 
         state = []
-        state.extend(vedge_loc)
-        state.extend(dest_edge_loc)
-        state.append(self.sumo.simulation.getTime())
+        xmin = self.parser.net_minmax()[0][0]
+        xmax = self.parser.net_minmax()[1][0]
+        ymin = self.parser.net_minmax()[0][1]
+        ymax = self.parser.net_minmax()[1][1]
+        vx = self.scale_xy(vedge_loc[0], xmin, xmax, 0, 1)
+        vy = self.scale_xy(vedge_loc[1], ymin, ymax, 0, 1)
+        destx = self.scale_xy(dest_edge_loc[0], xmin, xmax, 0, 1)
+        desty = self.scale_xy(dest_edge_loc[1], ymin, ymax, 0, 1)
+        state.append(vx)
+        state.append(vy)
+        state.append(destx)
+        state.append(desty)
+        state.append(self.agent_step)
         # state.append(math.log(edge_distance+1))
         state.append(self.new_range(edge_distance, self.max, 10))
         state.append(new_dist_check)
@@ -341,3 +372,8 @@ class Env:
             ((old_val - old_min) * (new_max - new_min))
             / (old_max - old_min)) + new_min
         
+    def scale_xy(self, old_val, old_min, old_max, new_min, new_max):
+        
+        return (
+            ((old_val - old_min) * (new_max - new_min))
+            / (old_max - old_min)) + new_min

@@ -3,6 +3,7 @@ import sys
 import os
 import traci
 import libsumo
+import sumolib
 
 
 if "SUMO_HOME" in os.environ:
@@ -110,5 +111,5 @@ class SUMOConnection:
         for stop in stops:
             lanes.append(self.sumo_.busstop.getLaneID(stop))
         return lanes
-    
+
     

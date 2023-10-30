@@ -27,6 +27,7 @@ class NetParser:
         path_b = "/".join(path_)
         return sumolib.net.readNet(path_b + "/" + net_file)
 
+
     def get_edges_info(self):
         ''' gets list of edges'''
 
@@ -141,5 +142,9 @@ class NetParser:
                     V1[-1] - V1[0])
  
         # print(maximum)
-
         return maximum
+
+    def net_minmax(self):
+        '''get net minmax xy coords for scaling input'''
+        net = self._clean_path()
+        return sumolib.net.Net.getBBoxXY(net)

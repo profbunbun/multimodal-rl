@@ -145,7 +145,7 @@ class Env:
         state.append(self.agent_step)
         # state.append(self.sumo.simulation.getTime())
         # state.append(math.log(edge_distance+1))
-        state.append(self.new_range(edge_distance, self.max, 10))
+        state.append(self.new_range(edge_distance, self.max, 1))
         state.append(new_dist_check)
         state.extend(outmask)
         self.stage = "pickup"
@@ -185,7 +185,8 @@ class Env:
 
         if self.old_dist > edge_distance:
             new_dist_check = 1
-            # self.reward += 1
+            # self.reward += 0.01
+            self.reward += 1 - self.new_range(edge_distance, self.max, 1)
             # self.reward += 2
         else:
             new_dist_check = -1
@@ -269,7 +270,7 @@ class Env:
             state.append(self.agent_step)
             # state.append(math.log(edge_distance+1))
             # state = self.normalize(state, 0, self.max)
-            state.append(self.new_range(edge_distance, self.max, 10))
+            state.append(self.new_range(edge_distance, self.max, 1))
             state.append(new_dist_check)
             state.extend(outmask)
             self.old_edge = vedge
@@ -305,7 +306,7 @@ class Env:
         state.append(desty)
         state.append(self.agent_step)
         # state.append(math.log(edge_distance+1))
-        state.append(self.new_range(edge_distance, self.max, 10))
+        state.append(self.new_range(edge_distance, self.max, 1))
         state.append(new_dist_check)
         state.extend(outmask)
         self.old_edge = vedge

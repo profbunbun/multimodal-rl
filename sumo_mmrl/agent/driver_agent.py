@@ -24,13 +24,13 @@ class Dagent:
     def __init__(self, state_size, action_size, path) -> None:
         self.path = path
         self.direction_choices = ['s', 't', 'l', 'r']
-        self.memory = deque(maxlen=20_000)
-        self.gamma = 0.98
+        self.memory = deque(maxlen=50_000)
+        self.gamma = 0.995
         self.epsilon = 1
         self.epsilon_max = 1
         self.decay = 0.999
-        self.epsilon_min = 0.01
-        self.learning_rate = 0.01
+        self.epsilon_min = 0.1
+        self.learning_rate = 0.1
         
         device = T.device(  # pylint: disable=E1101
             "cuda" if T.cuda.is_available() else "cpu"

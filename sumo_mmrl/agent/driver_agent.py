@@ -20,11 +20,11 @@ TAU = 0.005
 
 
 class Dagent:
-
+    '''Da Agent'''
     def __init__(self, state_size, action_size, path) -> None:
         self.path = path
         self.direction_choices = ['s', 't', 'l', 'r']
-        self.memory = deque(maxlen=100_000)
+        self.memory = deque(maxlen=20_000)
         self.gamma = 0.98
         self.epsilon = 1
         self.epsilon_max = 1
@@ -41,10 +41,7 @@ class Dagent:
         
         if os.path.exists(path + PATH):
             self.target_net.load_state_dict(T.load(path + PATH))
-            # self.policy_net.eval()
 
-        # self.policy_net = dqn.DQN(state_size, action_size)
-        # self.target_net = dqn.DQN(state_size, action_size)
         self.policy_net.to(device)
         self.target_net.to(device)
 
@@ -57,10 +54,12 @@ class Dagent:
                                      lr=self.learning_rate, amsgrad=True)
         
     def remember(self, state, action, reward, next_state, done):
+        '''Add memory to queue'''
 
         self.memory.append((state, action, reward, next_state, done))
 
     def explore(self, options):
+        '''Make arndom choice'''
 
         action = np.random.choice(self.direction_choices)
         if action in options:
@@ -68,6 +67,7 @@ class Dagent:
         return action, -1
 
     def exploit(self, state, options):
+        '''use policy to make a decision'''
 
         act_values = self.policy_net(state)
 
@@ -75,10 +75,11 @@ class Dagent:
             T.argmax(act_values)]  # pylint: disable=E1101
 
         if action in options:
-            return action, 1
+            return action, 1  # action,validator
         return action, -1
 
     def choose_action(self, state, options):
+        '''off_policy / uses epsilon greedy algo'''
 
         available_choices = list(options.keys())
         rando = np.random.rand()
@@ -94,6 +95,7 @@ class Dagent:
         return action, self.direction_choices.index(action), valid
 
     def replay(self, batch_size):
+        '''training loop'''
 
         minibatch = random.sample(self.memory, batch_size)
         step = 1
@@ -105,12 +107,16 @@ class Dagent:
             reward = i[2]
             new_state = i[3]
             done = i[4]
-            self.optimizer.zero_grad(set_to_none=True)
-            if done != "1":
-                new_state_policy = self.target_net(new_state)
-                adjusted_reward = reward + self.gamma * max(new_state_policy)
+            # self.optimizer.zero_grad(set_to_none=True)
+            if done != 1:
+                ## Trying out different value functions here
+
                 output = self.policy_net(state)
-                # output = new_state_policy
+                new_state_policy = self.target_net(new_state)
+                ##Bellman q TD(0)?
+                adjusted_reward = reward + self.gamma * max(new_state_policy)
+               
+                
                 target = new_state_policy
                 target[action] = adjusted_reward
 
@@ -124,7 +130,7 @@ class Dagent:
             loss.backward()
             # T.nn.utils.clip_grad_value_(self.policy_net.parameters(), 100)
             self.optimizer.zero_grad()
-            writer.add_scalar("Loss/train", loss, step)
+            # writer.add_scalar("Loss/train", loss, step)
             self.optimizer.step()
             step += 1
 

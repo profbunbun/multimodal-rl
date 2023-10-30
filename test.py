@@ -5,7 +5,7 @@ from sumo_mmrl.environment.env import Env
 EPISODES = 1_000
 STEPS = 500
 BATCH_SIZE = 32
-MIN_MEMORY = 2000
+# MIN_MEMORY = 2000
 EXPERIMENT_PATH = "Experiments/3x3"
 SUMOCONFIG = "/Nets/3x3b.sumocfg"
 NUM_VEHIC = 1
@@ -40,12 +40,12 @@ def main():
            
             state = next_state
 
-            if len(dagent.memory) > MIN_MEMORY:
+            if len(dagent.memory) > BATCH_SIZE:
                 dagent.replay(BATCH_SIZE)
                 
         dagent.remember(state, action_index, new_reward, next_state, done=1)
-        if episode % 2 == 0:
-            dagent.soft_update()
+        # if episode % 2 == 0:
+        #     dagent.soft_update()
                 # dagent.hard_update()
         if episode % 10 == 0:
             # dagent.soft_update()

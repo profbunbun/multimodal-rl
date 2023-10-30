@@ -156,7 +156,7 @@ class Env:
         vedge = self.vehicle.get_road()
 
         if self.steps >= self.steps_per_episode:
-            self.reward += -10
+            self.reward += -20
             self.stage = "done"
 
         while not self.make_choice_flag and self.stage != "done":
@@ -185,7 +185,7 @@ class Env:
 
         if self.old_dist > edge_distance:
             new_dist_check = 1
-            self.reward += 1
+            # self.reward += 1
             # self.reward += 2
         else:
             new_dist_check = -1
@@ -211,7 +211,7 @@ class Env:
                 vedge, self.destination_edge, choices, self.edge_position
             )
             if vedge == self.destination_edge:
-                self.reward += 20
+                self.reward += 30
                 match self.stage:
                     case "pickup":
                         self.reward += 10
@@ -223,7 +223,7 @@ class Env:
                             ).partition("_")[0]
 
                     case "dropoff":
-                        self.reward += 10
+                        self.reward += 20
                         print(self.stage + " ", end="")
                         self.stage = "onbus"  # for test. change back to onbus
                         next_route_edge = self.bussroute[1].partition("_")[0]
@@ -231,7 +231,7 @@ class Env:
                         self.make_choice_flag = True
 
                     case "onbus":
-                        self.reward += 10
+                        self.reward += 30
                         print(self.stage + " ", end="")
                         self.stage = "final"
                         self.make_choice_flag = True
@@ -248,12 +248,11 @@ class Env:
                             dest_loc[1])
 
                     case "final":
-                        self.reward += 100
+                        self.reward += 40
                         print(self.stage + " ", end="")
                         self.stage = "done"
                         self.make_choice_flag = True
                        
-
             state = []
             xmin = self.parser.net_minmax()[0][0]
             xmax = self.parser.net_minmax()[1][0]
@@ -288,7 +287,7 @@ class Env:
         )
 
         self.stage = "done"
-        self.reward += -10
+        self.reward += -15
         self.make_choice_flag = False
 
         state = []

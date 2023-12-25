@@ -49,13 +49,13 @@ def main():
                     'episode': episode,
                     'step': env.get_global_step(),
                     'reward': new_reward,
-                    'epsilon': dagent.get_epsilon,  # Make sure the agent has an attribute or method to provide this
-                    'vehicle_location_edge_id': env.get_vehicle_location_edge_id(),  # Implement this method in your environment
-                    'destination_edge_id': env.get_destination_edge_id(),  # Implement this method in your environment
-                    'out_lanes': env.get_out_lanes(),  # Implement this method in your environment
+                    'epsilon': dagent.get_epsilon(),  
+                    'vehicle_location_edge_id': env.get_vehicle_location_edge_id(),  
+                    'destination_edge_id': env.get_destination_edge_id(),
+                    'out_lanes': env.get_out_lanes(), 
                     'action_chosen': action,
-                    'best_choice': env.get_best_choice(),  # Implement this method in your environment or determine it another way
-                    'q_values': q_values,  # Make sure the agent has an attribute or method to provide this
+                    'best_choice': env.get_best_choice(),  
+                    'q_values': q_values,  
                     'stage': stage,
                     'done': 1 if stage == "done" else 0
                     }

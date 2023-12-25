@@ -1,69 +1,86 @@
-from sumo_mmrl import Dagent
+''' main driver '''
+import os
+import json
+import traceback
+from sumo_mmrl import Agent
 from sumo_mmrl.environment.env import Env
+from sumo_mmrl import Logger
+import numpy as np
 
-# import time
-EPISODES = 2_000
-STEPS = 500
-BATCH_SIZE = 32
-MIN_MEMORY = 2000
-EXPERIMENT_PATH = "Experiments/3x3"
-SUMOCONFIG = "/Nets/3x3b.sumocfg"
-NUM_VEHIC = 1
-TYPES = 1
+with open('config.json') as f:
+    config = json.load(f)
+
+EPISODES = config['training_settings']['episodes']
+BATCH_SIZE = config['training_settings']['batch_size']
+EXPERIMENT_PATH = config['training_settings']['experiment_path']
+SUMOCONFIG = config['training_settings']['sumoconfig']
+NUM_VEHIC = config['training_settings']['num_vehic']
+TYPES = config['training_settings']['types']
+base_log_dir = config['training_settings']['log_dir_path']
 
 
 def main():
-    env = Env(EXPERIMENT_PATH, SUMOCONFIG, STEPS, NUM_VEHIC, TYPES, "A")
-    dagent = Dagent(11, 4, EXPERIMENT_PATH)
+    env = Env(EXPERIMENT_PATH, SUMOCONFIG, NUM_VEHIC, TYPES)
+    dagent = Agent(12, 4, EXPERIMENT_PATH)
+    logger = Logger(base_log_dir, 'config.json')
 
-    for episode in range(EPISODES + 1):
-        accumulated_reward = 0
+    try:
+        for episode in range(EPISODES + 1):
+            accumulated_reward = 0
+            steps_per_episode = []
 
-        # if (episode) % 100 == 0:
-        #     env.render("gui")
-        # else:
-        #     env.render("libsumo")
-        env.render("libsumo")
 
-        state, stage, legal_actions = env.reset()
+            env.render("libsumo" if episode % 100 != 0 else "libsumo")
+            state, stage, legal_actions = env.reset()
 
-        while stage != "done":
-            (action, action_index, validator) = dagent.choose_action(
-                state, legal_actions)
-        
-            (next_state, new_reward, stage,
-             legal_actions) = env.step(action, validator)
-
-            accumulated_reward += new_reward
-            
-            dagent.remember(state, action_index, new_reward, next_state, done=0)
-           
-            state = next_state
-
-            if len(dagent.memory) > MIN_MEMORY:
-                dagent.replay(BATCH_SIZE)
+            while stage != "done":
+                action, action_index, validator, q_values = dagent.choose_action(state, legal_actions)
                 
-        dagent.remember(state, action_index, new_reward, next_state, done=1)
-        if episode % 2 == 0:
-            dagent.soft_update()
-                # dagent.hard_update()
-        if episode % 10 == 0:
-            # dagent.soft_update()
-            dagent.hard_update()
-        # dagent.eps_linear(EPISODES)
-        
-        # dagent.epsilon_null()
+                next_state, new_reward, stage, legal_actions = env.step(action, validator)
 
-        if episode < (0.8 * EPISODES):
-            dagent.eps_linear(0.8 * EPISODES)
+                accumulated_reward += new_reward
 
-        else:
-            dagent.epsilon_decay_2(episode, (0.2 * EPISODES))
+                if stage == "done":
+                    dagent.remember(state, action_index, new_reward, next_state, done=1)
+                else:
+                    dagent.remember(state, action_index, new_reward, next_state, done=0)
 
-        env.close(episode, dagent.epsilon,
-                  accumulated_reward)
+                step_data = {
+                    'episode': episode,
+                    'step': env.get_global_step(),
+                    'reward': new_reward,
+                    'epsilon': dagent.get_epsilon,  # Make sure the agent has an attribute or method to provide this
+                    'vehicle_location_edge_id': env.get_vehicle_location_edge_id(),  # Implement this method in your environment
+                    'destination_edge_id': env.get_destination_edge_id(),  # Implement this method in your environment
+                    'out_lanes': env.get_out_lanes(),  # Implement this method in your environment
+                    'action_chosen': action,
+                    'best_choice': env.get_best_choice(),  # Implement this method in your environment or determine it another way
+                    'q_values': q_values,  # Make sure the agent has an attribute or method to provide this
+                    'stage': stage,
+                    'done': 1 if stage == "done" else 0
+                    }
+                logger.log_step(step_data)
+
+                if len(dagent.memory) > BATCH_SIZE:
+                    dagent.replay(BATCH_SIZE)
+                    dagent.soft_update()
+                    
+                state = next_state
+
+            dagent.decay()
+            steps_per_episode.append(env.get_steps_per_episode())
+            env.close(episode, accumulated_reward, dagent.get_epsilon())
+
+            if episode % 30 == 0:
+                dagent.hard_update()
+
+
+    except Exception as e:
+        trace = traceback.format_exc()
+        print(f"An exception occurred: {e}\nTraceback: {trace}")
+    finally:
+        print("Training complete.")
         dagent.save()
-
 
 if __name__ == "__main__":
     main()

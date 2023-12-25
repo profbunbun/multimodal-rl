@@ -3,6 +3,7 @@ import sys
 import os
 import traci
 import libsumo
+import sumolib
 
 
 if "SUMO_HOME" in os.environ:
@@ -13,15 +14,9 @@ else:
 
 
 class SUMOConnection:
-    """_summary_
+    ''' sumo Traci API stuff'''
 
-    Returns:
-        _type_: _description_
-    """
     
-    # traci.person.setParameter("0","fart","poop")
-    # traci.person.getParameter("fart")
-    # traci.person.getParameterWithKey("fart")
     CONNECTION_LABEL = 0
 
     def __init__(self, sumocfg: str) -> None:
@@ -50,6 +45,7 @@ class SUMOConnection:
         traci.start(self.sumo_cmd, label=self.label)
         self.sumo_ = traci
         # self.sumo_.addStepListener(self.listener)
+        
         return self.sumo_
 
     def connect_libsumo_no_gui(self):
@@ -99,16 +95,24 @@ class SUMOConnection:
         self.sumo_.close()
     
     def busstopCheck(self):
-        '''
-        busstopCheck _summary_
+        ''' busstopCheck'''
 
-        _extended_summary_
-        '''        
         # getting all bus stops on the map\
-        lanes=[]
+        lanes = []
         stops = self.sumo_.busstop.getIDList()
         for stop in stops:
             lanes.append(self.sumo_.busstop.getLaneID(stop))
         return lanes
-    
+
+    def get_junction_list(self):
+        ''' get junction list'''
+        return traci.constants.junction.getIDList()
+
+    def get_edge_list(self):
+        ''' get edges list'''
+        return traci.constants.edge.getIDList()
+
+    def get_lane_list(self):
+        ''' get lanes list'''
+        return traci.constants.lane.getIDList()
     

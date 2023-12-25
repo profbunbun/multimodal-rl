@@ -140,6 +140,25 @@ class NetParser:
         maximum = max(V[-1] - V[0],
                     V1[-1] - V1[0])
  
-        # print(maximum)
-
+        print(maximum)
         return maximum
+
+    def net_minmax(self):
+        '''get net minmax xy coords for scaling input'''
+        net = self._clean_path()
+        return sumolib.net.Net.getBBoxXY(net)
+    
+    def get_junctions(self):
+        """Retrieve junctions and their internal edges from the network."""
+        net = self._clean_path()
+        junctions = set()
+        for junction in net.getNodes():
+            # Add the junction ID
+            if junction.getType() != "internal":  # Exclude external junctions
+                junctions.add(junction.getID())
+
+        # Add internal edges from the network
+        for edge in net.getEdges():
+            if edge.getID().startswith(":"):  # Check if it's an internal edge
+                junctions.add(edge.getID())
+        return junctions

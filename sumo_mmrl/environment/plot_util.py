@@ -15,18 +15,28 @@ class Plotter:
         return -1  # Return -1 if no valid index is found
 
     def plot_learning(self, x, smoothed_rewards, epsilons, filename):
-        fig, ax = plt.subplots(figsize=(15, 10))
+        fig, ax1 = plt.subplots(figsize=(15, 10))
 
         # Shared X-axis for all plots
         shared_x = np.arange(1, len(x) + 1)
 
-        # Plot Smoothed Rewards and Epsilons on the same plot
-        ax.plot(shared_x, smoothed_rewards, label="Smoothed Reward per Episode", color='C0')
-        ax.plot(shared_x, epsilons, label="Epsilon Decay", color='C1')
-        ax.set_title('Episode Rewards & Epsilon Decay')
-        ax.set_xlabel('Episode')
-        ax.set_ylabel('Value')
-        ax.legend(loc='upper right')
+        # Plot Smoothed Rewards on the primary y-axis
+        color = 'C0'
+        ax1.plot(shared_x, smoothed_rewards, label="Smoothed Reward per Episode", color=color)
+        ax1.set_xlabel('Episode')
+        ax1.set_ylabel('Smoothed Reward', color=color)
+        ax1.tick_params(axis='y', labelcolor=color)
+
+        # Create a twin y-axis to plot Epsilon Decay
+        ax2 = ax1.twinx()
+        color = 'C1'
+        ax2.plot(shared_x, epsilons, label="Epsilon Decay", color=color)
+        ax2.set_ylabel('Epsilon', color=color)
+        ax2.tick_params(axis='y', labelcolor=color)
+
+        ax1.set_title('Episode Rewards & Epsilon Decay')
+        ax1.legend(loc='upper left')
+        ax2.legend(loc='upper right')
 
         plt.tight_layout()
         plt.savefig(filename)

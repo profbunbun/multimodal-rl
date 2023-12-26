@@ -23,6 +23,9 @@ def main():
     logger = Logger(base_log_dir, 'config.json')
     env = Env(EXPERIMENT_PATH, SUMOCONFIG, NUM_VEHIC, TYPES)
     dagent = Agent(12, 4, EXPERIMENT_PATH,logger)
+    logger.log_config()
+    model_info = dagent.get_model_info()
+    logger.log_model_info(model_info)
 
     try:
         for episode in range(EPISODES + 1):

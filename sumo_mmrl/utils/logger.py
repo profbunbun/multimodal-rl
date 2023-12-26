@@ -2,15 +2,18 @@ import csv
 import os
 import json
 from datetime import datetime
+import torch
 
 class Logger:
     def __init__(self, base_log_dir, config_path):
         # Read hyperparameters and training settings from the config file
         with open(config_path, 'r') as config_file:
-            config = json.load(config_file)
+            self.config = json.load(config_file)
         
-        hyperparameters = config.get("hyperparameters", {})
-        training_settings = config.get("training_settings", {})
+        hyperparameters = self.config.get("hyperparameters", {})
+        training_settings = self.config.get("training_settings", {})
+        
+
 
         # Extract relevant values
         episodes = training_settings.get("episodes", "")
@@ -30,6 +33,10 @@ class Logger:
         self.episode_filename = os.path.join(log_dir, 'episode_log.csv')
          # Define a new filename for the training log within the constructed directory
         self.training_filename = os.path.join(log_dir, 'training_log.csv')
+        self.config_filename = os.path.join(log_dir, 'config_log.csv')
+        self.model_info_filename = os.path.join(log_dir, 'model_info.txt') 
+
+
         
         # Fields for the training log
         self.training_fields = [
@@ -58,6 +65,41 @@ class Logger:
         # Initialize log files
         self.init_step_log()
         self.init_episode_log()
+        self.init_config_log()  
+        self.init_training_log()
+    
+    def log_model_info(self, model):
+        """Log information about a PyTorch model."""
+        with open(self.model_info_filename, 'w') as f:
+            # Log the model's architecture
+            f.write("Model Architecture:\n")
+            f.write(str(model))
+            f.write("\n\n")
+
+            # Log the details of each layer
+            f.write("Layer Details:\n")
+            for name, module in model.named_modules():
+                f.write(f"{name} ({module.__class__.__name__}): \n")
+                
+                # Log the shape of the parameters
+                for param_name, param in module.named_parameters():
+                    f.write(f" - {param_name}: {param.size()}\n")
+            
+            # Log the total number of parameters
+            total_params = sum(p.numel() for p in model.parameters())
+            f.write(f"\nTotal Parameters: {total_params}\n")
+
+    def init_config_log(self):
+        """Initialize the config log file and write the header."""
+        with open(self.config_filename, 'w', newline='') as file:
+            writer = csv.DictWriter(file, fieldnames=self.config.keys())
+            writer.writeheader()
+
+    def log_config(self):
+        """Log the configuration data to the CSV file."""
+        with open(self.config_filename, 'a', newline='') as file:
+            writer = csv.DictWriter(file, fieldnames=self.config.keys())
+            writer.writerow(self.config)
 
     def format_value(self, value):
         """Format the value by removing unnecessary leading zeros and preserving decimals."""
@@ -100,3 +142,15 @@ class Logger:
         with open(self.training_filename, 'a', newline='') as file:
             writer = csv.DictWriter(file, fieldnames=self.training_fields)
             writer.writerow(data)
+            
+    def log_model_info(self, model_info):
+        """Log the model information."""
+        with open(self.model_info_filename, 'w') as f:
+            # Log the total number of parameters
+            f.write(f"Total Parameters: {model_info['total_parameters']}\n\n")
+            
+            # Log details of each layer
+            for layer in model_info['layers']:
+                f.write(f"Layer Name: {layer['name']}\n")
+                f.write(f"Layer Type: {layer['type']}\n")
+                f.write(f"Parameters: {layer['parameters']}\n\n")

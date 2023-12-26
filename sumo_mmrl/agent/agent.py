@@ -155,3 +155,20 @@ class Agent:
     
     def get_epsilon(self):
         return self.exploration_strategy.epsilon
+    
+    def get_model_info(self):
+        """Returns information about the policy network."""
+        model_info = {
+            'total_parameters': sum(p.numel() for p in self.policy_net.parameters()),
+            'layers': []
+        }
+
+        for name, module in self.policy_net.named_modules():
+            layer_info = {
+                'name': name,
+                'type': module.__class__.__name__,
+                'parameters': sum(p.numel() for p in module.parameters()),
+            }
+            model_info['layers'].append(layer_info)
+
+        return model_info

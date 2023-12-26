@@ -157,18 +157,41 @@ class Agent:
         return self.exploration_strategy.epsilon
     
     def get_model_info(self):
-        """Returns information about the policy network."""
+        """Returns detailed information about the policy network."""
         model_info = {
             'total_parameters': sum(p.numel() for p in self.policy_net.parameters()),
             'layers': []
         }
 
+        # Iterate through all modules in the policy network
         for name, module in self.policy_net.named_modules():
+            # Skip the top-level module (the whole network)
+            if name == "":
+                continue
+
+            # Layer information dictionary
             layer_info = {
                 'name': name,
                 'type': module.__class__.__name__,
-                'parameters': sum(p.numel() for p in module.parameters()),
+                'parameters': sum(p.numel() for p in module.parameters(recurse=False)),
+                'input_shape': None,  # Placeholder for input shape
+                'output_shape': None,  # Placeholder for output shape
+                # ... other attributes ...
             }
+
+            # Infer input/output sizes for linear layers
+            if isinstance(module, nn.Linear):
+                layer_info['input_shape'] = module.in_features
+                layer_info['output_shape'] = module.out_features
+
+            # Infer input/output sizes for convolutional layers
+            if isinstance(module, nn.Conv2d):
+                layer_info['input_shape'] = (module.in_channels, *module.kernel_size)
+                layer_info['output_shape'] = module.out_channels  # Note: actual size depends on input and padding
+
+            # ... add logic for other layer types as needed ...
+
+            # Add layer information to the model info
             model_info['layers'].append(layer_info)
 
         return model_info

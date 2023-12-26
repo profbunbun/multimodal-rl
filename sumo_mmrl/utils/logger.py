@@ -143,14 +143,16 @@ class Logger:
             writer = csv.DictWriter(file, fieldnames=self.training_fields)
             writer.writerow(data)
             
-    def log_model_info(self, model_info):
-        """Log the model information."""
+    def log_model_and_optimizer_info(self, model_state, optimizer_state):
+        """Log the model and optimizer information."""
         with open(self.model_info_filename, 'w') as f:
-            # Log the total number of parameters
-            f.write(f"Total Parameters: {model_info['total_parameters']}\n\n")
+            # Log the model state
+            f.write("Model's state_dict:\n")
+            f.write(model_state)
             
-            # Log details of each layer
-            for layer in model_info['layers']:
-                f.write(f"Layer Name: {layer['name']}\n")
-                f.write(f"Layer Type: {layer['type']}\n")
-                f.write(f"Parameters: {layer['parameters']}\n\n")
+            # Add a separator between model and optimizer information
+            f.write("\n\n")
+            
+            # Log the optimizer state
+            f.write("Optimizer's state_dict:\n")
+            f.write(optimizer_state)

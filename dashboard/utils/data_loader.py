@@ -15,5 +15,11 @@ def get_directories(path):
     return [d for d in os.listdir(path) if os.path.isdir(os.path.join(path, d))]
 
 
-def load_data(filepath):
-    return pd.read_csv(filepath)
+def load_csv_data(folder_path, view_option):
+    # Define the path to your CSV file based on folder_path and view_option
+    # This is a placeholder path. Update it to match your project's structure and data.
+    csv_file_path = f"{folder_path}/{view_option}.csv"
+    
+    # Load the CSV data into a DataFrame
+    data = pd.read_csv(csv_file_path)
+    return data

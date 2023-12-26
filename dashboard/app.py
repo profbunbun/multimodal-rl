@@ -1,56 +1,78 @@
+# app.py
+from dash import Dash, dcc, Output, Input
+import dash_bootstrap_components as dbc
+import plotly.express as px
+import pandas as pd
 import os
-import dash
-from dash import dcc, html
-import plotly.graph_objs as go
-from dash.dependencies import Input, Output
-from components.graph_components import create_dual_axis_line_chart  # Update import path as necessary
-from utils.data_loader import load_data, get_directories  # Update import path as necessary
-from config.dashboard_config import EXPERIMENT_PATH # Update import path as necessary
-from components.control_components import create_file_tree_component
 
-app = dash.Dash(__name__)
+EXPERIMENT_PATH = 'Experiments/3x3/logger/'
 
 
 
-app.layout = html.Div([
-    # File tree on the left
-    html.Div(create_file_tree_component(EXPERIMENT_PATH), className='three columns'),
+def list_dirs(directory):
+    try:
+        return [d for d in os.listdir(directory) if os.path.isdir(os.path.join(directory, d))]
+    except FileNotFoundError:
+        return []
 
-    # Main content area on the right
-    html.Div([
-        html.H1('Reinforcement Learning Agent Dashboard'),
-        dcc.Graph(id='main-content'),
-        dcc.Interval(id='interval-component', interval=1*1000, n_intervals=0)
-    ], className='nine columns')
-], className='row')
-
-# Callbacks and other functionalities remain the same
+folder_list = list_dirs(EXPERIMENT_PATH)
 
 
 
-@app.callback(
-    Output('log-folder-dropdown', 'options'),
-    [Input('experiment-dropdown', 'value')]
-)
-def set_log_folder_options(selected_experiment):
-    if selected_experiment is not None:
-        log_folders = get_directories(os.path.join(EXPERIMENT_PATH, selected_experiment, '/logger/'))
-        return [{'label': name, 'value': name} for name in log_folders]
-    return []
+app = Dash(__name__, external_stylesheets=[dbc.themes.VAPOR])
+#components
+title = dcc.Markdown(children='')
+graph1 = dcc.Graph(figure={})
+dropdown = dcc.Dropdown(options=[{'label': name, 'value': name} for name in folder_list], value=folder_list[0] if folder_list else None, id='dropdown')
+data_paths_store = dcc.Store(data=None, id='data_paths_store')
 
-@app.callback(
-    Output('rewards-epsilon-per-episode', 'figure'),
-    [Input('interval-component', 'n_intervals'),
-     Input('log-folder-dropdown', 'value')]
-)
-def update_graph(n, selected_log_folder):
-    if selected_log_folder:
-        global SELECTED_PATH
-        SELECTED_PATH = os.path.join(EXPERIMENT_PATH, 'logger/', selected_log_folder, 'episode_log.csv')
-        df_episode = load_data(SELECTED_PATH)
-        rewards_epsilon_figure = create_dual_axis_line_chart(df_episode, 'episode', 'episode_reward', 'epsilon', 'Average Rewards and Epsilon Over Episodes')
-        return rewards_epsilon_figure
-    return go.Figure()  # Return an empty figure if no log folder is selected
+
+#layout
+app.layout = dbc.Container([
+    dbc.Row([dbc.Col(title, width=12)],justify='center'),
+    dbc.Row([dbc.Col(dropdown, width=12)]),
+    dbc.Row([dbc.Col(graph1, width=6)]),
+    data_paths_store
+    ])
+                                   
+
+#callbacks
+@app.callback(Output(data_paths_store, 'data'), [Input('dropdown', 'value')])
+
+
+def update_data_paths(value):
+    if not value:
+        return {}  # Return an empty dictionary if value is None
+
+    model_info = None
+
+    # Construct the path for each CSV file
+    base_path = os.path.join(EXPERIMENT_PATH, value)
+    # Open the file for reading
+
+    paths = {
+        'training': os.path.join(base_path, 'training_log.csv'),
+        'config': os.path.join(base_path, 'config_log.csv'),
+        'episodes': os.path.join(base_path, 'episode_log.csv'),
+        'steps': os.path.join(base_path, 'step_log.csv'),
+        'model_info': os.path.join(base_path, 'model_info.txt')
+    }
+
+    with open(paths['model_info'], 'r') as f:
+        model_info = f.read()
+    # Read the data from CSV files and convert them to JSON serializable format
+    data = {
+        'model_info': model_info,
+        'training_df': pd.read_csv(paths['training']).to_dict(orient='records'),
+        'config_df': pd.read_csv(paths['config']).to_dict(orient='records'),
+        'episodes_df': pd.read_csv(paths['episodes']).to_dict(orient='records'),
+        'step_df': pd.read_csv(paths['steps']).to_dict(orient='records')
+    }
+
+    return data
+
+# @app.callback(Output(graph1, 'figure'), [Input(data_paths_store, 'data')])
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)

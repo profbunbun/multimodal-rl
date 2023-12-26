@@ -3,6 +3,7 @@ import os
 import json
 import traceback
 from sumo_mmrl import Agent
+from sumo_mmrl import DQN
 from sumo_mmrl.environment.env import Env
 from sumo_mmrl import Logger
 import numpy as np
@@ -24,8 +25,9 @@ def main():
     env = Env(EXPERIMENT_PATH, SUMOCONFIG, NUM_VEHIC, TYPES)
     dagent = Agent(12, 4, EXPERIMENT_PATH,logger)
     logger.log_config()
-    model_info = dagent.get_model_info()
-    logger.log_model_info(model_info)
+    model_state, optimizer_state = dagent.get_model_info()
+    logger.log_model_and_optimizer_info(model_state , optimizer_state)
+    
 
     try:
         for episode in range(EPISODES + 1):
@@ -85,6 +87,7 @@ def main():
 
             if episode % 30 == 0:
                 dagent.hard_update()
+            
 
 
     except Exception as e:

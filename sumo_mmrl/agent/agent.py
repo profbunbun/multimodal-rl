@@ -5,6 +5,7 @@ import torch.optim as optim
 from .dqn import DQN
 from . import exploration, memory
 import json 
+from torchinfo import summary
 
 PATH = "/Models/model.pt"
 
@@ -158,40 +159,22 @@ class Agent:
     
     def get_model_info(self):
         """Returns detailed information about the policy network."""
-        model_info = {
-            'total_parameters': sum(p.numel() for p in self.policy_net.parameters()),
-            'layers': []
-        }
+        model = DQN(12, 4)
+        model.load_state_dict(torch.load(self.path + PATH))
+        state_info = self.get_model_state_dict_as_string(model)
+        opt_info = self.get_optimizer_state_dict_as_string(self.optimizer)
+        
 
-        # Iterate through all modules in the policy network
-        for name, module in self.policy_net.named_modules():
-            # Skip the top-level module (the whole network)
-            if name == "":
-                continue
+        return state_info, opt_info
 
-            # Layer information dictionary
-            layer_info = {
-                'name': name,
-                'type': module.__class__.__name__,
-                'parameters': sum(p.numel() for p in module.parameters(recurse=False)),
-                'input_shape': None,  # Placeholder for input shape
-                'output_shape': None,  # Placeholder for output shape
-                # ... other attributes ...
-            }
-
-            # Infer input/output sizes for linear layers
-            if isinstance(module, nn.Linear):
-                layer_info['input_shape'] = module.in_features
-                layer_info['output_shape'] = module.out_features
-
-            # Infer input/output sizes for convolutional layers
-            if isinstance(module, nn.Conv2d):
-                layer_info['input_shape'] = (module.in_channels, *module.kernel_size)
-                layer_info['output_shape'] = module.out_channels  # Note: actual size depends on input and padding
-
-            # ... add logic for other layer types as needed ...
-
-            # Add layer information to the model info
-            model_info['layers'].append(layer_info)
-
+    def get_model_state_dict_as_string(self, model):
+        model_info = "Model's state_dict:\n"
+        for param_tensor in model.state_dict():
+            model_info += f"{param_tensor}\t{model.state_dict()[param_tensor].size()}\n"
         return model_info
+
+    def get_optimizer_state_dict_as_string(self, optimizer):
+        optimizer_info = "Optimizer's state_dict:\n"
+        for var_name in optimizer.state_dict():
+            optimizer_info += f"{var_name}\t{optimizer.state_dict()[var_name]}\n"
+        return optimizer_info

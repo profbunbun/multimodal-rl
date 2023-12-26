@@ -20,9 +20,9 @@ base_log_dir = config['training_settings']['log_dir_path']
 
 
 def main():
-    env = Env(EXPERIMENT_PATH, SUMOCONFIG, NUM_VEHIC, TYPES)
-    dagent = Agent(12, 4, EXPERIMENT_PATH)
     logger = Logger(base_log_dir, 'config.json')
+    env = Env(EXPERIMENT_PATH, SUMOCONFIG, NUM_VEHIC, TYPES)
+    dagent = Agent(12, 4, EXPERIMENT_PATH,logger)
 
     try:
         for episode in range(EPISODES + 1):
@@ -62,7 +62,7 @@ def main():
                 logger.log_step(step_data)
 
                 if len(dagent.memory) > BATCH_SIZE:
-                    dagent.replay(BATCH_SIZE)
+                    dagent.replay(BATCH_SIZE, episode, env.get_global_step())
                     dagent.soft_update()
                     
                 state = next_state
@@ -70,6 +70,15 @@ def main():
             dagent.decay()
             steps_per_episode.append(env.get_steps_per_episode())
             env.close(episode, accumulated_reward, dagent.get_epsilon())
+            episode_data = {
+                'episode': episode,
+                'epsilon': dagent.get_epsilon(),
+                'episode_reward': accumulated_reward,
+                'simulation_steps': env.get_global_step(),
+                'agent_steps': steps_per_episode[-1],
+                'life': env.get_life()
+            }
+            logger.log_episode(episode_data)
 
             if episode % 30 == 0:
                 dagent.hard_update()

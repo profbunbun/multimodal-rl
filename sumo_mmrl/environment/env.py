@@ -38,20 +38,14 @@ class Env:
 
         self.sumo = None  # this becomes the sumo conection used after GUI
         # or command line is decided
-        self.path = path  # path to the experiment folder  for simulation data
+        self.path = path  
 
         self.steps = 0
         self.agent_step = 0
         self.accumulated_reward = 0
         self.reward = 0
-
-        self.make_choice_flag = False  # changes if agent is in a valid
-        # state to make a decison:
-        # not an intersection,
-        # one choice on new lane
-
-        self.old_edge = None  # location variable to check
-        # against new position. For make choice flag
+        self.make_choice_flag = False 
+        self.old_edge = None  
         self.old_dist = None
         self.rewards = []
         self.epsilon_hist = []
@@ -190,10 +184,6 @@ class Env:
         elif mode == "no_gui":
             self.sumo = self.sumo_con.connect_no_gui()
     
-    def get_steps_per_episode(self):
-        return self.sumo.simulation.getTime()
-    def get_global_step(self):
-        return self.agent_step
 
     def close(self, episode, accu, current_epsilon):
         '''close connection and print graph'''
@@ -251,6 +241,13 @@ class Env:
             print(f"Warning: Found {non_numeric_count} non-numeric values. Some smoothing results may be None.")
 
         return smoothed
+    
+    def get_steps_per_episode(self):
+        return self.sumo.simulation.getTime()
+    
+    def get_global_step(self):
+        return self.agent_step
+    
     def get_destination_edge_id(self):
         return self.destination_edge
     
@@ -259,7 +256,10 @@ class Env:
     
     def get_best_choice(self):
         return self.best_choice
+    
     def get_out_lanes(self):
-        return self.vehicle.get_out_dict() 
+        return self.vehicle.get_out_dict()
+    def get_life(self):
+        return self.life
     
     

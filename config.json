@@ -3,14 +3,14 @@
     "soft_update_factor": 0.01,
     "gamma": 0.995,
     "learning_rate": 0.001,
-    "epsilon_decay": 0.999,
+    "epsilon_decay": 0.998,
     "epsilon_min": 0.001,
     "epsilon_max": 1
   },
   "training_settings": {
       "batch_size": 1024,
       "memory_size": 100000,
-      "episodes": 20000,
+      "episodes": 10000,
       "experiment_path": "Experiments/3x3",
       "log_dir_path": "Experiments/3x3/logger",
       "sumoconfig": "/Nets/3x3b.sumocfg",

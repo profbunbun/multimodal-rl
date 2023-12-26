@@ -28,6 +28,23 @@ class Logger:
         # Define filenames within the constructed directory
         self.step_filename = os.path.join(log_dir, 'step_log.csv')
         self.episode_filename = os.path.join(log_dir, 'episode_log.csv')
+         # Define a new filename for the training log within the constructed directory
+        self.training_filename = os.path.join(log_dir, 'training_log.csv')
+        
+        # Fields for the training log
+        self.training_fields = [
+            'episode',              # Tracked manually in the training loop
+            'agent_step',           # Tracked manually in the training loop
+            'batch_size',           # Determined by your training settings
+            'loss',                 # Calculated during the training step in Agent
+            'q_values',             # Output from the policy network for the current states
+            'target_q_values',      # Calculated as part of the target for the loss function
+            'epsilon',              # Current epsilon from the exploration strategy in Agent
+            'learning_rate',        # Current learning rate (if using a scheduler or static value)
+            'gradient_norms',       # Calculated post-backpropagation
+            'max_gradient_norm',    # Also calculated post-backpropagation, especially if applying gradient clipping
+            'replay_memory_size'    # The current size of the replay memory, obtainable from Memory class
+        ]
         
         # Fields for step and episode logs
         self.step_fields = [
@@ -35,8 +52,7 @@ class Logger:
             'destination_edge_id', 'out_lanes', 'action_chosen', 'best_choice', 'q_values','stage', 'done'
         ]
         self.episode_fields = [
-             'episode', 'epsilon', 'cumulative_reward', 'total_steps', 'action_distribution',
-            'action_probabilities', 'td_error', 'life'
+             'episode', 'epsilon', 'episode_reward', 'simulation_steps','agent_steps', 'life'
         ]
         
         # Initialize log files
@@ -71,4 +87,16 @@ class Logger:
         """Log the provided episode aggregate data to the CSV file."""
         with open(self.episode_filename, 'a', newline='') as file:
             writer = csv.DictWriter(file, fieldnames=self.episode_fields)
+            writer.writerow(data)
+    
+    def init_training_log(self):
+        """Initialize the training log file and write the header."""
+        with open(self.training_filename, 'w', newline='') as file:
+            writer = csv.DictWriter(file, fieldnames=self.training_fields)
+            writer.writeheader()
+
+    def log_training(self, data):
+        """Log the provided training data to the CSV file."""
+        with open(self.training_filename, 'a', newline='') as file:
+            writer = csv.DictWriter(file, fieldnames=self.training_fields)
             writer.writerow(data)

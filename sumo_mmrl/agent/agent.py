@@ -71,21 +71,21 @@ class Agent:
         dones = torch.tensor(dones, device=self.device, dtype=torch.float32)
 
         loss_item, max_grad_norm, current_q_values, expected_q_values = self.perform_training_step(states, actions, rewards, next_states, dones)
-        if self.logger:
-            training_data = {
-                'episode': current_episode,  # Current episode
-                'agent_step': current_step,  # Current step of the agent
-                'batch_size': batch_size,  # Size of the batch
-                'loss': loss_item,  # Loss from the current training step
-                'q_values': [q.tolist() for q in current_q_values],  # Q values from the policy network
-                'target_q_values': [q.tolist() for q in expected_q_values],  # Target Q values for loss calculation
-                'epsilon': self.get_epsilon(),  # Current epsilon for exploration
-                'learning_rate': self.learning_rate,  # Current learning rate
-                'gradient_norms': [p.grad.data.norm(2).item() for p in self.policy_net.parameters() if p.grad is not None],  # Gradient norms
-                'max_gradient_norm': max_grad_norm,  # Maximum gradient norm
-                'replay_memory_size': len(self.memory)  # Size of the replay memory
-            }
-            self.logger.log_training(training_data)
+        # if self.logger:
+        #     training_data = {
+        #         'episode': current_episode,  # Current episode
+        #         'agent_step': current_step,  # Current step of the agent
+        #         'batch_size': batch_size,  # Size of the batch
+        #         'loss': loss_item,  # Loss from the current training step
+        #         'q_values': [q.tolist() for q in current_q_values],  # Q values from the policy network
+        #         'target_q_values': [q.tolist() for q in expected_q_values],  # Target Q values for loss calculation
+        #         'epsilon': self.get_epsilon(),  # Current epsilon for exploration
+        #         'learning_rate': self.learning_rate,  # Current learning rate
+        #         'gradient_norms': [p.grad.data.norm(2).item() for p in self.policy_net.parameters() if p.grad is not None],  # Gradient norms
+        #         'max_gradient_norm': max_grad_norm,  # Maximum gradient norm
+        #         'replay_memory_size': len(self.memory)  # Size of the replay memory
+        #     }
+        #     self.logger.log_training(training_data)
         return loss_item
 
     def perform_training_step(self, state, action, reward, next_state, done):

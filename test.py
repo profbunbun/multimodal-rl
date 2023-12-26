@@ -50,21 +50,21 @@ def main():
                 else:
                     dagent.remember(state, action_index, new_reward, next_state, done=0)
 
-                step_data = {
-                    'episode': episode,
-                    'step': env.get_global_step(),
-                    'reward': new_reward,
-                    'epsilon': dagent.get_epsilon(),  
-                    'vehicle_location_edge_id': env.get_vehicle_location_edge_id(),  
-                    'destination_edge_id': env.get_destination_edge_id(),
-                    'out_lanes': env.get_out_lanes(), 
-                    'action_chosen': action,
-                    'best_choice': env.get_best_choice(),  
-                    'q_values': q_values,  
-                    'stage': stage,
-                    'done': 1 if stage == "done" else 0
-                    }
-                logger.log_step(step_data)
+                # step_data = {
+                #     'episode': episode,
+                #     'step': env.get_global_step(),
+                #     'reward': new_reward,
+                #     'epsilon': dagent.get_epsilon(),  
+                #     'vehicle_location_edge_id': env.get_vehicle_location_edge_id(),  
+                #     'destination_edge_id': env.get_destination_edge_id(),
+                #     'out_lanes': env.get_out_lanes(), 
+                #     'action_chosen': action,
+                #     'best_choice': env.get_best_choice(),  
+                #     'q_values': q_values,  
+                #     'stage': stage,
+                #     'done': 1 if stage == "done" else 0
+                #     }
+                # logger.log_step(step_data)
 
                 if len(dagent.memory) > BATCH_SIZE:
                     dagent.replay(BATCH_SIZE, episode, env.get_global_step())
@@ -79,8 +79,8 @@ def main():
                 'episode': episode,
                 'epsilon': dagent.get_epsilon(),
                 'episode_reward': accumulated_reward,
-                'simulation_steps': env.get_global_step(),
-                'agent_steps': steps_per_episode[-1],
+                'simulation_steps': steps_per_episode[-1],
+                'agent_steps': env.get_global_step(),
                 'life': env.get_life()
             }
             logger.log_episode(episode_data)

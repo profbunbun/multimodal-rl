@@ -2,7 +2,7 @@
   "hyperparameters": {
     "soft_update_factor": 0.01,
     "gamma": 0.995,
-    "learning_rate": 0.01,
+    "learning_rate": 0.001,
     "epsilon_decay": 0.998,
     "epsilon_min": 0.001,
     "epsilon_max": 1

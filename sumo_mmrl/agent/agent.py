@@ -5,39 +5,41 @@ import torch.optim as optim
 from .dqn import DQN
 from . import exploration, memory
 import json 
+import hashlib
 
 
 
 
 
-PATH = "/logger/model.pt"
+# PATH = "/logger/model.pt"
 
 class Agent:
-    def __init__(self, state_size, action_size, path, learning_rate=None, gamma=None, epsilon_decay=None):
+    def __init__(self, state_size, action_size, path, learning_rate=None, gamma=None, epsilon_decay=None, epsilon_max=None, epsilon_min=None, memory_size=None, n_layers=None, layer_size=None, activation=None, batch_size=None):
         self.logger = None
         self.path = path
         self.direction_choices = ['r', 's', 'l', 't']
         with open("config.json", "r") as config_file:
             config = json.load(config_file)
 
-        self.memory_size = config["training_settings"]["memory_size"]
+        self.memory_size = memory_size if memory_size is not None else config["training_settings"]["memory_size"]
         self.gamma = gamma if gamma is not None else config["hyperparameters"]["gamma"]
         self.learning_rate = learning_rate if learning_rate is not None else config["hyperparameters"]["learning_rate"]
         self.epsilon_decay = epsilon_decay if epsilon_decay is not None else config["hyperparameters"]["epsilon_decay"]
 
         self.soft_update_factor = config["hyperparameters"]["soft_update_factor"]
-        self.batch_size = config["training_settings"]["batch_size"]
-        self.epsilon_max = config["hyperparameters"]["epsilon_max"]
-        self.epsilon_min = config["hyperparameters"]["epsilon_min"]
+        self.batch_size = batch_size if batch_size is not None else config["training_settings"]["batch_size"]
+        self.epsilon_max = epsilon_max if epsilon_max is not None else config["hyperparameters"]["epsilon_max"]
+        self.epsilon_min = epsilon_min if epsilon_min is not None else config["hyperparameters"]["epsilon_min"]
 
         
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.policy_net = DQN(state_size, action_size).to(self.device)
-        self.target_net = DQN(state_size, action_size).to(self.device)
+        self.policy_net = DQN(state_size, action_size, n_layers, layer_size, activation).to(self.device)
+        self.target_net = DQN(state_size, action_size, n_layers, layer_size, activation).to(self.device)
 
-        if os.path.exists(path + PATH):
-            self.target_net.load_state_dict(torch.load(path + PATH))
-
+        # if os.path.exists(path + PATH):
+        #     self.target_net.load_state_dict(torch.load(path + PATH))
+        self.config_id = self.generate_config_id(learning_rate, gamma, epsilon_decay, epsilon_max, epsilon_min, memory_size, n_layers, layer_size, activation, batch_size)
+        self.load_model()
 
         self.criterion = nn.HuberLoss()
 
@@ -152,9 +154,29 @@ class Agent:
         policy_net_state_dict = self.policy_net.state_dict()
         self.target_net.load_state_dict(policy_net_state_dict)
 
-    def save(self, custom_path=None):
-        save_path = custom_path if custom_path else self.path + PATH
+    def generate_config_id(self, *args):
+        """Generate a unique hash for the given configuration."""
+        config_str = '_'.join(map(str, args))
+        return hashlib.md5(config_str.encode()).hexdigest()
+
+    def save_model(self, episode_num=None):
+        """Save the model uniquely based on its configuration and episode number."""
+        filename = f"model_{self.config_id}"
+        if episode_num is not None:
+            filename += f"_ep{episode_num}"
+        filename += ".pt"
+        save_path = os.path.join(self.path, filename)
         torch.save(self.policy_net.state_dict(), save_path)
+        print(f"Model saved to {save_path}")
+
+    def load_model(self):
+        """Load the model if a file matching the configuration exists."""
+        filename = f"model_{self.config_id}.pt"
+        load_path = os.path.join(self.path, filename)
+        if os.path.exists(load_path):
+            self.policy_net.load_state_dict(torch.load(load_path, map_location=self.device))
+            self.policy_net.to(self.device)
+            print(f"Model loaded from {load_path}")
 
 
     def decay(self):
@@ -163,12 +185,12 @@ class Agent:
     def get_epsilon(self):
         return self.exploration_strategy.epsilon
     
-    def get_model_info(self):
-        """Returns detailed information about the policy network."""
-        model = DQN(12, 4)
-        model.load_state_dict(torch.load(self.path + PATH))
-        state_info = self.get_model_state_dict_as_string(model)
-        opt_info = self.get_optimizer_state_dict_as_string(self.optimizer)
+    # def get_model_info(self):
+    #     """Returns detailed information about the policy network."""
+    #     model = DQN(12, 4)
+    #     model.load_state_dict(torch.load(self.path + PATH))
+    #     state_info = self.get_model_state_dict_as_string(model)
+    #     opt_info = self.get_optimizer_state_dict_as_string(self.optimizer)
         
 
         return state_info, opt_info

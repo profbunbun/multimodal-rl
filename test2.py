@@ -33,9 +33,11 @@ def objective(trial):
     layer_size = trial.suggest_categorical("layer_size", [64, 128, 256])
     activation = trial.suggest_categorical("activation", ["relu", "tanh"])
     env = Env(EXPERIMENT_PATH, SUMOCONFIG, NUM_VEHIC, TYPES)
-    dagent = Agent(12, 4, EXPERIMENT_PATH,  learning_rate, gamma, epsilon_decay, epsilon_max, epsilon_min, memory_size, n_layers, layer_size)
+    dagent = Agent(12, 4, EXPERIMENT_PATH,  learning_rate, gamma, epsilon_decay, epsilon_max, epsilon_min, memory_size, n_layers, layer_size, activation, batch_size)
 
     cumulative_reward = 0
+    best_reward = float('-inf')  # Track the best reward for early stopping
+    no_improvement_count = 0  # Count episodes with no improvement
 
     for episode in range(EPISODES):
         env.render("libsumo" if episode % 100 != 0 else "libsumo")
@@ -58,7 +60,17 @@ def objective(trial):
         if episode % 30 == 0:
             dagent.hard_update()
 
+        if cumulative_reward > best_reward:
+            best_reward = cumulative_reward
+            no_improvement_count = 0
+        else:
+            no_improvement_count += 1
+            if no_improvement_count >= trial.suggest_int("early_stopping_patience", 1000, 10000):
+                print("Early stopping triggered.")
+                break
+
     return cumulative_reward  # The objective value to maximize
+
 def get_next_study_name(storage_url, base_name="study"):
     try:
         # Attempt to connect to the Optuna storage database.

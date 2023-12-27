@@ -2,11 +2,8 @@
 import os
 import json
 import traceback
-from sumo_mmrl import Agent
-from sumo_mmrl import DQN
-from sumo_mmrl.environment.env import Env
-from sumo_mmrl import Logger
-import numpy as np
+from sumo_mmrl import Agent , DQN , Env , Logger
+
 
 with open('config.json') as f:
     config = json.load(f)
@@ -17,16 +14,17 @@ EXPERIMENT_PATH = config['training_settings']['experiment_path']
 SUMOCONFIG = config['training_settings']['sumoconfig']
 NUM_VEHIC = config['training_settings']['num_vehic']
 TYPES = config['training_settings']['types']
-base_log_dir = config['training_settings']['log_dir_path']
+LOG_PATH= config['training_settings']['log_dir_path']
 
 
 def main():
-    logger = Logger(base_log_dir, 'config.json')
+    logger = Logger(LOG_PATH, 'config.json')
     env = Env(EXPERIMENT_PATH, SUMOCONFIG, NUM_VEHIC, TYPES)
     dagent = Agent(12, 4, EXPERIMENT_PATH,logger)
     logger.log_config()
-    model_state, optimizer_state = dagent.get_model_info()
-    logger.log_model_and_optimizer_info(model_state , optimizer_state)
+    if os.path.exists(LOG_PATH + "/model.pt"):
+        model_state, optimizer_state = dagent.get_model_info()
+        logger.log_model_and_optimizer_info(model_state , optimizer_state)
     
 
     try:

@@ -5,9 +5,12 @@ import torch.optim as optim
 from .dqn import DQN
 from . import exploration, memory
 import json 
-from torchinfo import summary
+from ray import tune,train
+from ray.tune.search.optuna import OptunaSearch
 
-PATH = "/Models/model.pt"
+
+
+PATH = "/logger/model.pt"
 
 class Agent:
     def __init__(self, state_size, action_size, path, logger):

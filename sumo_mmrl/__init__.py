@@ -4,4 +4,5 @@ from .environment.plot_util import Plotter
 from .agent.agent import Agent
 from .utils.logger import Logger
 from .agent.dqn import DQN
+from .environment.env import Env
 

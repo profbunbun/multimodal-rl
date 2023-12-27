@@ -8,7 +8,7 @@
     "epsilon_max": 1
   },
   "training_settings": {
-      "batch_size": 1024,
+      "batch_size": 32,
       "memory_size": 100000,
       "episodes": 50000,
       "experiment_path": "Experiments/3x3",

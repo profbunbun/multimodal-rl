@@ -5,29 +5,31 @@ import torch.optim as optim
 from .dqn import DQN
 from . import exploration, memory
 import json 
-from ray import tune,train
-from ray.tune.search.optuna import OptunaSearch
+
+
 
 
 
 PATH = "/logger/model.pt"
 
 class Agent:
-    def __init__(self, state_size, action_size, path, logger):
-        self.logger = logger
+    def __init__(self, state_size, action_size, path, learning_rate=None, gamma=None, epsilon_decay=None):
+        self.logger = None
         self.path = path
         self.direction_choices = ['r', 's', 'l', 't']
         with open("config.json", "r") as config_file:
             config = json.load(config_file)
 
         self.memory_size = config["training_settings"]["memory_size"]
-        self.gamma = config["hyperparameters"]["gamma"]
-        self.learning_rate = config["hyperparameters"]["learning_rate"]
+        self.gamma = gamma if gamma is not None else config["hyperparameters"]["gamma"]
+        self.learning_rate = learning_rate if learning_rate is not None else config["hyperparameters"]["learning_rate"]
+        self.epsilon_decay = epsilon_decay if epsilon_decay is not None else config["hyperparameters"]["epsilon_decay"]
+
         self.soft_update_factor = config["hyperparameters"]["soft_update_factor"]
         self.batch_size = config["training_settings"]["batch_size"]
         self.epsilon_max = config["hyperparameters"]["epsilon_max"]
         self.epsilon_min = config["hyperparameters"]["epsilon_min"]
-        self.epsilon_decay = config["hyperparameters"]["epsilon_decay"]
+
         
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.policy_net = DQN(state_size, action_size).to(self.device)
@@ -150,8 +152,9 @@ class Agent:
         policy_net_state_dict = self.policy_net.state_dict()
         self.target_net.load_state_dict(policy_net_state_dict)
 
-    def save(self):
-        torch.save(self.policy_net.state_dict(), self.path + PATH)
+    def save(self, custom_path=None):
+        save_path = custom_path if custom_path else self.path + PATH
+        torch.save(self.policy_net.state_dict(), save_path)
 
 
     def decay(self):
@@ -181,3 +184,10 @@ class Agent:
         for var_name in optimizer.state_dict():
             optimizer_info += f"{var_name}\t{optimizer.state_dict()[var_name]}\n"
         return optimizer_info
+    
+    def set_hyperparameters(self, learning_rate, gamma, epsilon_decay):
+        self.gamma = gamma
+        self.learning_rate = learning_rate
+        self.epsilon_decay = epsilon_decay
+        self.optimizer = optim.RMSprop(self.policy_net.parameters(), lr=self.learning_rate, momentum=0.9)
+        self.exploration_strategy = exploration.Explorer(self.policy_net, self.epsilon_max, self.epsilon_decay, self.epsilon_min)

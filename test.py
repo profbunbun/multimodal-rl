@@ -46,6 +46,7 @@ def main():
                 if stage == "done":
                     dagent.remember(state, action_index, new_reward, next_state, done=1)
                 else:
+                    
                     dagent.remember(state, action_index, new_reward, next_state, done=0)
 
                 # step_data = {

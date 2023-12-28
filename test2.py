@@ -6,7 +6,7 @@ import optuna
 from sumo_mmrl import Agent,Env
 import sqlalchemy
 import wandb 
-wandb.init(project='sumo_mmrl', entity='aaronrls')
+
 # Load configuration
 with open('config.json') as f:
     config = json.load(f)
@@ -35,6 +35,7 @@ def objective(trial):
     activation = trial.suggest_categorical("activation", ["relu", "tanh","leaky_relu"])
     env = Env(EXPERIMENT_PATH, SUMOCONFIG, NUM_VEHIC, TYPES)
     dagent = Agent(12, 4, EXPERIMENT_PATH,wandb , learning_rate, gamma, epsilon_decay, epsilon_max, epsilon_min, memory_size, n_layers, layer_size, activation, batch_size)
+    wandb.init(project='sumo_mmrl', entity='aaronrls')
     wandb.config.update({"learning_rate": learning_rate, "gamma": gamma, "epsilon_decay": epsilon_decay, "batch_size": batch_size, "memory_size": memory_size, "epsilon_max": epsilon_max, "epsilon_min": epsilon_min, "n_layers": n_layers, "layer_size": layer_size, "activation": activation})
     
     best_reward = float('-inf')  # Track the best reward for early stopping
@@ -47,6 +48,11 @@ def objective(trial):
         while stage != "done":
             action, action_index, validator, q_values = dagent.choose_action(state, legal_actions)
             next_state, new_reward, stage, legal_actions = env.step(action, validator)
+            wandb.log({"location": env.get_vehicle_location_edge_id,
+                       "best_choice": env.get_best_choice,
+                       "agent choice": action,
+                       "q_values": q_values,
+                       "out lanes": env.get_out_lanes,})
             dagent.remember(state, action_index, new_reward, next_state, done=(stage == "done"))
             cumulative_reward += new_reward
             if len(dagent.memory) > batch_size:

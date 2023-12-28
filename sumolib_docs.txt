@@ -1,0 +1,89 @@
+Help on package sumolib:
+
+NAME
+    sumolib
+
+DESCRIPTION
+    # -*- coding: utf-8 -*-
+    # Eclipse SUMO, Simulation of Urban MObility; see https://eclipse.dev/sumo
+    # Copyright (C) 2011-2023 German Aerospace Center (DLR) and others.
+    # This program and the accompanying materials are made available under the
+    # terms of the Eclipse Public License 2.0 which is available at
+    # https://www.eclipse.org/legal/epl-2.0/
+    # This Source Code may also be made available under the following Secondary
+    # Licenses when the conditions for such availability set forth in the Eclipse
+    # Public License 2.0 are satisfied: GNU General Public License, version 2
+    # or later which is available at
+    # https://www.gnu.org/licenses/old-licenses/gpl-2.0-standalone.html
+    # SPDX-License-Identifier: EPL-2.0 OR GPL-2.0-or-later
+
+PACKAGE CONTENTS
+    color
+    datastructures (package)
+    files (package)
+    fpdiff
+    geomhelper
+    miscutils
+    net (package)
+    options
+    output (package)
+    route
+    scenario (package)
+    sensors (package)
+    shapes (package)
+    statistics
+    translation
+    vehicletype
+    version
+    visualization (package)
+    xml
+
+CLASSES
+    builtins.object
+        TeeFile
+    
+    class TeeFile(builtins.object)
+     |  TeeFile(*outputfiles)
+     |  
+     |  A helper class which allows simultaneous writes to several files
+     |  
+     |  Methods defined here:
+     |  
+     |  __init__(self, *outputfiles)
+     |      Initialize self.  See help(type(self)) for accurate signature.
+     |  
+     |  close(self)
+     |      closes all closable outputs
+     |  
+     |  flush(self)
+     |      flushes all file contents to disc
+     |  
+     |  write(self, txt)
+     |      Writes the text to all files
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |  
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |  
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+
+FUNCTIONS
+    call(executable, args)
+    
+    checkBinary(name, bindir=None)
+        Checks for the given binary in the places, defined by the environment
+        variables SUMO_HOME and <NAME>_BINARY.
+    
+    exeExists(binary)
+    
+    open(fileOrURL, tryGZip=True, mode='rb')
+    
+    saveConfiguration(executable, configoptions, filename)
+
+FILE
+    /home/ahoope5/anaconda3/envs/gym/lib/python3.11/site-packages/sumolib/__init__.py
+
+

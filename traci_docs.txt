@@ -1,0 +1,89 @@
+Help on package traci:
+
+NAME
+    traci
+
+DESCRIPTION
+    # -*- coding: utf-8 -*-
+    # Eclipse SUMO, Simulation of Urban MObility; see https://eclipse.dev/sumo
+    # Copyright (C) 2008-2023 German Aerospace Center (DLR) and others.
+    # This program and the accompanying materials are made available under the
+    # terms of the Eclipse Public License 2.0 which is available at
+    # https://www.eclipse.org/legal/epl-2.0/
+    # This Source Code may also be made available under the following Secondary
+    # Licenses when the conditions for such availability set forth in the Eclipse
+    # Public License 2.0 are satisfied: GNU General Public License, version 2
+    # or later which is available at
+    # https://www.gnu.org/licenses/old-licenses/gpl-2.0-standalone.html
+    # SPDX-License-Identifier: EPL-2.0 OR GPL-2.0-or-later
+
+PACKAGE CONTENTS
+    _busstop
+    _calibrator
+    _chargingstation
+    _edge
+    _gui
+    _inductionloop
+    _junction
+    _lane
+    _lanearea
+    _meandata
+    _multientryexit
+    _overheadwire
+    _parkingarea
+    _person
+    _poi
+    _polygon
+    _rerouter
+    _route
+    _routeprobe
+    _simulation
+    _trafficlight
+    _variablespeedsign
+    _vehicle
+    _vehicletype
+    check_constants
+    connection
+    constants
+    domain
+    exceptions
+    main
+    rebuildConstants
+    step
+    storage
+    traciToHex
+
+SUBMODULES
+    tc
+
+DATA
+    DOMAINS = [<traci._busstop.BusStopDomain object>, <traci._calibrator.C...
+    busstop = <traci._busstop.BusStopDomain object>
+    calibrator = <traci._calibrator.CalibratorDomain object>
+    chargingstation = <traci._chargingstation.ChargingStationDomain object...
+    edge = <traci._edge.EdgeDomain object>
+    gui = <traci._gui.GuiDomain object>
+    inductionloop = <traci._inductionloop.InductionLoopDomain object>
+    junction = <traci._junction.JunctionDomain object>
+    lane = <traci._lane.LaneDomain object>
+    lanearea = <traci._lanearea.LaneAreaDomain object>
+    meandata = <traci._meandata.MeanDataDomain object>
+    multientryexit = <traci._multientryexit.MultiEntryExitDomain object>
+    overheadwire = <traci._overheadwire.OverheadWireDomain object>
+    parkingarea = <traci._parkingarea.ParkingAreaDomain object>
+    person = <traci._person.PersonDomain object>
+    poi = <traci._poi.PoiDomain object>
+    polygon = <traci._polygon.PolygonDomain object>
+    rerouter = <traci._rerouter.RerouterDomain object>
+    route = <traci._route.RouteDomain object>
+    routeprobe = <traci._routeprobe.RouteProbeDomain object>
+    simulation = <traci._simulation.SimulationDomain object>
+    trafficlight = <traci._trafficlight.TrafficLightDomain object>
+    variablespeedsign = <traci._variablespeedsign.VariableSpeedSignDomain ...
+    vehicle = <traci._vehicle.VehicleDomain object>
+    vehicletype = <traci._vehicletype.VehicleTypeDomain object>
+
+FILE
+    /home/ahoope5/anaconda3/envs/gym/lib/python3.11/site-packages/traci/__init__.py
+
+

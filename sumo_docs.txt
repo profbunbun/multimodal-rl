@@ -1,0 +1,20 @@
+Help on package sumo:
+
+NAME
+    sumo - Sumo is a set of scripts and an API for dealing with VASP output files.
+
+PACKAGE CONTENTS
+    cli (package)
+    electronic_structure (package)
+    io (package)
+    phonon (package)
+    plotting (package)
+    symmetry (package)
+
+VERSION
+    2.3.7
+
+FILE
+    /home/ahoope5/anaconda3/envs/gym/lib/python3.11/site-packages/sumo/__init__.py
+
+

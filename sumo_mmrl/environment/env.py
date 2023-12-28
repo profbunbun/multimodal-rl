@@ -19,26 +19,26 @@ class Env:
     '''RL Enviroment'''
     def __init__(self, path, sumocon, num_of_vehic, types):
         self.obs = Observation()
-        self.plotter = Plotter()  # for plotting results
+        self.plotter = Plotter()  
         self.out_mask = OutMask()
         self.finder = StopFinder()
 
-        self.parser = NetParser(  # This is all the stuff to create the
-            path + sumocon  # different map network dictionaries
+        self.parser = NetParser( 
+            path + sumocon  
         )
 
         self.sumo_con = SUMOConnection(
             path + sumocon
         )
 
-        # with the TRACI simulation interface (??REDUNDANT?)
-        self.ruff_rider = RideSelect()  # This is object to select the vehicle
+
+        self.ride_selector = RideSelect()  
         self.edge_position = (
             self.parser.get_edge_pos_dic()
         )  # This creates the x y positions of all the lanes
 
-        self.sumo = None  # this becomes the sumo conection used after GUI
-        # or command line is decided
+        self.sumo = None  
+        
         self.path = path  
 
         self.steps = 0
@@ -96,7 +96,7 @@ class Env:
         people = self.person_manager.create_people()
 
         self.person = people[0]
-        vid_selected = self.ruff_rider.select(vehicles, self.person)
+        vid_selected = self.ride_selector.select(vehicles, self.person)
         self.vehicle = vehicles[int(vid_selected)]
         self.sumo.simulationStep()
         self.old_dist = 0

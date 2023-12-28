@@ -108,7 +108,7 @@ class Agent:
         self.optimizer.zero_grad()
         loss.backward()
         max_grad_norm = max(p.grad.data.norm(2).item() for p in self.policy_net.parameters() if p.grad is not None)
-        torch.nn.utils.clip_grad_value_(self.policy_net.parameters(), 100)
+        torch.nn.utils.clip_grad_norm_(self.policy_net.parameters(), 1)
         self.optimizer.step()
         if self.wandb_run:
             logs = {
@@ -124,6 +124,7 @@ class Agent:
                 if param.requires_grad:
                     logs[f"Gradients/{name}"] = param.grad.norm().item()
                     logs[f"Weights/{name}"] = param.norm().item()
+            self.wandb_run.log(logs)
 
 
 

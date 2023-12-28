@@ -1,13 +1,9 @@
 ''' main driver '''
-import os
 import json
-import traceback
-from concurrent.futures import ProcessPoolExecutor
 import optuna
 from sumo_mmrl import Agent,Env
 import sqlalchemy
 import wandb 
-from optuna.pruners import HyperbandPruner
 
 # Load configuration
 with open('config.json') as f:
@@ -34,21 +30,37 @@ def objective(trial):
     memory_size = trial.suggest_categorical("memory_size", [10000, 20000, 50000, 100000])
     epsilon_max = trial.suggest_float("epsilon_max", 0.9, 1.0,log=True)
     epsilon_min = trial.suggest_float("epsilon_min", 0.01, 0.1,log=True)
-    
-    n_layers = trial.suggest_int('n_layers', 1, 5, log=True)  # For example, between 1 and 5 layers
-    layer_sizes = [trial.suggest_int(f'n_units_l{i}', 16, 128) for i in range(n_layers)]  # Each layer size between 16 and 128
-
-
+    n_layers = trial.suggest_int('n_layers', 1, 5, log=True) 
+    layer_sizes = [trial.suggest_int(f'n_units_l{i}', 16, 128) for i in range(n_layers)]
     activation = trial.suggest_categorical("activation", ["relu", "tanh","leaky_relu"])
+
     env = Env(EXPERIMENT_PATH, SUMOCONFIG, NUM_VEHIC, TYPES)
-    dagent = Agent(12, 4, EXPERIMENT_PATH,wandb , learning_rate, gamma, epsilon_decay, epsilon_max, epsilon_min, memory_size, layer_sizes, activation, batch_size)
-
     wandb.init(project='sumo_mmrl', entity='aaronrls')
-    wandb.config.update({"learning_rate": learning_rate, "gamma": gamma, "epsilon_decay": epsilon_decay, "batch_size": batch_size, "memory_size": memory_size, "epsilon_max": epsilon_max, "epsilon_min": epsilon_min, "n_layers": n_layers, "layer_sizes": layer_sizes, "activation": activation})
+    dagent = Agent(12, 4, EXPERIMENT_PATH,
+                    wandb,
+                    learning_rate,
+                    gamma, 
+                    epsilon_decay, 
+                    epsilon_max, 
+                    epsilon_min, 
+                    memory_size, 
+                    layer_sizes, 
+                    activation, batch_size)
     
-    best_reward = float('-inf')  # Track the best reward for early stopping
-    no_improvement_count = 0  # Count episodes with no improvement
-
+    wandb.config.update({
+        "learning_rate": learning_rate, 
+        "gamma": gamma, 
+        "epsilon_decay": epsilon_decay, 
+        "batch_size": batch_size, 
+        "memory_size": memory_size, 
+        "epsilon_max": epsilon_max, 
+        "epsilon_min": epsilon_min, 
+        "n_layers": n_layers, 
+        "layer_sizes": layer_sizes, 
+        "activation": activation})
+    
+    best_reward = float('-inf') 
+    
     for episode in range(EPISODES):
         cumulative_reward = 0
         env.render("libsumo")
@@ -68,33 +80,33 @@ def objective(trial):
                 dagent.replay(batch_size, episode, env.get_global_step())
                 dagent.soft_update()
             state = next_state
-            
 
         # Log episode details
         wandb.log({
-                            "cumulative_reward": cumulative_reward,
-                            "epsilon": dagent.get_epsilon(),
-                                "explore_ratio": dagent.get_exploration_stats()[0],
-                                "exploit_ratio": dagent.get_exploration_stats()[1],
-                                    "episode": episode,
-                                    "agent_steps": env.get_global_step(),
-                                    "simulation_steps": env.get_steps_per_episode(),
-                                        })
+            "cumulative_reward": cumulative_reward,
+            "epsilon": dagent.get_epsilon(),
+            "explore_ratio": dagent.get_exploration_stats()[0],
+            "exploit_ratio": dagent.get_exploration_stats()[1],
+            "episode": episode,
+            "agent_steps": env.get_global_step(),
+            "simulation_steps": env.get_steps_per_episode(),
+            })
+        
         trial.report(cumulative_reward, episode)
         if trial.should_prune():
             raise optuna.exceptions.TrialPruned()
 
         dagent.decay()
-        env.close(episode, cumulative_reward, dagent.get_epsilon())  # Close the environment properly
+
+        env.close(episode, cumulative_reward, dagent.get_epsilon())
+
         if episode % 30 == 0:
             dagent.hard_update()
 
         if cumulative_reward > best_reward:
             best_reward = cumulative_reward
             dagent.save_model(str(episode))
-        
-
-        
+  
     wandb.finish()   
     return cumulative_reward  # The objective value to maximize
 
@@ -136,7 +148,7 @@ def main():
     storage_path = "sqlite:///db.sqlite3"
     new_study_name = get_next_study_name(storage_path, base_name="study",)
     study = optuna.create_study(
-        storage=storage_path,  # Specify the storage URL here.
+        storage=storage_path,
         study_name=new_study_name,
         direction="maximize",
         pruner=pruner,
@@ -148,3 +160,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

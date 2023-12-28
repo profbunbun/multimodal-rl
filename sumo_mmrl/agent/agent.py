@@ -15,7 +15,7 @@ import wandb
 # PATH = "/logger/model.pt"
 
 class Agent:
-    def __init__(self, state_size, action_size, path,wandb_run=None, learning_rate=None, gamma=None, epsilon_decay=None, epsilon_max=None, epsilon_min=None, memory_size=None, n_layers=None, layer_size=None, activation=None, batch_size=None):
+    def __init__(self, state_size, action_size, path,wandb_run=None, learning_rate=None, gamma=None, epsilon_decay=None, epsilon_max=None, epsilon_min=None, memory_size=None, layer_sizes=None, activation=None, batch_size=None):
         self.wandb_run = wandb_run
         self.path = path
         self.direction_choices = ['r', 's', 'l', 't']
@@ -34,12 +34,12 @@ class Agent:
 
         
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        self.policy_net = DQN(state_size, action_size, n_layers, layer_size, activation).to(self.device)
-        self.target_net = DQN(state_size, action_size, n_layers, layer_size, activation).to(self.device)
+        self.policy_net = DQN(state_size, action_size, layer_sizes, activation).to(self.device)
+        self.target_net = DQN(state_size, action_size, layer_sizes, activation).to(self.device)
 
         # if os.path.exists(path + PATH):
         #     self.target_net.load_state_dict(torch.load(path + PATH))
-        self.config_id = self.generate_config_id(learning_rate, gamma, epsilon_decay, epsilon_max, epsilon_min, memory_size, n_layers, layer_size, activation, batch_size)
+        
         
 
         self.criterion = nn.HuberLoss()

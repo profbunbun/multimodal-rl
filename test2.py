@@ -30,13 +30,16 @@ def objective(trial):
     memory_size = trial.suggest_categorical("memory_size", [10000, 20000, 50000, 100000])
     epsilon_max = trial.suggest_float("epsilon_max", 0.8, 1.0,log=True)
     epsilon_min = trial.suggest_float("epsilon_min", 0.01, 0.1,log=True)
-    n_layers = trial.suggest_int("n_layers", 1, 3,log=True)
-    layer_size = trial.suggest_categorical("layer_size", [64, 128, 256])
+    
+    n_layers = trial.suggest_int('n_layers', 1, 5, log=True)  # For example, between 1 and 5 layers
+    layer_sizes = [trial.suggest_int(f'n_units_l{i}', 16, 128) for i in range(n_layers)]  # Each layer size between 16 and 128
+
+    # layer_size = trial.suggest_categorical("layer_size", [64, 128, 256])
     activation = trial.suggest_categorical("activation", ["relu", "tanh","leaky_relu"])
     env = Env(EXPERIMENT_PATH, SUMOCONFIG, NUM_VEHIC, TYPES)
-    dagent = Agent(12, 4, EXPERIMENT_PATH,wandb , learning_rate, gamma, epsilon_decay, epsilon_max, epsilon_min, memory_size, n_layers, layer_size, activation, batch_size)
+    dagent = Agent(12, 4, EXPERIMENT_PATH,wandb , learning_rate, gamma, epsilon_decay, epsilon_max, epsilon_min, memory_size, layer_sizes, activation, batch_size)
     wandb.init(project='sumo_mmrl', entity='aaronrls')
-    wandb.config.update({"learning_rate": learning_rate, "gamma": gamma, "epsilon_decay": epsilon_decay, "batch_size": batch_size, "memory_size": memory_size, "epsilon_max": epsilon_max, "epsilon_min": epsilon_min, "n_layers": n_layers, "layer_size": layer_size, "activation": activation})
+    wandb.config.update({"learning_rate": learning_rate, "gamma": gamma, "epsilon_decay": epsilon_decay, "batch_size": batch_size, "memory_size": memory_size, "epsilon_max": epsilon_max, "epsilon_min": epsilon_min, "n_layers": n_layers, "layer_sizes": layer_sizes, "activation": activation})
     
     best_reward = float('-inf')  # Track the best reward for early stopping
     no_improvement_count = 0  # Count episodes with no improvement

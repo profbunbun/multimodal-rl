@@ -6,6 +6,7 @@ import optuna
 from sumo_mmrl import Agent,Env
 import sqlalchemy
 import wandb 
+from optuna.pruners import HyperbandPruner
 
 # Load configuration
 with open('config.json') as f:
@@ -25,10 +26,10 @@ def objective(trial):
     # Suggested hyperparameters
     learning_rate = trial.suggest_float("learning_rate", 1e-5, 1e-1, log=True)
     gamma = trial.suggest_float("gamma", 0.8, 0.9999, log=True)
-    epsilon_decay = trial.suggest_float("epsilon_decay", 0.99, 0.9999, log=True)
+    epsilon_decay = trial.suggest_float("epsilon_decay", 0.999, 0.9999, log=True)
     batch_size = trial.suggest_categorical("batch_size", [32, 64, 128, 256, 512, 1024, 2048])
     memory_size = trial.suggest_categorical("memory_size", [10000, 20000, 50000, 100000])
-    epsilon_max = trial.suggest_float("epsilon_max", 0.8, 1.0,log=True)
+    epsilon_max = trial.suggest_float("epsilon_max", 0.9, 1.0,log=True)
     epsilon_min = trial.suggest_float("epsilon_min", 0.01, 0.1,log=True)
     
     n_layers = trial.suggest_int('n_layers', 1, 5, log=True)  # For example, between 1 and 5 layers
@@ -51,11 +52,12 @@ def objective(trial):
         while stage != "done":
             action, action_index, validator, q_values = dagent.choose_action(state, legal_actions)
             next_state, new_reward, stage, legal_actions = env.step(action, validator)
+            # if env.get_global_step() % 2 == 0:
             wandb.log({"location": env.get_vehicle_location_edge_id(),
-                       "best_choice": env.get_best_choice(),
-                       "agent choice": action,
-                       "q_values": q_values,
-                       "out lanes": env.get_out_lanes(),})
+                    "best_choice": env.get_best_choice(),
+                    "agent choice": action,
+                    "q_values": q_values,
+                    "out lanes": env.get_out_lanes(),})
             dagent.remember(state, action_index, new_reward, next_state, done=(stage == "done"))
             cumulative_reward += new_reward
             if len(dagent.memory) > batch_size:
@@ -128,12 +130,14 @@ def get_next_study_name(storage_url, base_name="study"):
     
 def main():
     # Set up Optuna study
+    pruner = HyperbandPruner()
     storage_path = "sqlite:///db.sqlite3"
-    new_study_name = get_next_study_name(storage_path, base_name="study")
+    new_study_name = get_next_study_name(storage_path, base_name="study",)
     study = optuna.create_study(
         storage=storage_path,  # Specify the storage URL here.
         study_name=new_study_name,
         direction="maximize",
+        pruner=pruner,
     )
     study.optimize(objective, n_trials=100)
     print(f"Best value: {study.best_value} (params: {study.best_params})")

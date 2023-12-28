@@ -1,0 +1,2997 @@
+Help on package wandb:
+
+NAME
+    wandb - Use wandb to track machine learning work.
+
+DESCRIPTION
+    The most commonly used functions/objects are:
+      - wandb.init — initialize a new run at the top of your training script
+      - wandb.config — track hyperparameters and metadata
+      - wandb.log — log metrics and media over time within your training loop
+    
+    For guides and examples, see https://docs.wandb.ai.
+    
+    For scripts and interactive notebooks, see https://github.com/wandb/examples.
+    
+    For reference documentation, see https://docs.wandb.com/ref/python.
+
+PACKAGE CONTENTS
+    __main__
+    _globals
+    agents (package)
+    analytics (package)
+    apis (package)
+    catboost (package)
+    cli (package)
+    data_types
+    docker (package)
+    env
+    errors (package)
+    fastai (package)
+    filesync (package)
+    integration (package)
+    jupyter
+    keras (package)
+    lightgbm (package)
+    magic
+    mpmain (package)
+    old (package)
+    plot (package)
+    plots (package)
+    proto (package)
+    sacred (package)
+    sdk (package)
+    sklearn (package)
+    sync (package)
+    trigger
+    util
+    vendor (package)
+    viz
+    wandb_agent
+    wandb_controller
+    wandb_run
+    wandb_torch
+    xgboost (package)
+
+SUBMODULES
+    _lazyloader
+    _preinit
+    gym
+    helper
+    profiler
+    tensorboard
+    tensorflow
+    wandb_lib
+    wandb_sdk
+
+CLASSES
+    builtins.object
+        wandb.apis.public.Api
+    enum.Enum(builtins.object)
+        wandb.sdk.artifacts.artifact_ttl.ArtifactTTL
+    wandb.sdk.data_types.base_types.media.BatchableMedia(wandb.sdk.data_types.base_types.media.Media)
+        wandb.data_types.Audio
+        wandb.sdk.data_types.html.Html
+        wandb.sdk.data_types.image.Image
+        wandb.sdk.data_types.molecule.Molecule
+        wandb.sdk.data_types.object_3d.Object3D
+        wandb.sdk.data_types.video.Video
+    wandb.sdk.data_types.base_types.media.Media(wandb.sdk.data_types.base_types.wb_value.WBValue)
+        wandb.data_types.Graph
+        wandb.data_types.Table
+        wandb.sdk.data_types.plotly.Plotly
+    wandb.sdk.data_types.base_types.wb_value.WBValue(builtins.object)
+        wandb.sdk.data_types.histogram.Histogram
+    
+    class Api(builtins.object)
+     |  Api(overrides=None, timeout: Optional[int] = None, api_key: Optional[str] = None) -> None
+     |  
+     |  Used for querying the wandb server.
+     |  
+     |  Examples:
+     |      Most common way to initialize
+     |      >>> wandb.Api()
+     |  
+     |  Arguments:
+     |      overrides: (dict) You can set `base_url` if you are using a wandb server
+     |          other than https://api.wandb.ai.
+     |          You can also set defaults for `entity`, `project`, and `run`.
+     |  
+     |  Methods defined here:
+     |  
+     |  __init__(self, overrides=None, timeout: Optional[int] = None, api_key: Optional[str] = None) -> None
+     |      Initialize self.  See help(type(self)) for accurate signature.
+     |  
+     |  artifact(self, name, type=None)
+     |      Return a single artifact by parsing path in the form `entity/project/name`.
+     |      
+     |      Arguments:
+     |          name: (str) An artifact name. May be prefixed with entity/project. Valid names
+     |              can be in the following forms:
+     |                  name:version
+     |                  name:alias
+     |          type: (str, optional) The type of artifact to fetch.
+     |      
+     |      Returns:
+     |          A `Artifact` object.
+     |  
+     |  artifact_type(self, type_name, project=None)
+     |  
+     |  artifact_types(self, project=None)
+     |  
+     |  artifact_versions(self, type_name, name, per_page=50)
+     |  
+     |  create_project(self, name: str, entity: str)
+     |  
+     |  create_report(self, project: str, entity: str = '', title: Optional[str] = 'Untitled Report', description: Optional[str] = '', width: Optional[str] = 'readable', blocks: Optional[ForwardRef('wandb.apis.reports.util.Block')] = None) -> 'wandb.apis.reports.Report'
+     |  
+     |  create_run(self, **kwargs)
+     |      Create a new run.
+     |  
+     |  create_run_queue(self, name: str, type: 'RunQueueResourceType', entity: Optional[str] = None, prioritization_mode: Optional[ForwardRef('RunQueuePrioritizationMode')] = None, config: Optional[dict] = None, template_variables: Optional[dict] = None) -> 'RunQueue'
+     |      Create a new run queue (launch).
+     |      
+     |      Arguments:
+     |          name: (str) Name of the queue to create
+     |          type: (str) Type of resource to be used for the queue. One of "local-container", "local-process", "kubernetes", "sagemaker", or "gcp-vertex".
+     |          entity: (str) Optional name of the entity to create the queue. If None, will use the configured or default entity.
+     |          prioritization_mode: (str) Optional version of prioritization to use. Either "V0" or None
+     |          config: (dict) Optional default resource configuration to be used for the queue. Use handlebars (eg. "{{var}}") to specify template variables.
+     |          template_variables (dict): A dictionary of template variable schemas to be used with the config. Expected format of:
+     |              {
+     |                  "var-name": {
+     |                      "schema": {
+     |                          "type": "<string | number | integer>",
+     |                          "default": <optional value>,
+     |                          "minimum": <optional minimum>,
+     |                          "maximum": <optional maximum>,
+     |                          "enum": [..."<options>"]
+     |                      }
+     |                  }
+     |              }
+     |      
+     |      Returns:
+     |          The newly created `RunQueue`
+     |      
+     |      Raises:
+     |          ValueError if any of the parameters are invalid
+     |          wandb.Error on wandb API errors
+     |  
+     |  create_team(self, team, admin_username=None)
+     |      Create a new team.
+     |      
+     |      Arguments:
+     |          team: (str) The name of the team
+     |          admin_username: (str) optional username of the admin user of the team, defaults to the current user.
+     |      
+     |      Returns:
+     |          A `Team` object
+     |  
+     |  create_user(self, email, admin=False)
+     |      Create a new user.
+     |      
+     |      Arguments:
+     |          email: (str) The name of the team
+     |          admin: (bool) Whether this user should be a global instance admin
+     |      
+     |      Returns:
+     |          A `User` object
+     |  
+     |  flush(self)
+     |      Flush the local cache.
+     |      
+     |      The api object keeps a local cache of runs, so if the state of the run may
+     |      change while executing your script you must clear the local cache with
+     |      `api.flush()` to get the latest values associated with the run.
+     |  
+     |  from_path(self, path)
+     |      Return a run, sweep, project or report from a path.
+     |      
+     |      Examples:
+     |          ```
+     |          project = api.from_path("my_project")
+     |          team_project = api.from_path("my_team/my_project")
+     |          run = api.from_path("my_team/my_project/runs/id")
+     |          sweep = api.from_path("my_team/my_project/sweeps/id")
+     |          report = api.from_path("my_team/my_project/reports/My-Report-Vm11dsdf")
+     |          ```
+     |      
+     |      Arguments:
+     |          path: (str) The path to the project, run, sweep or report
+     |      
+     |      Returns:
+     |          A `Project`, `Run`, `Sweep`, or `BetaReport` instance.
+     |      
+     |      Raises:
+     |          wandb.Error if path is invalid or the object doesn't exist
+     |  
+     |  job(self, name, path=None)
+     |  
+     |  list_jobs(self, entity, project)
+     |  
+     |  load_report(self, path: str) -> 'wandb.apis.reports.Report'
+     |      Get report at a given path.
+     |      
+     |      Arguments:
+     |          path: (str) Path to the target report in the form `entity/project/reports/reportId`.
+     |              You can get this by copy-pasting the URL after your wandb url.  For example:
+     |              `megatruong/report-editing/reports/My-fabulous-report-title--VmlldzoxOTc1Njk0`
+     |      
+     |      Returns:
+     |          A `BetaReport` object which represents the report at `path`
+     |      
+     |      Raises:
+     |          wandb.Error if path is invalid
+     |  
+     |  project(self, name, entity=None)
+     |  
+     |  projects(self, entity=None, per_page=200)
+     |      Get projects for a given entity.
+     |      
+     |      Arguments:
+     |          entity: (str) Name of the entity requested.  If None, will fall back to
+     |              default entity passed to `Api`.  If no default entity, will raise a `ValueError`.
+     |          per_page: (int) Sets the page size for query pagination.  None will use the default size.
+     |              Usually there is no reason to change this.
+     |      
+     |      Returns:
+     |          A `Projects` object which is an iterable collection of `Project` objects.
+     |  
+     |  queued_run(self, entity, project, queue_name, run_queue_item_id, project_queue=None, priority=None)
+     |      Return a single queued run based on the path.
+     |      
+     |      Parses paths of the form entity/project/queue_id/run_queue_item_id.
+     |  
+     |  reports(self, path='', name=None, per_page=50)
+     |      Get reports for a given project path.
+     |      
+     |      WARNING: This api is in beta and will likely change in a future release
+     |      
+     |      Arguments:
+     |          path: (str) path to project the report resides in, should be in the form: "entity/project"
+     |          name: (str) optional name of the report requested.
+     |          per_page: (int) Sets the page size for query pagination.  None will use the default size.
+     |              Usually there is no reason to change this.
+     |      
+     |      Returns:
+     |          A `Reports` object which is an iterable collection of `BetaReport` objects.
+     |  
+     |  run(self, path='')
+     |      Return a single run by parsing path in the form entity/project/run_id.
+     |      
+     |      Arguments:
+     |          path: (str) path to run in the form `entity/project/run_id`.
+     |              If `api.entity` is set, this can be in the form `project/run_id`
+     |              and if `api.project` is set this can just be the run_id.
+     |      
+     |      Returns:
+     |          A `Run` object.
+     |  
+     |  run_queue(self, entity, name)
+     |      Return the named `RunQueue` for entity.
+     |      
+     |      To create a new `RunQueue`, use `wandb.Api().create_run_queue(...)`.
+     |  
+     |  runs(self, path: Optional[str] = None, filters: Optional[Dict[str, Any]] = None, order: str = '-created_at', per_page: int = 50, include_sweeps: bool = True)
+     |      Return a set of runs from a project that match the filters provided.
+     |      
+     |      You can filter by `config.*`, `summary_metrics.*`, `tags`, `state`, `entity`, `createdAt`, etc.
+     |      
+     |      Examples:
+     |          Find runs in my_project where config.experiment_name has been set to "foo"
+     |          ```
+     |          api.runs(path="my_entity/my_project", filters={"config.experiment_name": "foo"})
+     |          ```
+     |      
+     |          Find runs in my_project where config.experiment_name has been set to "foo" or "bar"
+     |          ```
+     |          api.runs(
+     |              path="my_entity/my_project",
+     |              filters={"$or": [{"config.experiment_name": "foo"}, {"config.experiment_name": "bar"}]}
+     |          )
+     |          ```
+     |      
+     |          Find runs in my_project where config.experiment_name matches a regex (anchors are not supported)
+     |          ```
+     |          api.runs(
+     |              path="my_entity/my_project",
+     |              filters={"config.experiment_name": {"$regex": "b.*"}}
+     |          )
+     |          ```
+     |      
+     |          Find runs in my_project where the run name matches a regex (anchors are not supported)
+     |          ```
+     |          api.runs(
+     |              path="my_entity/my_project",
+     |              filters={"display_name": {"$regex": "^foo.*"}}
+     |          )
+     |          ```
+     |      
+     |          Find runs in my_project sorted by ascending loss
+     |          ```
+     |          api.runs(path="my_entity/my_project", order="+summary_metrics.loss")
+     |          ```
+     |      
+     |      Arguments:
+     |          path: (str) path to project, should be in the form: "entity/project"
+     |          filters: (dict) queries for specific runs using the MongoDB query language.
+     |              You can filter by run properties such as config.key, summary_metrics.key, state, entity, createdAt, etc.
+     |              For example: {"config.experiment_name": "foo"} would find runs with a config entry
+     |                  of experiment name set to "foo"
+     |              You can compose operations to make more complicated queries,
+     |                  see Reference for the language is at  https://docs.mongodb.com/manual/reference/operator/query
+     |          order: (str) Order can be `created_at`, `heartbeat_at`, `config.*.value`, or `summary_metrics.*`.
+     |              If you prepend order with a + order is ascending.
+     |              If you prepend order with a - order is descending (default).
+     |              The default order is run.created_at from newest to oldest.
+     |      
+     |      Returns:
+     |          A `Runs` object, which is an iterable collection of `Run` objects.
+     |  
+     |  sweep(self, path='')
+     |      Return a sweep by parsing path in the form `entity/project/sweep_id`.
+     |      
+     |      Arguments:
+     |          path: (str, optional) path to sweep in the form entity/project/sweep_id.  If `api.entity`
+     |              is set, this can be in the form project/sweep_id and if `api.project` is set
+     |              this can just be the sweep_id.
+     |      
+     |      Returns:
+     |          A `Sweep` object.
+     |  
+     |  sync_tensorboard(self, root_dir, run_id=None, project=None, entity=None)
+     |      Sync a local directory containing tfevent files to wandb.
+     |  
+     |  team(self, team)
+     |  
+     |  user(self, username_or_email)
+     |      Return a user from a username or email address.
+     |      
+     |      Note: This function only works for Local Admins, if you are trying to get your own user object, please use `api.viewer`.
+     |      
+     |      Arguments:
+     |          username_or_email: (str) The username or email address of the user
+     |      
+     |      Returns:
+     |          A `User` object or None if a user couldn't be found
+     |  
+     |  users(self, username_or_email)
+     |      Return all users from a partial username or email address query.
+     |      
+     |      Note: This function only works for Local Admins, if you are trying to get your own user object, please use `api.viewer`.
+     |      
+     |      Arguments:
+     |          username_or_email: (str) The prefix or suffix of the user you want to find
+     |      
+     |      Returns:
+     |          An array of `User` objects
+     |  
+     |  ----------------------------------------------------------------------
+     |  Readonly properties defined here:
+     |  
+     |  api_key
+     |  
+     |  client
+     |  
+     |  default_entity
+     |  
+     |  user_agent
+     |  
+     |  viewer
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |  
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |  
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes defined here:
+     |  
+     |  CREATE_PROJECT = Document(definitions=[OperationDefinition(operat...ts...
+     |  
+     |  USERS_QUERY = Document(definitions=[OperationDefinition(operat...es=[]...
+     |  
+     |  VIEWER_QUERY = Document(definitions=[OperationDefinition(operat...rect...
+    
+    class ArtifactTTL(enum.Enum)
+     |  ArtifactTTL(value, names=None, *, module=None, qualname=None, type=None, start=1, boundary=None)
+     |  
+     |  Method resolution order:
+     |      ArtifactTTL
+     |      enum.Enum
+     |      builtins.object
+     |  
+     |  Data and other attributes defined here:
+     |  
+     |  INHERIT = <ArtifactTTL.INHERIT: 0>
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from enum.Enum:
+     |  
+     |  name
+     |      The name of the Enum member.
+     |  
+     |  value
+     |      The value of the Enum member.
+     |  
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from enum.EnumType:
+     |  
+     |  __contains__(member) from enum.EnumType
+     |      Return True if member is a member of this enum
+     |      raises TypeError if member is not an enum member
+     |      
+     |      note: in 3.12 TypeError will no longer be raised, and True will also be
+     |      returned if member is the value of a member in this enum
+     |  
+     |  __getitem__(name) from enum.EnumType
+     |      Return the member matching `name`.
+     |  
+     |  __iter__() from enum.EnumType
+     |      Return members in definition order.
+     |  
+     |  __len__() from enum.EnumType
+     |      Return the number of members (no aliases)
+     |  
+     |  ----------------------------------------------------------------------
+     |  Readonly properties inherited from enum.EnumType:
+     |  
+     |  __members__
+     |      Returns a mapping of member name->value.
+     |      
+     |      This mapping lists all enum members, including aliases. Note that this
+     |      is a read-only view of the internal mapping.
+    
+    class Audio(wandb.sdk.data_types.base_types.media.BatchableMedia)
+     |  Audio(data_or_path, sample_rate=None, caption=None)
+     |  
+     |  Wandb class for audio clips.
+     |  
+     |  Arguments:
+     |      data_or_path: (string or numpy array) A path to an audio file
+     |          or a numpy array of audio data.
+     |      sample_rate: (int) Sample rate, required when passing in raw
+     |          numpy array of audio data.
+     |      caption: (string) Caption to display with audio.
+     |  
+     |  Method resolution order:
+     |      Audio
+     |      wandb.sdk.data_types.base_types.media.BatchableMedia
+     |      wandb.sdk.data_types.base_types.media.Media
+     |      wandb.sdk.data_types.base_types.wb_value.WBValue
+     |      builtins.object
+     |  
+     |  Methods defined here:
+     |  
+     |  __eq__(self, other)
+     |      Likely will need to override for any more complicated media objects.
+     |  
+     |  __init__(self, data_or_path, sample_rate=None, caption=None)
+     |      Accept a path to an audio file or a numpy array of audio data.
+     |  
+     |  __ne__(self, other)
+     |      Return self!=value.
+     |  
+     |  bind_to_run(self, run, key, step, id_=None, ignore_copy_err: Optional[bool] = None)
+     |      Bind this object to a particular Run.
+     |      
+     |      Calling this function is necessary so that we have somewhere specific to put the
+     |      file associated with this object, from which other Runs can refer to it.
+     |  
+     |  resolve_ref(self)
+     |  
+     |  to_json(self, run)
+     |      Serialize the object into a JSON blob.
+     |      
+     |      Uses run or artifact to store additional data. If `run_or_artifact` is a
+     |      wandb.Run then `self.bind_to_run()` must have been previously been called.
+     |      
+     |      Args:
+     |          run_or_artifact (wandb.Run | wandb.Artifact): the Run or Artifact for which
+     |              this object should be generating JSON for - this is useful to store
+     |              additional data if needed.
+     |      
+     |      Returns:
+     |          dict: JSON representation
+     |  
+     |  ----------------------------------------------------------------------
+     |  Class methods defined here:
+     |  
+     |  captions(audio_list) from builtins.type
+     |  
+     |  durations(audio_list) from builtins.type
+     |  
+     |  from_json(json_obj, source_artifact) from builtins.type
+     |      Likely will need to override for any more complicated media objects.
+     |  
+     |  get_media_subdir() from builtins.type
+     |  
+     |  sample_rates(audio_list) from builtins.type
+     |  
+     |  seq_to_json(seq, run, key, step) from builtins.type
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes defined here:
+     |  
+     |  __annotations__ = {}
+     |  
+     |  __hash__ = None
+     |  
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from wandb.sdk.data_types.base_types.media.Media:
+     |  
+     |  file_is_set(self) -> bool
+     |  
+     |  is_bound(self) -> bool
+     |  
+     |  ----------------------------------------------------------------------
+     |  Static methods inherited from wandb.sdk.data_types.base_types.media.Media:
+     |  
+     |  path_is_reference(path: Optional[str]) -> bool
+     |  
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from wandb.sdk.data_types.base_types.wb_value.WBValue:
+     |  
+     |  to_data_array(self) -> List[Any]
+     |      Convert the object to a list of primitives representing the underlying data.
+     |  
+     |  ----------------------------------------------------------------------
+     |  Class methods inherited from wandb.sdk.data_types.base_types.wb_value.WBValue:
+     |  
+     |  with_suffix(name: str, filetype: str = 'json') -> str from builtins.type
+     |      Get the name with the appropriate suffix.
+     |      
+     |      Args:
+     |          name (str): the name of the file
+     |          filetype (str, optional): the filetype to use. Defaults to "json".
+     |      
+     |      Returns:
+     |          str: a filename which is suffixed with it's `_log_type` followed by the
+     |              filetype.
+     |  
+     |  ----------------------------------------------------------------------
+     |  Static methods inherited from wandb.sdk.data_types.base_types.wb_value.WBValue:
+     |  
+     |  init_from_json(json_obj: dict, source_artifact: 'Artifact') -> Optional[ForwardRef('WBValue')]
+     |      Initialize a `WBValue` from a JSON blob based on the class that creatd it.
+     |      
+     |      Looks through all subclasses and tries to match the json obj with the class
+     |      which created it. It will then call that subclass' `from_json` method.
+     |      Importantly, this function will set the return object's `source_artifact`
+     |      attribute to the passed in source artifact. This is critical for artifact
+     |      bookkeeping. If you choose to create a wandb.Value via it's `from_json` method,
+     |      make sure to properly set this `artifact_source` to avoid data duplication.
+     |      
+     |      Args:
+     |          json_obj (dict): A JSON dictionary to deserialize. It must contain a `_type`
+     |              key. This is used to lookup the correct subclass to use.
+     |          source_artifact (wandb.Artifact): An artifact which will hold any additional
+     |              resources which were stored during the `to_json` function.
+     |      
+     |      Returns:
+     |          wandb.Value: a newly created instance of a subclass of wandb.Value
+     |  
+     |  type_mapping() -> 'TypeMappingType'
+     |      Return a map from `_log_type` to subclass. Used to lookup correct types for deserialization.
+     |      
+     |      Returns:
+     |          dict: dictionary of str:class
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from wandb.sdk.data_types.base_types.wb_value.WBValue:
+     |  
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |  
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+    
+    class Graph(wandb.sdk.data_types.base_types.media.Media)
+     |  Graph(format='keras')
+     |  
+     |  Wandb class for graphs.
+     |  
+     |  This class is typically used for saving and displaying neural net models.  It
+     |  represents the graph as an array of nodes and edges.  The nodes can have
+     |  labels that can be visualized by wandb.
+     |  
+     |  Examples:
+     |      Import a keras model:
+     |      ```
+     |      Graph.from_keras(keras_model)
+     |      ```
+     |  
+     |  Attributes:
+     |      format (string): Format to help wandb display the graph nicely.
+     |      nodes ([wandb.Node]): List of wandb.Nodes
+     |      nodes_by_id (dict): dict of ids -> nodes
+     |      edges ([(wandb.Node, wandb.Node)]): List of pairs of nodes interpreted as edges
+     |      loaded (boolean): Flag to tell whether the graph is completely loaded
+     |      root (wandb.Node): root node of the graph
+     |  
+     |  Method resolution order:
+     |      Graph
+     |      wandb.sdk.data_types.base_types.media.Media
+     |      wandb.sdk.data_types.base_types.wb_value.WBValue
+     |      builtins.object
+     |  
+     |  Methods defined here:
+     |  
+     |  __getitem__(self, nid)
+     |  
+     |  __init__(self, format='keras')
+     |      Initialize self.  See help(type(self)) for accurate signature.
+     |  
+     |  add_edge(self, from_node, to_node)
+     |  
+     |  add_node(self, node=None, **node_kwargs)
+     |  
+     |  bind_to_run(self, *args, **kwargs)
+     |      Bind this object to a particular Run.
+     |      
+     |      Calling this function is necessary so that we have somewhere specific to put the
+     |      file associated with this object, from which other Runs can refer to it.
+     |  
+     |  pprint(self)
+     |  
+     |  to_json(self, run)
+     |      Serialize the object into a JSON blob.
+     |      
+     |      Uses run or artifact to store additional data. If `run_or_artifact` is a
+     |      wandb.Run then `self.bind_to_run()` must have been previously been called.
+     |      
+     |      Args:
+     |          run_or_artifact (wandb.Run | wandb.Artifact): the Run or Artifact for which
+     |              this object should be generating JSON for - this is useful to store
+     |              additional data if needed.
+     |      
+     |      Returns:
+     |          dict: JSON representation
+     |  
+     |  ----------------------------------------------------------------------
+     |  Class methods defined here:
+     |  
+     |  from_keras(model) from builtins.type
+     |  
+     |  get_media_subdir() from builtins.type
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes defined here:
+     |  
+     |  __annotations__ = {}
+     |  
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from wandb.sdk.data_types.base_types.media.Media:
+     |  
+     |  __eq__(self, other: object) -> bool
+     |      Likely will need to override for any more complicated media objects.
+     |  
+     |  file_is_set(self) -> bool
+     |  
+     |  is_bound(self) -> bool
+     |  
+     |  ----------------------------------------------------------------------
+     |  Class methods inherited from wandb.sdk.data_types.base_types.media.Media:
+     |  
+     |  from_json(json_obj: dict, source_artifact: 'Artifact') -> 'Media' from builtins.type
+     |      Likely will need to override for any more complicated media objects.
+     |  
+     |  ----------------------------------------------------------------------
+     |  Static methods inherited from wandb.sdk.data_types.base_types.media.Media:
+     |  
+     |  captions(media_items: Sequence[ForwardRef('Media')]) -> Union[bool, Sequence[Optional[str]]]
+     |  
+     |  path_is_reference(path: Optional[str]) -> bool
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes inherited from wandb.sdk.data_types.base_types.media.Media:
+     |  
+     |  __hash__ = None
+     |  
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from wandb.sdk.data_types.base_types.wb_value.WBValue:
+     |  
+     |  __ne__(self, other: object) -> bool
+     |      Return self!=value.
+     |  
+     |  to_data_array(self) -> List[Any]
+     |      Convert the object to a list of primitives representing the underlying data.
+     |  
+     |  ----------------------------------------------------------------------
+     |  Class methods inherited from wandb.sdk.data_types.base_types.wb_value.WBValue:
+     |  
+     |  with_suffix(name: str, filetype: str = 'json') -> str from builtins.type
+     |      Get the name with the appropriate suffix.
+     |      
+     |      Args:
+     |          name (str): the name of the file
+     |          filetype (str, optional): the filetype to use. Defaults to "json".
+     |      
+     |      Returns:
+     |          str: a filename which is suffixed with it's `_log_type` followed by the
+     |              filetype.
+     |  
+     |  ----------------------------------------------------------------------
+     |  Static methods inherited from wandb.sdk.data_types.base_types.wb_value.WBValue:
+     |  
+     |  init_from_json(json_obj: dict, source_artifact: 'Artifact') -> Optional[ForwardRef('WBValue')]
+     |      Initialize a `WBValue` from a JSON blob based on the class that creatd it.
+     |      
+     |      Looks through all subclasses and tries to match the json obj with the class
+     |      which created it. It will then call that subclass' `from_json` method.
+     |      Importantly, this function will set the return object's `source_artifact`
+     |      attribute to the passed in source artifact. This is critical for artifact
+     |      bookkeeping. If you choose to create a wandb.Value via it's `from_json` method,
+     |      make sure to properly set this `artifact_source` to avoid data duplication.
+     |      
+     |      Args:
+     |          json_obj (dict): A JSON dictionary to deserialize. It must contain a `_type`
+     |              key. This is used to lookup the correct subclass to use.
+     |          source_artifact (wandb.Artifact): An artifact which will hold any additional
+     |              resources which were stored during the `to_json` function.
+     |      
+     |      Returns:
+     |          wandb.Value: a newly created instance of a subclass of wandb.Value
+     |  
+     |  type_mapping() -> 'TypeMappingType'
+     |      Return a map from `_log_type` to subclass. Used to lookup correct types for deserialization.
+     |      
+     |      Returns:
+     |          dict: dictionary of str:class
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from wandb.sdk.data_types.base_types.wb_value.WBValue:
+     |  
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |  
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+    
+    class Histogram(wandb.sdk.data_types.base_types.wb_value.WBValue)
+     |  Histogram(sequence: Optional[Sequence] = None, np_histogram: Optional[ForwardRef('NumpyHistogram')] = None, num_bins: int = 64) -> None
+     |  
+     |  wandb class for histograms.
+     |  
+     |  This object works just like numpy's histogram function
+     |  https://docs.scipy.org/doc/numpy/reference/generated/numpy.histogram.html
+     |  
+     |  Examples:
+     |      Generate histogram from a sequence
+     |      ```python
+     |      wandb.Histogram([1, 2, 3])
+     |      ```
+     |  
+     |      Efficiently initialize from np.histogram.
+     |      ```python
+     |      hist = np.histogram(data)
+     |      wandb.Histogram(np_histogram=hist)
+     |      ```
+     |  
+     |  Arguments:
+     |      sequence: (array_like) input data for histogram
+     |      np_histogram: (numpy histogram) alternative input of a precomputed histogram
+     |      num_bins: (int) Number of bins for the histogram.  The default number of bins
+     |          is 64.  The maximum number of bins is 512
+     |  
+     |  Attributes:
+     |      bins: ([float]) edges of bins
+     |      histogram: ([int]) number of elements falling in each bin
+     |  
+     |  Method resolution order:
+     |      Histogram
+     |      wandb.sdk.data_types.base_types.wb_value.WBValue
+     |      builtins.object
+     |  
+     |  Methods defined here:
+     |  
+     |  __init__(self, sequence: Optional[Sequence] = None, np_histogram: Optional[ForwardRef('NumpyHistogram')] = None, num_bins: int = 64) -> None
+     |      Initialize self.  See help(type(self)) for accurate signature.
+     |  
+     |  __sizeof__(self) -> int
+     |      Estimated size in bytes.
+     |      
+     |      Currently the factor of 1.7 is used to account for the JSON encoding. We use
+     |      this in tb_watcher.TBHistory.
+     |  
+     |  to_json(self, run: Union[ForwardRef('LocalRun'), ForwardRef('Artifact'), NoneType] = None) -> dict
+     |      Serialize the object into a JSON blob.
+     |      
+     |      Uses current run or artifact to store additional data.
+     |      
+     |      Args:
+     |          run_or_artifact (wandb.Run | wandb.Artifact): the Run or Artifact for which
+     |              this object should be generating JSON for - this is useful to to store
+     |              additional data if needed.
+     |      
+     |      Returns:
+     |          dict: JSON representation
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes defined here:
+     |  
+     |  MAX_LENGTH = 512
+     |  
+     |  __annotations__ = {'MAX_LENGTH': <class 'int'>}
+     |  
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from wandb.sdk.data_types.base_types.wb_value.WBValue:
+     |  
+     |  __eq__(self, other: object) -> bool
+     |      Return self==value.
+     |  
+     |  __ne__(self, other: object) -> bool
+     |      Return self!=value.
+     |  
+     |  to_data_array(self) -> List[Any]
+     |      Convert the object to a list of primitives representing the underlying data.
+     |  
+     |  ----------------------------------------------------------------------
+     |  Class methods inherited from wandb.sdk.data_types.base_types.wb_value.WBValue:
+     |  
+     |  from_json(json_obj: dict, source_artifact: 'Artifact') -> 'WBValue' from builtins.type
+     |      Deserialize a `json_obj` into it's class representation.
+     |      
+     |      If additional resources were stored in the `run_or_artifact` artifact during the
+     |      `to_json` call, then those resources should be in the `source_artifact`.
+     |      
+     |      Args:
+     |          json_obj (dict): A JSON dictionary to deserialize source_artifact
+     |          (wandb.Artifact): An artifact which will hold any additional
+     |              resources which were stored during the `to_json` function.
+     |  
+     |  with_suffix(name: str, filetype: str = 'json') -> str from builtins.type
+     |      Get the name with the appropriate suffix.
+     |      
+     |      Args:
+     |          name (str): the name of the file
+     |          filetype (str, optional): the filetype to use. Defaults to "json".
+     |      
+     |      Returns:
+     |          str: a filename which is suffixed with it's `_log_type` followed by the
+     |              filetype.
+     |  
+     |  ----------------------------------------------------------------------
+     |  Static methods inherited from wandb.sdk.data_types.base_types.wb_value.WBValue:
+     |  
+     |  init_from_json(json_obj: dict, source_artifact: 'Artifact') -> Optional[ForwardRef('WBValue')]
+     |      Initialize a `WBValue` from a JSON blob based on the class that creatd it.
+     |      
+     |      Looks through all subclasses and tries to match the json obj with the class
+     |      which created it. It will then call that subclass' `from_json` method.
+     |      Importantly, this function will set the return object's `source_artifact`
+     |      attribute to the passed in source artifact. This is critical for artifact
+     |      bookkeeping. If you choose to create a wandb.Value via it's `from_json` method,
+     |      make sure to properly set this `artifact_source` to avoid data duplication.
+     |      
+     |      Args:
+     |          json_obj (dict): A JSON dictionary to deserialize. It must contain a `_type`
+     |              key. This is used to lookup the correct subclass to use.
+     |          source_artifact (wandb.Artifact): An artifact which will hold any additional
+     |              resources which were stored during the `to_json` function.
+     |      
+     |      Returns:
+     |          wandb.Value: a newly created instance of a subclass of wandb.Value
+     |  
+     |  type_mapping() -> 'TypeMappingType'
+     |      Return a map from `_log_type` to subclass. Used to lookup correct types for deserialization.
+     |      
+     |      Returns:
+     |          dict: dictionary of str:class
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from wandb.sdk.data_types.base_types.wb_value.WBValue:
+     |  
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |  
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes inherited from wandb.sdk.data_types.base_types.wb_value.WBValue:
+     |  
+     |  __hash__ = None
+    
+    class Html(wandb.sdk.data_types.base_types.media.BatchableMedia)
+     |  Html(data: Union[str, ForwardRef('TextIO')], inject: bool = True) -> None
+     |  
+     |  Wandb class for arbitrary html.
+     |  
+     |  Arguments:
+     |      data: (string or io object) HTML to display in wandb
+     |      inject: (boolean) Add a stylesheet to the HTML object.  If set
+     |          to False the HTML will pass through unchanged.
+     |  
+     |  Method resolution order:
+     |      Html
+     |      wandb.sdk.data_types.base_types.media.BatchableMedia
+     |      wandb.sdk.data_types.base_types.media.Media
+     |      wandb.sdk.data_types.base_types.wb_value.WBValue
+     |      builtins.object
+     |  
+     |  Methods defined here:
+     |  
+     |  __init__(self, data: Union[str, ForwardRef('TextIO')], inject: bool = True) -> None
+     |      Initialize self.  See help(type(self)) for accurate signature.
+     |  
+     |  inject_head(self) -> None
+     |  
+     |  to_json(self, run_or_artifact: Union[ForwardRef('LocalRun'), ForwardRef('Artifact')]) -> dict
+     |      Serialize the object into a JSON blob.
+     |      
+     |      Uses run or artifact to store additional data. If `run_or_artifact` is a
+     |      wandb.Run then `self.bind_to_run()` must have been previously been called.
+     |      
+     |      Args:
+     |          run_or_artifact (wandb.Run | wandb.Artifact): the Run or Artifact for which
+     |              this object should be generating JSON for - this is useful to store
+     |              additional data if needed.
+     |      
+     |      Returns:
+     |          dict: JSON representation
+     |  
+     |  ----------------------------------------------------------------------
+     |  Class methods defined here:
+     |  
+     |  from_json(json_obj: dict, source_artifact: 'Artifact') -> 'Html' from builtins.type
+     |      Likely will need to override for any more complicated media objects.
+     |  
+     |  get_media_subdir() -> str from builtins.type
+     |  
+     |  seq_to_json(seq: Sequence[ForwardRef('BatchableMedia')], run: 'LocalRun', key: str, step: Union[int, str]) -> dict from builtins.type
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes defined here:
+     |  
+     |  __annotations__ = {}
+     |  
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from wandb.sdk.data_types.base_types.media.Media:
+     |  
+     |  __eq__(self, other: object) -> bool
+     |      Likely will need to override for any more complicated media objects.
+     |  
+     |  bind_to_run(self, run: 'LocalRun', key: Union[int, str], step: Union[int, str], id_: Union[int, str, NoneType] = None, ignore_copy_err: Optional[bool] = None) -> None
+     |      Bind this object to a particular Run.
+     |      
+     |      Calling this function is necessary so that we have somewhere specific to put the
+     |      file associated with this object, from which other Runs can refer to it.
+     |  
+     |  file_is_set(self) -> bool
+     |  
+     |  is_bound(self) -> bool
+     |  
+     |  ----------------------------------------------------------------------
+     |  Static methods inherited from wandb.sdk.data_types.base_types.media.Media:
+     |  
+     |  captions(media_items: Sequence[ForwardRef('Media')]) -> Union[bool, Sequence[Optional[str]]]
+     |  
+     |  path_is_reference(path: Optional[str]) -> bool
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes inherited from wandb.sdk.data_types.base_types.media.Media:
+     |  
+     |  __hash__ = None
+     |  
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from wandb.sdk.data_types.base_types.wb_value.WBValue:
+     |  
+     |  __ne__(self, other: object) -> bool
+     |      Return self!=value.
+     |  
+     |  to_data_array(self) -> List[Any]
+     |      Convert the object to a list of primitives representing the underlying data.
+     |  
+     |  ----------------------------------------------------------------------
+     |  Class methods inherited from wandb.sdk.data_types.base_types.wb_value.WBValue:
+     |  
+     |  with_suffix(name: str, filetype: str = 'json') -> str from builtins.type
+     |      Get the name with the appropriate suffix.
+     |      
+     |      Args:
+     |          name (str): the name of the file
+     |          filetype (str, optional): the filetype to use. Defaults to "json".
+     |      
+     |      Returns:
+     |          str: a filename which is suffixed with it's `_log_type` followed by the
+     |              filetype.
+     |  
+     |  ----------------------------------------------------------------------
+     |  Static methods inherited from wandb.sdk.data_types.base_types.wb_value.WBValue:
+     |  
+     |  init_from_json(json_obj: dict, source_artifact: 'Artifact') -> Optional[ForwardRef('WBValue')]
+     |      Initialize a `WBValue` from a JSON blob based on the class that creatd it.
+     |      
+     |      Looks through all subclasses and tries to match the json obj with the class
+     |      which created it. It will then call that subclass' `from_json` method.
+     |      Importantly, this function will set the return object's `source_artifact`
+     |      attribute to the passed in source artifact. This is critical for artifact
+     |      bookkeeping. If you choose to create a wandb.Value via it's `from_json` method,
+     |      make sure to properly set this `artifact_source` to avoid data duplication.
+     |      
+     |      Args:
+     |          json_obj (dict): A JSON dictionary to deserialize. It must contain a `_type`
+     |              key. This is used to lookup the correct subclass to use.
+     |          source_artifact (wandb.Artifact): An artifact which will hold any additional
+     |              resources which were stored during the `to_json` function.
+     |      
+     |      Returns:
+     |          wandb.Value: a newly created instance of a subclass of wandb.Value
+     |  
+     |  type_mapping() -> 'TypeMappingType'
+     |      Return a map from `_log_type` to subclass. Used to lookup correct types for deserialization.
+     |      
+     |      Returns:
+     |          dict: dictionary of str:class
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from wandb.sdk.data_types.base_types.wb_value.WBValue:
+     |  
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |  
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+    
+    class Image(wandb.sdk.data_types.base_types.media.BatchableMedia)
+     |  Image(data_or_path: 'ImageDataOrPathType', mode: Optional[str] = None, caption: Optional[str] = None, grouping: Optional[int] = None, classes: Union[ForwardRef('Classes'), Sequence[dict], NoneType] = None, boxes: Union[Dict[str, ForwardRef('BoundingBoxes2D')], Dict[str, dict], NoneType] = None, masks: Union[Dict[str, ForwardRef('ImageMask')], Dict[str, dict], NoneType] = None, file_type: Optional[str] = None) -> None
+     |  
+     |  Format images for logging to W&B.
+     |  
+     |  Arguments:
+     |      data_or_path: (numpy array, string, io) Accepts numpy array of
+     |          image data, or a PIL image. The class attempts to infer
+     |          the data format and converts it.
+     |      mode: (string) The PIL mode for an image. Most common are "L", "RGB",
+     |          "RGBA". Full explanation at https://pillow.readthedocs.io/en/stable/handbook/concepts.html#modes
+     |      caption: (string) Label for display of image.
+     |  
+     |  Note : When logging a `torch.Tensor` as a `wandb.Image`, images are normalized. If you do not want to normalize your images, please convert your tensors to a PIL Image.
+     |  
+     |  Examples:
+     |      ### Create a wandb.Image from a numpy array
+     |      <!--yeadoc-test:log-image-numpy-->
+     |      ```python
+     |      import numpy as np
+     |      import wandb
+     |  
+     |      with wandb.init() as run:
+     |          examples = []
+     |          for i in range(3):
+     |              pixels = np.random.randint(low=0, high=256, size=(100, 100, 3))
+     |              image = wandb.Image(pixels, caption=f"random field {i}")
+     |              examples.append(image)
+     |          run.log({"examples": examples})
+     |      ```
+     |  
+     |      ### Create a wandb.Image from a PILImage
+     |      <!--yeadoc-test:log-image-pillow-->
+     |      ```python
+     |      import numpy as np
+     |      from PIL import Image as PILImage
+     |      import wandb
+     |  
+     |      with wandb.init() as run:
+     |          examples = []
+     |          for i in range(3):
+     |              pixels = np.random.randint(low=0, high=256, size=(100, 100, 3), dtype=np.uint8)
+     |              pil_image = PILImage.fromarray(pixels, mode="RGB")
+     |              image = wandb.Image(pil_image, caption=f"random field {i}")
+     |              examples.append(image)
+     |          run.log({"examples": examples})
+     |      ```
+     |  
+     |      ### log .jpg rather than .png (default)
+     |      <!--yeadoc-test:log-image-format-->
+     |      ```python
+     |      import numpy as np
+     |      import wandb
+     |  
+     |      with wandb.init() as run:
+     |          examples = []
+     |          for i in range(3):
+     |              pixels = np.random.randint(low=0, high=256, size=(100, 100, 3))
+     |              image = wandb.Image(pixels, caption=f"random field {i}", file_type="jpg")
+     |              examples.append(image)
+     |          run.log({"examples": examples})
+     |      ```
+     |  
+     |  Method resolution order:
+     |      Image
+     |      wandb.sdk.data_types.base_types.media.BatchableMedia
+     |      wandb.sdk.data_types.base_types.media.Media
+     |      wandb.sdk.data_types.base_types.wb_value.WBValue
+     |      builtins.object
+     |  
+     |  Methods defined here:
+     |  
+     |  __eq__(self, other: object) -> bool
+     |      Likely will need to override for any more complicated media objects.
+     |  
+     |  __init__(self, data_or_path: 'ImageDataOrPathType', mode: Optional[str] = None, caption: Optional[str] = None, grouping: Optional[int] = None, classes: Union[ForwardRef('Classes'), Sequence[dict], NoneType] = None, boxes: Union[Dict[str, ForwardRef('BoundingBoxes2D')], Dict[str, dict], NoneType] = None, masks: Union[Dict[str, ForwardRef('ImageMask')], Dict[str, dict], NoneType] = None, file_type: Optional[str] = None) -> None
+     |      Initialize self.  See help(type(self)) for accurate signature.
+     |  
+     |  __ne__(self, other: object) -> bool
+     |      Return self!=value.
+     |  
+     |  bind_to_run(self, run: 'LocalRun', key: Union[int, str], step: Union[int, str], id_: Union[int, str, NoneType] = None, ignore_copy_err: Optional[bool] = None) -> None
+     |      Bind this object to a particular Run.
+     |      
+     |      Calling this function is necessary so that we have somewhere specific to put the
+     |      file associated with this object, from which other Runs can refer to it.
+     |  
+     |  guess_mode(self, data: 'np.ndarray') -> str
+     |      Guess what type of image the np.array is representing.
+     |  
+     |  to_data_array(self) -> List[Any]
+     |      Convert the object to a list of primitives representing the underlying data.
+     |  
+     |  to_json(self, run_or_artifact: Union[ForwardRef('LocalRun'), ForwardRef('Artifact')]) -> dict
+     |      Serialize the object into a JSON blob.
+     |      
+     |      Uses run or artifact to store additional data. If `run_or_artifact` is a
+     |      wandb.Run then `self.bind_to_run()` must have been previously been called.
+     |      
+     |      Args:
+     |          run_or_artifact (wandb.Run | wandb.Artifact): the Run or Artifact for which
+     |              this object should be generating JSON for - this is useful to store
+     |              additional data if needed.
+     |      
+     |      Returns:
+     |          dict: JSON representation
+     |  
+     |  ----------------------------------------------------------------------
+     |  Class methods defined here:
+     |  
+     |  all_boxes(images: Sequence[ForwardRef('Image')], run: 'LocalRun', run_key: str, step: Union[int, str]) -> Union[List[Optional[dict]], bool] from builtins.type
+     |  
+     |  all_captions(images: Sequence[ForwardRef('Media')]) -> Union[bool, Sequence[Optional[str]]] from builtins.type
+     |  
+     |  all_masks(images: Sequence[ForwardRef('Image')], run: 'LocalRun', run_key: str, step: Union[int, str]) -> Union[List[Optional[dict]], bool] from builtins.type
+     |  
+     |  from_json(json_obj: dict, source_artifact: 'Artifact') -> 'Image' from builtins.type
+     |      Likely will need to override for any more complicated media objects.
+     |  
+     |  get_media_subdir() -> str from builtins.type
+     |  
+     |  seq_to_json(seq: Sequence[ForwardRef('BatchableMedia')], run: 'LocalRun', key: str, step: Union[int, str]) -> dict from builtins.type
+     |      Combine a list of images into a meta dictionary object describing the child images.
+     |  
+     |  to_uint8(data: 'np.ndarray') -> 'np.ndarray' from builtins.type
+     |      Convert image data to uint8.
+     |      
+     |      Convert floating point image on the range [0,1] and integer images on the range
+     |      [0,255] to uint8, clipping if necessary.
+     |  
+     |  ----------------------------------------------------------------------
+     |  Readonly properties defined here:
+     |  
+     |  image
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes defined here:
+     |  
+     |  MAX_DIMENSION = 65500
+     |  
+     |  MAX_ITEMS = 108
+     |  
+     |  __annotations__ = {'_boxes': typing.Optional[typing.Dict[str, ForwardR...
+     |  
+     |  __hash__ = None
+     |  
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from wandb.sdk.data_types.base_types.media.Media:
+     |  
+     |  file_is_set(self) -> bool
+     |  
+     |  is_bound(self) -> bool
+     |  
+     |  ----------------------------------------------------------------------
+     |  Static methods inherited from wandb.sdk.data_types.base_types.media.Media:
+     |  
+     |  captions(media_items: Sequence[ForwardRef('Media')]) -> Union[bool, Sequence[Optional[str]]]
+     |  
+     |  path_is_reference(path: Optional[str]) -> bool
+     |  
+     |  ----------------------------------------------------------------------
+     |  Class methods inherited from wandb.sdk.data_types.base_types.wb_value.WBValue:
+     |  
+     |  with_suffix(name: str, filetype: str = 'json') -> str from builtins.type
+     |      Get the name with the appropriate suffix.
+     |      
+     |      Args:
+     |          name (str): the name of the file
+     |          filetype (str, optional): the filetype to use. Defaults to "json".
+     |      
+     |      Returns:
+     |          str: a filename which is suffixed with it's `_log_type` followed by the
+     |              filetype.
+     |  
+     |  ----------------------------------------------------------------------
+     |  Static methods inherited from wandb.sdk.data_types.base_types.wb_value.WBValue:
+     |  
+     |  init_from_json(json_obj: dict, source_artifact: 'Artifact') -> Optional[ForwardRef('WBValue')]
+     |      Initialize a `WBValue` from a JSON blob based on the class that creatd it.
+     |      
+     |      Looks through all subclasses and tries to match the json obj with the class
+     |      which created it. It will then call that subclass' `from_json` method.
+     |      Importantly, this function will set the return object's `source_artifact`
+     |      attribute to the passed in source artifact. This is critical for artifact
+     |      bookkeeping. If you choose to create a wandb.Value via it's `from_json` method,
+     |      make sure to properly set this `artifact_source` to avoid data duplication.
+     |      
+     |      Args:
+     |          json_obj (dict): A JSON dictionary to deserialize. It must contain a `_type`
+     |              key. This is used to lookup the correct subclass to use.
+     |          source_artifact (wandb.Artifact): An artifact which will hold any additional
+     |              resources which were stored during the `to_json` function.
+     |      
+     |      Returns:
+     |          wandb.Value: a newly created instance of a subclass of wandb.Value
+     |  
+     |  type_mapping() -> 'TypeMappingType'
+     |      Return a map from `_log_type` to subclass. Used to lookup correct types for deserialization.
+     |      
+     |      Returns:
+     |          dict: dictionary of str:class
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from wandb.sdk.data_types.base_types.wb_value.WBValue:
+     |  
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |  
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+    
+    class Molecule(wandb.sdk.data_types.base_types.media.BatchableMedia)
+     |  Molecule(data_or_path: Union[str, ForwardRef('TextIO')], caption: Optional[str] = None, **kwargs: str) -> None
+     |  
+     |  Wandb class for 3D Molecular data.
+     |  
+     |  Arguments:
+     |      data_or_path: (string, io)
+     |          Molecule can be initialized from a file name or an io object.
+     |      caption: (string)
+     |          Caption associated with the molecule for display.
+     |  
+     |  Method resolution order:
+     |      Molecule
+     |      wandb.sdk.data_types.base_types.media.BatchableMedia
+     |      wandb.sdk.data_types.base_types.media.Media
+     |      wandb.sdk.data_types.base_types.wb_value.WBValue
+     |      builtins.object
+     |  
+     |  Methods defined here:
+     |  
+     |  __init__(self, data_or_path: Union[str, ForwardRef('TextIO')], caption: Optional[str] = None, **kwargs: str) -> None
+     |      Initialize self.  See help(type(self)) for accurate signature.
+     |  
+     |  to_json(self, run_or_artifact: Union[ForwardRef('LocalRun'), ForwardRef('Artifact')]) -> dict
+     |      Serialize the object into a JSON blob.
+     |      
+     |      Uses run or artifact to store additional data. If `run_or_artifact` is a
+     |      wandb.Run then `self.bind_to_run()` must have been previously been called.
+     |      
+     |      Args:
+     |          run_or_artifact (wandb.Run | wandb.Artifact): the Run or Artifact for which
+     |              this object should be generating JSON for - this is useful to store
+     |              additional data if needed.
+     |      
+     |      Returns:
+     |          dict: JSON representation
+     |  
+     |  ----------------------------------------------------------------------
+     |  Class methods defined here:
+     |  
+     |  from_rdkit(data_or_path: 'RDKitDataType', caption: Optional[str] = None, convert_to_3d_and_optimize: bool = True, mmff_optimize_molecule_max_iterations: int = 200) -> 'Molecule' from builtins.type
+     |      Convert RDKit-supported file/object types to wandb.Molecule.
+     |      
+     |      Arguments:
+     |          data_or_path: (string, rdkit.Chem.rdchem.Mol)
+     |              Molecule can be initialized from a file name or an rdkit.Chem.rdchem.Mol object.
+     |          caption: (string)
+     |              Caption associated with the molecule for display.
+     |          convert_to_3d_and_optimize: (bool)
+     |              Convert to rdkit.Chem.rdchem.Mol with 3D coordinates.
+     |              This is an expensive operation that may take a long time for complicated molecules.
+     |          mmff_optimize_molecule_max_iterations: (int)
+     |              Number of iterations to use in rdkit.Chem.AllChem.MMFFOptimizeMolecule
+     |  
+     |  from_smiles(data: str, caption: Optional[str] = None, sanitize: bool = True, convert_to_3d_and_optimize: bool = True, mmff_optimize_molecule_max_iterations: int = 200) -> 'Molecule' from builtins.type
+     |      Convert SMILES string to wandb.Molecule.
+     |      
+     |      Arguments:
+     |          data: (string)
+     |              SMILES string.
+     |          caption: (string)
+     |              Caption associated with the molecule for display
+     |          sanitize: (bool)
+     |              Check if the molecule is chemically reasonable by the RDKit's definition.
+     |          convert_to_3d_and_optimize: (bool)
+     |              Convert to rdkit.Chem.rdchem.Mol with 3D coordinates.
+     |              This is an expensive operation that may take a long time for complicated molecules.
+     |          mmff_optimize_molecule_max_iterations: (int)
+     |              Number of iterations to use in rdkit.Chem.AllChem.MMFFOptimizeMolecule
+     |  
+     |  get_media_subdir() -> str from builtins.type
+     |  
+     |  seq_to_json(seq: Sequence[ForwardRef('BatchableMedia')], run: 'LocalRun', key: str, step: Union[int, str]) -> dict from builtins.type
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes defined here:
+     |  
+     |  SUPPORTED_RDKIT_TYPES = {'mol', 'sdf'}
+     |  
+     |  SUPPORTED_TYPES = {'cif', 'gro', 'mcif', 'mmcif', 'mmtf', 'mol2', ...}
+     |  
+     |  __annotations__ = {}
+     |  
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from wandb.sdk.data_types.base_types.media.Media:
+     |  
+     |  __eq__(self, other: object) -> bool
+     |      Likely will need to override for any more complicated media objects.
+     |  
+     |  bind_to_run(self, run: 'LocalRun', key: Union[int, str], step: Union[int, str], id_: Union[int, str, NoneType] = None, ignore_copy_err: Optional[bool] = None) -> None
+     |      Bind this object to a particular Run.
+     |      
+     |      Calling this function is necessary so that we have somewhere specific to put the
+     |      file associated with this object, from which other Runs can refer to it.
+     |  
+     |  file_is_set(self) -> bool
+     |  
+     |  is_bound(self) -> bool
+     |  
+     |  ----------------------------------------------------------------------
+     |  Class methods inherited from wandb.sdk.data_types.base_types.media.Media:
+     |  
+     |  from_json(json_obj: dict, source_artifact: 'Artifact') -> 'Media' from builtins.type
+     |      Likely will need to override for any more complicated media objects.
+     |  
+     |  ----------------------------------------------------------------------
+     |  Static methods inherited from wandb.sdk.data_types.base_types.media.Media:
+     |  
+     |  captions(media_items: Sequence[ForwardRef('Media')]) -> Union[bool, Sequence[Optional[str]]]
+     |  
+     |  path_is_reference(path: Optional[str]) -> bool
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes inherited from wandb.sdk.data_types.base_types.media.Media:
+     |  
+     |  __hash__ = None
+     |  
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from wandb.sdk.data_types.base_types.wb_value.WBValue:
+     |  
+     |  __ne__(self, other: object) -> bool
+     |      Return self!=value.
+     |  
+     |  to_data_array(self) -> List[Any]
+     |      Convert the object to a list of primitives representing the underlying data.
+     |  
+     |  ----------------------------------------------------------------------
+     |  Class methods inherited from wandb.sdk.data_types.base_types.wb_value.WBValue:
+     |  
+     |  with_suffix(name: str, filetype: str = 'json') -> str from builtins.type
+     |      Get the name with the appropriate suffix.
+     |      
+     |      Args:
+     |          name (str): the name of the file
+     |          filetype (str, optional): the filetype to use. Defaults to "json".
+     |      
+     |      Returns:
+     |          str: a filename which is suffixed with it's `_log_type` followed by the
+     |              filetype.
+     |  
+     |  ----------------------------------------------------------------------
+     |  Static methods inherited from wandb.sdk.data_types.base_types.wb_value.WBValue:
+     |  
+     |  init_from_json(json_obj: dict, source_artifact: 'Artifact') -> Optional[ForwardRef('WBValue')]
+     |      Initialize a `WBValue` from a JSON blob based on the class that creatd it.
+     |      
+     |      Looks through all subclasses and tries to match the json obj with the class
+     |      which created it. It will then call that subclass' `from_json` method.
+     |      Importantly, this function will set the return object's `source_artifact`
+     |      attribute to the passed in source artifact. This is critical for artifact
+     |      bookkeeping. If you choose to create a wandb.Value via it's `from_json` method,
+     |      make sure to properly set this `artifact_source` to avoid data duplication.
+     |      
+     |      Args:
+     |          json_obj (dict): A JSON dictionary to deserialize. It must contain a `_type`
+     |              key. This is used to lookup the correct subclass to use.
+     |          source_artifact (wandb.Artifact): An artifact which will hold any additional
+     |              resources which were stored during the `to_json` function.
+     |      
+     |      Returns:
+     |          wandb.Value: a newly created instance of a subclass of wandb.Value
+     |  
+     |  type_mapping() -> 'TypeMappingType'
+     |      Return a map from `_log_type` to subclass. Used to lookup correct types for deserialization.
+     |      
+     |      Returns:
+     |          dict: dictionary of str:class
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from wandb.sdk.data_types.base_types.wb_value.WBValue:
+     |  
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |  
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+    
+    class Object3D(wandb.sdk.data_types.base_types.media.BatchableMedia)
+     |  Object3D(data_or_path: Union[ForwardRef('np.ndarray'), str, ForwardRef('TextIO'), dict], **kwargs: Union[str, ForwardRef('FileFormat3D'), NoneType]) -> None
+     |  
+     |  Wandb class for 3D point clouds.
+     |  
+     |  Arguments:
+     |      data_or_path: (numpy array, string, io)
+     |          Object3D can be initialized from a file or a numpy array.
+     |  
+     |          You can pass a path to a file or an io object and a file_type
+     |          which must be one of SUPPORTED_TYPES
+     |  
+     |  The shape of the numpy array must be one of either:
+     |  ```
+     |  [[x y z],       ...] nx3
+     |  [[x y z c],     ...] nx4 where c is a category with supported range [1, 14]
+     |  [[x y z r g b], ...] nx6 where is rgb is color
+     |  ```
+     |  
+     |  Method resolution order:
+     |      Object3D
+     |      wandb.sdk.data_types.base_types.media.BatchableMedia
+     |      wandb.sdk.data_types.base_types.media.Media
+     |      wandb.sdk.data_types.base_types.wb_value.WBValue
+     |      builtins.object
+     |  
+     |  Methods defined here:
+     |  
+     |  __init__(self, data_or_path: Union[ForwardRef('np.ndarray'), str, ForwardRef('TextIO'), dict], **kwargs: Union[str, ForwardRef('FileFormat3D'), NoneType]) -> None
+     |      Initialize self.  See help(type(self)) for accurate signature.
+     |  
+     |  to_json(self, run_or_artifact: Union[ForwardRef('LocalRun'), ForwardRef('Artifact')]) -> dict
+     |      Serialize the object into a JSON blob.
+     |      
+     |      Uses run or artifact to store additional data. If `run_or_artifact` is a
+     |      wandb.Run then `self.bind_to_run()` must have been previously been called.
+     |      
+     |      Args:
+     |          run_or_artifact (wandb.Run | wandb.Artifact): the Run or Artifact for which
+     |              this object should be generating JSON for - this is useful to store
+     |              additional data if needed.
+     |      
+     |      Returns:
+     |          dict: JSON representation
+     |  
+     |  ----------------------------------------------------------------------
+     |  Class methods defined here:
+     |  
+     |  from_file(data_or_path: Union[ForwardRef('TextIO'), str], file_type: Optional[ForwardRef('FileFormat3D')] = None) -> 'Object3D' from builtins.type
+     |      Initializes Object3D from a file or stream.
+     |      
+     |      Arguments:
+     |          data_or_path (Union["TextIO", str]): A path to a file or a `TextIO` stream.
+     |          file_type (str): Specifies the data format passed to `data_or_path`. Required when `data_or_path` is a
+     |              `TextIO` stream. This parameter is ignored if a file path is provided. The type is taken from the file extension.
+     |  
+     |  from_numpy(data: 'np.ndarray') -> 'Object3D' from builtins.type
+     |      Initializes Object3D from a numpy array.
+     |      
+     |      Arguments:
+     |          data (numpy array): Each entry in the array will
+     |              represent one point in the point cloud.
+     |      
+     |      
+     |      The shape of the numpy array must be one of either:
+     |      ```
+     |      [[x y z],       ...]  # nx3.
+     |      [[x y z c],     ...]  # nx4 where c is a category with supported range [1, 14].
+     |      [[x y z r g b], ...]  # nx6 where is rgb is color.
+     |      ```
+     |  
+     |  from_point_cloud(points: Sequence[ForwardRef('Point')], boxes: Sequence[ForwardRef('Box3D')], vectors: Optional[Sequence[ForwardRef('Vector3D')]] = None, point_cloud_type: 'PointCloudType' = 'lidar/beta') -> 'Object3D' from builtins.type
+     |      Initializes Object3D from a python object.
+     |      
+     |      Arguments:
+     |          points (Sequence["Point"]): The points in the point cloud.
+     |          boxes (Sequence["Box3D"]): 3D bounding boxes for labeling the point cloud. Boxes
+     |          are displayed in point cloud visualizations.
+     |          vectors (Optional[Sequence["Vector3D"]]): Each vector is displayed in the point cloud
+     |              visualization. Can be used to indicate directionality of bounding boxes. Defaults to None.
+     |          point_cloud_type ("lidar/beta"): At this time, only the "lidar/beta" type is supported. Defaults to "lidar/beta".
+     |  
+     |  get_media_subdir() -> str from builtins.type
+     |  
+     |  seq_to_json(seq: Sequence[ForwardRef('BatchableMedia')], run: 'LocalRun', key: str, step: Union[int, str]) -> dict from builtins.type
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes defined here:
+     |  
+     |  SUPPORTED_POINT_CLOUD_TYPES = {'lidar/beta'}
+     |  
+     |  SUPPORTED_TYPES = {'babylon', 'glb', 'gltf', 'obj', 'pts.json', 'stl'}
+     |  
+     |  __annotations__ = {'SUPPORTED_POINT_CLOUD_TYPES': typing.ClassVar[typi...
+     |  
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from wandb.sdk.data_types.base_types.media.Media:
+     |  
+     |  __eq__(self, other: object) -> bool
+     |      Likely will need to override for any more complicated media objects.
+     |  
+     |  bind_to_run(self, run: 'LocalRun', key: Union[int, str], step: Union[int, str], id_: Union[int, str, NoneType] = None, ignore_copy_err: Optional[bool] = None) -> None
+     |      Bind this object to a particular Run.
+     |      
+     |      Calling this function is necessary so that we have somewhere specific to put the
+     |      file associated with this object, from which other Runs can refer to it.
+     |  
+     |  file_is_set(self) -> bool
+     |  
+     |  is_bound(self) -> bool
+     |  
+     |  ----------------------------------------------------------------------
+     |  Class methods inherited from wandb.sdk.data_types.base_types.media.Media:
+     |  
+     |  from_json(json_obj: dict, source_artifact: 'Artifact') -> 'Media' from builtins.type
+     |      Likely will need to override for any more complicated media objects.
+     |  
+     |  ----------------------------------------------------------------------
+     |  Static methods inherited from wandb.sdk.data_types.base_types.media.Media:
+     |  
+     |  captions(media_items: Sequence[ForwardRef('Media')]) -> Union[bool, Sequence[Optional[str]]]
+     |  
+     |  path_is_reference(path: Optional[str]) -> bool
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes inherited from wandb.sdk.data_types.base_types.media.Media:
+     |  
+     |  __hash__ = None
+     |  
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from wandb.sdk.data_types.base_types.wb_value.WBValue:
+     |  
+     |  __ne__(self, other: object) -> bool
+     |      Return self!=value.
+     |  
+     |  to_data_array(self) -> List[Any]
+     |      Convert the object to a list of primitives representing the underlying data.
+     |  
+     |  ----------------------------------------------------------------------
+     |  Class methods inherited from wandb.sdk.data_types.base_types.wb_value.WBValue:
+     |  
+     |  with_suffix(name: str, filetype: str = 'json') -> str from builtins.type
+     |      Get the name with the appropriate suffix.
+     |      
+     |      Args:
+     |          name (str): the name of the file
+     |          filetype (str, optional): the filetype to use. Defaults to "json".
+     |      
+     |      Returns:
+     |          str: a filename which is suffixed with it's `_log_type` followed by the
+     |              filetype.
+     |  
+     |  ----------------------------------------------------------------------
+     |  Static methods inherited from wandb.sdk.data_types.base_types.wb_value.WBValue:
+     |  
+     |  init_from_json(json_obj: dict, source_artifact: 'Artifact') -> Optional[ForwardRef('WBValue')]
+     |      Initialize a `WBValue` from a JSON blob based on the class that creatd it.
+     |      
+     |      Looks through all subclasses and tries to match the json obj with the class
+     |      which created it. It will then call that subclass' `from_json` method.
+     |      Importantly, this function will set the return object's `source_artifact`
+     |      attribute to the passed in source artifact. This is critical for artifact
+     |      bookkeeping. If you choose to create a wandb.Value via it's `from_json` method,
+     |      make sure to properly set this `artifact_source` to avoid data duplication.
+     |      
+     |      Args:
+     |          json_obj (dict): A JSON dictionary to deserialize. It must contain a `_type`
+     |              key. This is used to lookup the correct subclass to use.
+     |          source_artifact (wandb.Artifact): An artifact which will hold any additional
+     |              resources which were stored during the `to_json` function.
+     |      
+     |      Returns:
+     |          wandb.Value: a newly created instance of a subclass of wandb.Value
+     |  
+     |  type_mapping() -> 'TypeMappingType'
+     |      Return a map from `_log_type` to subclass. Used to lookup correct types for deserialization.
+     |      
+     |      Returns:
+     |          dict: dictionary of str:class
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from wandb.sdk.data_types.base_types.wb_value.WBValue:
+     |  
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |  
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+    
+    class Plotly(wandb.sdk.data_types.base_types.media.Media)
+     |  Plotly(val: Union[ForwardRef('plotly.Figure'), ForwardRef('matplotlib.artist.Artist')])
+     |  
+     |  Wandb class for plotly plots.
+     |  
+     |  Arguments:
+     |      val: matplotlib or plotly figure
+     |  
+     |  Method resolution order:
+     |      Plotly
+     |      wandb.sdk.data_types.base_types.media.Media
+     |      wandb.sdk.data_types.base_types.wb_value.WBValue
+     |      builtins.object
+     |  
+     |  Methods defined here:
+     |  
+     |  __init__(self, val: Union[ForwardRef('plotly.Figure'), ForwardRef('matplotlib.artist.Artist')])
+     |      Initialize self.  See help(type(self)) for accurate signature.
+     |  
+     |  to_json(self, run_or_artifact: Union[ForwardRef('LocalRun'), ForwardRef('Artifact')]) -> dict
+     |      Serialize the object into a JSON blob.
+     |      
+     |      Uses run or artifact to store additional data. If `run_or_artifact` is a
+     |      wandb.Run then `self.bind_to_run()` must have been previously been called.
+     |      
+     |      Args:
+     |          run_or_artifact (wandb.Run | wandb.Artifact): the Run or Artifact for which
+     |              this object should be generating JSON for - this is useful to store
+     |              additional data if needed.
+     |      
+     |      Returns:
+     |          dict: JSON representation
+     |  
+     |  ----------------------------------------------------------------------
+     |  Class methods defined here:
+     |  
+     |  get_media_subdir() -> str from builtins.type
+     |  
+     |  make_plot_media(val: Union[ForwardRef('plotly.Figure'), ForwardRef('matplotlib.artist.Artist')]) -> Union[wandb.sdk.data_types.image.Image, ForwardRef('Plotly')] from builtins.type
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes defined here:
+     |  
+     |  __annotations__ = {}
+     |  
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from wandb.sdk.data_types.base_types.media.Media:
+     |  
+     |  __eq__(self, other: object) -> bool
+     |      Likely will need to override for any more complicated media objects.
+     |  
+     |  bind_to_run(self, run: 'LocalRun', key: Union[int, str], step: Union[int, str], id_: Union[int, str, NoneType] = None, ignore_copy_err: Optional[bool] = None) -> None
+     |      Bind this object to a particular Run.
+     |      
+     |      Calling this function is necessary so that we have somewhere specific to put the
+     |      file associated with this object, from which other Runs can refer to it.
+     |  
+     |  file_is_set(self) -> bool
+     |  
+     |  is_bound(self) -> bool
+     |  
+     |  ----------------------------------------------------------------------
+     |  Class methods inherited from wandb.sdk.data_types.base_types.media.Media:
+     |  
+     |  from_json(json_obj: dict, source_artifact: 'Artifact') -> 'Media' from builtins.type
+     |      Likely will need to override for any more complicated media objects.
+     |  
+     |  ----------------------------------------------------------------------
+     |  Static methods inherited from wandb.sdk.data_types.base_types.media.Media:
+     |  
+     |  captions(media_items: Sequence[ForwardRef('Media')]) -> Union[bool, Sequence[Optional[str]]]
+     |  
+     |  path_is_reference(path: Optional[str]) -> bool
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes inherited from wandb.sdk.data_types.base_types.media.Media:
+     |  
+     |  __hash__ = None
+     |  
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from wandb.sdk.data_types.base_types.wb_value.WBValue:
+     |  
+     |  __ne__(self, other: object) -> bool
+     |      Return self!=value.
+     |  
+     |  to_data_array(self) -> List[Any]
+     |      Convert the object to a list of primitives representing the underlying data.
+     |  
+     |  ----------------------------------------------------------------------
+     |  Class methods inherited from wandb.sdk.data_types.base_types.wb_value.WBValue:
+     |  
+     |  with_suffix(name: str, filetype: str = 'json') -> str from builtins.type
+     |      Get the name with the appropriate suffix.
+     |      
+     |      Args:
+     |          name (str): the name of the file
+     |          filetype (str, optional): the filetype to use. Defaults to "json".
+     |      
+     |      Returns:
+     |          str: a filename which is suffixed with it's `_log_type` followed by the
+     |              filetype.
+     |  
+     |  ----------------------------------------------------------------------
+     |  Static methods inherited from wandb.sdk.data_types.base_types.wb_value.WBValue:
+     |  
+     |  init_from_json(json_obj: dict, source_artifact: 'Artifact') -> Optional[ForwardRef('WBValue')]
+     |      Initialize a `WBValue` from a JSON blob based on the class that creatd it.
+     |      
+     |      Looks through all subclasses and tries to match the json obj with the class
+     |      which created it. It will then call that subclass' `from_json` method.
+     |      Importantly, this function will set the return object's `source_artifact`
+     |      attribute to the passed in source artifact. This is critical for artifact
+     |      bookkeeping. If you choose to create a wandb.Value via it's `from_json` method,
+     |      make sure to properly set this `artifact_source` to avoid data duplication.
+     |      
+     |      Args:
+     |          json_obj (dict): A JSON dictionary to deserialize. It must contain a `_type`
+     |              key. This is used to lookup the correct subclass to use.
+     |          source_artifact (wandb.Artifact): An artifact which will hold any additional
+     |              resources which were stored during the `to_json` function.
+     |      
+     |      Returns:
+     |          wandb.Value: a newly created instance of a subclass of wandb.Value
+     |  
+     |  type_mapping() -> 'TypeMappingType'
+     |      Return a map from `_log_type` to subclass. Used to lookup correct types for deserialization.
+     |      
+     |      Returns:
+     |          dict: dictionary of str:class
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from wandb.sdk.data_types.base_types.wb_value.WBValue:
+     |  
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |  
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+    
+    class Table(wandb.sdk.data_types.base_types.media.Media)
+     |  Table(columns=None, data=None, rows=None, dataframe=None, dtype=None, optional=True, allow_mixed_types=False)
+     |  
+     |  The Table class used to display and analyze tabular data.
+     |  
+     |  Unlike traditional spreadsheets, Tables support numerous types of data:
+     |  scalar values, strings, numpy arrays, and most subclasses of `wandb.data_types.Media`.
+     |  This means you can embed `Images`, `Video`, `Audio`, and other sorts of rich, annotated media
+     |  directly in Tables, alongside other traditional scalar values.
+     |  
+     |  This class is the primary class used to generate the Table Visualizer
+     |  in the UI: https://docs.wandb.ai/guides/data-vis/tables.
+     |  
+     |  Tables can be constructed with initial data using the `data` or
+     |  `dataframe` parameters:
+     |  <!--yeadoc-test:table-construct-dataframe-->
+     |  ```python
+     |  import pandas as pd
+     |  import wandb
+     |  
+     |  data = {"users": ["geoff", "juergen", "ada"], "feature_01": [1, 117, 42]}
+     |  df = pd.DataFrame(data)
+     |  
+     |  tbl = wandb.Table(data=df)
+     |  assert all(tbl.get_column("users") == df["users"])
+     |  assert all(tbl.get_column("feature_01") == df["feature_01"])
+     |  ```
+     |  
+     |  Additionally, users can add data to Tables incrementally by using the
+     |  `add_data`, `add_column`, and `add_computed_column` functions for
+     |  adding rows, columns, and columns computed from data in other columns, respectively:
+     |  <!--yeadoc-test:table-construct-rowwise-->
+     |  ```python
+     |  import wandb
+     |  
+     |  tbl = wandb.Table(columns=["user"])
+     |  
+     |  users = ["geoff", "juergen", "ada"]
+     |  
+     |  [tbl.add_data(user) for user in users]
+     |  assert tbl.get_column("user") == users
+     |  
+     |  
+     |  def get_user_name_length(index, row):
+     |      return {"feature_01": len(row["user"])}
+     |  
+     |  
+     |  tbl.add_computed_columns(get_user_name_length)
+     |  assert tbl.get_column("feature_01") == [5, 7, 3]
+     |  ```
+     |  
+     |  Tables can be logged directly to runs using `run.log({"my_table": table})`
+     |  or added to artifacts using `artifact.add(table, "my_table")`:
+     |  <!--yeadoc-test:table-logging-direct-->
+     |  ```python
+     |  import numpy as np
+     |  import wandb
+     |  
+     |  wandb.init()
+     |  
+     |  tbl = wandb.Table(columns=["image", "label"])
+     |  
+     |  images = np.random.randint(0, 255, [2, 100, 100, 3], dtype=np.uint8)
+     |  labels = ["panda", "gibbon"]
+     |  [tbl.add_data(wandb.Image(image), label) for image, label in zip(images, labels)]
+     |  
+     |  wandb.log({"classifier_out": tbl})
+     |  ```
+     |  
+     |  Tables added directly to runs as above will produce a corresponding Table Visualizer in the
+     |  Workspace which can be used for further analysis and exporting to reports.
+     |  
+     |  Tables added to artifacts can be viewed in the Artifact Tab and will render
+     |  an equivalent Table Visualizer directly in the artifact browser.
+     |  
+     |  Tables expect each value for a column to be of the same type. By default, a column supports
+     |  optional values, but not mixed values. If you absolutely need to mix types,
+     |  you can enable the `allow_mixed_types` flag which will disable type checking
+     |  on the data. This will result in some table analytics features being disabled
+     |  due to lack of consistent typing.
+     |  
+     |  Arguments:
+     |      columns: (List[str]) Names of the columns in the table.
+     |          Defaults to ["Input", "Output", "Expected"].
+     |      data: (List[List[any]]) 2D row-oriented array of values.
+     |      dataframe: (pandas.DataFrame) DataFrame object used to create the table.
+     |          When set, `data` and `columns` arguments are ignored.
+     |      optional: (Union[bool,List[bool]]) Determines if `None` values are allowed. Default to True
+     |          - If a singular bool value, then the optionality is enforced for all
+     |          columns specified at construction time
+     |          - If a list of bool values, then the optionality is applied to each
+     |          column - should be the same length as `columns`
+     |          applies to all columns. A list of bool values applies to each respective column.
+     |      allow_mixed_types: (bool) Determines if columns are allowed to have mixed types
+     |          (disables type validation). Defaults to False
+     |  
+     |  Method resolution order:
+     |      Table
+     |      wandb.sdk.data_types.base_types.media.Media
+     |      wandb.sdk.data_types.base_types.wb_value.WBValue
+     |      builtins.object
+     |  
+     |  Methods defined here:
+     |  
+     |  __eq__(self, other)
+     |      Likely will need to override for any more complicated media objects.
+     |  
+     |  __init__(self, columns=None, data=None, rows=None, dataframe=None, dtype=None, optional=True, allow_mixed_types=False)
+     |      Initialize a Table object.
+     |      
+     |      Rows is kept for legacy reasons, we use data to mimic the Pandas api.
+     |  
+     |  __ne__(self, other)
+     |      Return self!=value.
+     |  
+     |  add_column(self, name, data, optional=False)
+     |      Add a column of data to the table.
+     |      
+     |      Arguments:
+     |          name: (str) - the unique name of the column
+     |          data: (list | np.array) - a column of homogenous data
+     |          optional: (bool) - if null-like values are permitted
+     |  
+     |  add_computed_columns(self, fn)
+     |      Add one or more computed columns based on existing data.
+     |      
+     |      Args:
+     |          fn: A function which accepts one or two parameters, ndx (int) and row (dict),
+     |              which is expected to return a dict representing new columns for that row, keyed
+     |              by the new column names.
+     |      
+     |              `ndx` is an integer representing the index of the row. Only included if `include_ndx`
+     |                    is set to `True`.
+     |      
+     |              `row` is a dictionary keyed by existing columns
+     |  
+     |  add_data(self, *data)
+     |      Add a row of data to the table.
+     |      
+     |      Argument length should match column length.
+     |  
+     |  add_row(self, *row)
+     |      Deprecated: use add_data instead.
+     |  
+     |  bind_to_run(self, *args, **kwargs)
+     |      Bind this object to a particular Run.
+     |      
+     |      Calling this function is necessary so that we have somewhere specific to put the
+     |      file associated with this object, from which other Runs can refer to it.
+     |  
+     |  cast(self, col_name, dtype, optional=False)
+     |      Cast a column to a specific type.
+     |      
+     |      Arguments:
+     |          col_name: (str) - name of the column to cast
+     |          dtype: (class, wandb.wandb_sdk.interface._dtypes.Type, any) - the target dtype. Can be one of
+     |              normal python class, internal WB type, or an example object (e.g. an instance of wandb.Image or wandb.Classes)
+     |          optional: (bool) - if the column should allow Nones
+     |  
+     |  get_column(self, name, convert_to=None)
+     |      Retrieve a column of data from the table.
+     |      
+     |      Arguments:
+     |          name: (str) - the name of the column
+     |          convert_to: (str, optional)
+     |              - "numpy": will convert the underlying data to numpy object
+     |  
+     |  get_dataframe(self)
+     |      Returns a pandas.DataFrame of the table.
+     |  
+     |  get_index(self)
+     |      Return an array of row indexes for use in other tables to create links.
+     |  
+     |  index_ref(self, index)
+     |      Get a reference to a particular row index in the table.
+     |  
+     |  iterrows(self)
+     |      Iterate over rows as (ndx, row).
+     |      
+     |      Yields:
+     |      ------
+     |      index : int
+     |          The index of the row. Using this value in other WandB tables
+     |          will automatically build a relationship between the tables
+     |      row : List[any]
+     |          The data of the row.
+     |  
+     |  set_fk(self, col_name, table, table_col)
+     |  
+     |  set_pk(self, col_name)
+     |  
+     |  to_json(self, run_or_artifact)
+     |      Serialize the object into a JSON blob.
+     |      
+     |      Uses run or artifact to store additional data. If `run_or_artifact` is a
+     |      wandb.Run then `self.bind_to_run()` must have been previously been called.
+     |      
+     |      Args:
+     |          run_or_artifact (wandb.Run | wandb.Artifact): the Run or Artifact for which
+     |              this object should be generating JSON for - this is useful to store
+     |              additional data if needed.
+     |      
+     |      Returns:
+     |          dict: JSON representation
+     |  
+     |  ----------------------------------------------------------------------
+     |  Class methods defined here:
+     |  
+     |  from_json(json_obj, source_artifact) from builtins.type
+     |      Likely will need to override for any more complicated media objects.
+     |  
+     |  get_media_subdir() from builtins.type
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes defined here:
+     |  
+     |  MAX_ARTIFACT_ROWS = 200000
+     |  
+     |  MAX_ROWS = 10000
+     |  
+     |  __annotations__ = {}
+     |  
+     |  __hash__ = None
+     |  
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from wandb.sdk.data_types.base_types.media.Media:
+     |  
+     |  file_is_set(self) -> bool
+     |  
+     |  is_bound(self) -> bool
+     |  
+     |  ----------------------------------------------------------------------
+     |  Static methods inherited from wandb.sdk.data_types.base_types.media.Media:
+     |  
+     |  captions(media_items: Sequence[ForwardRef('Media')]) -> Union[bool, Sequence[Optional[str]]]
+     |  
+     |  path_is_reference(path: Optional[str]) -> bool
+     |  
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from wandb.sdk.data_types.base_types.wb_value.WBValue:
+     |  
+     |  to_data_array(self) -> List[Any]
+     |      Convert the object to a list of primitives representing the underlying data.
+     |  
+     |  ----------------------------------------------------------------------
+     |  Class methods inherited from wandb.sdk.data_types.base_types.wb_value.WBValue:
+     |  
+     |  with_suffix(name: str, filetype: str = 'json') -> str from builtins.type
+     |      Get the name with the appropriate suffix.
+     |      
+     |      Args:
+     |          name (str): the name of the file
+     |          filetype (str, optional): the filetype to use. Defaults to "json".
+     |      
+     |      Returns:
+     |          str: a filename which is suffixed with it's `_log_type` followed by the
+     |              filetype.
+     |  
+     |  ----------------------------------------------------------------------
+     |  Static methods inherited from wandb.sdk.data_types.base_types.wb_value.WBValue:
+     |  
+     |  init_from_json(json_obj: dict, source_artifact: 'Artifact') -> Optional[ForwardRef('WBValue')]
+     |      Initialize a `WBValue` from a JSON blob based on the class that creatd it.
+     |      
+     |      Looks through all subclasses and tries to match the json obj with the class
+     |      which created it. It will then call that subclass' `from_json` method.
+     |      Importantly, this function will set the return object's `source_artifact`
+     |      attribute to the passed in source artifact. This is critical for artifact
+     |      bookkeeping. If you choose to create a wandb.Value via it's `from_json` method,
+     |      make sure to properly set this `artifact_source` to avoid data duplication.
+     |      
+     |      Args:
+     |          json_obj (dict): A JSON dictionary to deserialize. It must contain a `_type`
+     |              key. This is used to lookup the correct subclass to use.
+     |          source_artifact (wandb.Artifact): An artifact which will hold any additional
+     |              resources which were stored during the `to_json` function.
+     |      
+     |      Returns:
+     |          wandb.Value: a newly created instance of a subclass of wandb.Value
+     |  
+     |  type_mapping() -> 'TypeMappingType'
+     |      Return a map from `_log_type` to subclass. Used to lookup correct types for deserialization.
+     |      
+     |      Returns:
+     |          dict: dictionary of str:class
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from wandb.sdk.data_types.base_types.wb_value.WBValue:
+     |  
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |  
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+    
+    class Video(wandb.sdk.data_types.base_types.media.BatchableMedia)
+     |  Video(data_or_path: Union[ForwardRef('np.ndarray'), str, ForwardRef('TextIO'), ForwardRef('BytesIO')], caption: Optional[str] = None, fps: int = 4, format: Optional[str] = None)
+     |  
+     |  Format a video for logging to W&B.
+     |  
+     |  Arguments:
+     |      data_or_path: (numpy array, string, io)
+     |          Video can be initialized with a path to a file or an io object.
+     |          The format must be "gif", "mp4", "webm" or "ogg".
+     |          The format must be specified with the format argument.
+     |          Video can be initialized with a numpy tensor.
+     |          The numpy tensor must be either 4 dimensional or 5 dimensional.
+     |          Channels should be (time, channel, height, width) or
+     |          (batch, time, channel, height width)
+     |      caption: (string) caption associated with the video for display
+     |      fps: (int) frames per second for video. Default is 4.
+     |      format: (string) format of video, necessary if initializing with path or io object.
+     |  
+     |  Examples:
+     |      ### Log a numpy array as a video
+     |      <!--yeadoc-test:log-video-numpy-->
+     |      ```python
+     |      import numpy as np
+     |      import wandb
+     |  
+     |      wandb.init()
+     |      # axes are (time, channel, height, width)
+     |      frames = np.random.randint(low=0, high=256, size=(10, 3, 100, 100), dtype=np.uint8)
+     |      wandb.log({"video": wandb.Video(frames, fps=4)})
+     |      ```
+     |  
+     |  Method resolution order:
+     |      Video
+     |      wandb.sdk.data_types.base_types.media.BatchableMedia
+     |      wandb.sdk.data_types.base_types.media.Media
+     |      wandb.sdk.data_types.base_types.wb_value.WBValue
+     |      builtins.object
+     |  
+     |  Methods defined here:
+     |  
+     |  __init__(self, data_or_path: Union[ForwardRef('np.ndarray'), str, ForwardRef('TextIO'), ForwardRef('BytesIO')], caption: Optional[str] = None, fps: int = 4, format: Optional[str] = None)
+     |      Initialize self.  See help(type(self)) for accurate signature.
+     |  
+     |  encode(self) -> None
+     |  
+     |  to_json(self, run_or_artifact: Union[ForwardRef('LocalRun'), ForwardRef('Artifact')]) -> dict
+     |      Serialize the object into a JSON blob.
+     |      
+     |      Uses run or artifact to store additional data. If `run_or_artifact` is a
+     |      wandb.Run then `self.bind_to_run()` must have been previously been called.
+     |      
+     |      Args:
+     |          run_or_artifact (wandb.Run | wandb.Artifact): the Run or Artifact for which
+     |              this object should be generating JSON for - this is useful to store
+     |              additional data if needed.
+     |      
+     |      Returns:
+     |          dict: JSON representation
+     |  
+     |  ----------------------------------------------------------------------
+     |  Class methods defined here:
+     |  
+     |  get_media_subdir() -> str from builtins.type
+     |  
+     |  seq_to_json(seq: Sequence[ForwardRef('BatchableMedia')], run: 'LocalRun', key: str, step: Union[int, str]) -> dict from builtins.type
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes defined here:
+     |  
+     |  EXTS = ('gif', 'mp4', 'webm', 'ogg')
+     |  
+     |  __annotations__ = {'_height': typing.Optional[int], '_width': typing.O...
+     |  
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from wandb.sdk.data_types.base_types.media.Media:
+     |  
+     |  __eq__(self, other: object) -> bool
+     |      Likely will need to override for any more complicated media objects.
+     |  
+     |  bind_to_run(self, run: 'LocalRun', key: Union[int, str], step: Union[int, str], id_: Union[int, str, NoneType] = None, ignore_copy_err: Optional[bool] = None) -> None
+     |      Bind this object to a particular Run.
+     |      
+     |      Calling this function is necessary so that we have somewhere specific to put the
+     |      file associated with this object, from which other Runs can refer to it.
+     |  
+     |  file_is_set(self) -> bool
+     |  
+     |  is_bound(self) -> bool
+     |  
+     |  ----------------------------------------------------------------------
+     |  Class methods inherited from wandb.sdk.data_types.base_types.media.Media:
+     |  
+     |  from_json(json_obj: dict, source_artifact: 'Artifact') -> 'Media' from builtins.type
+     |      Likely will need to override for any more complicated media objects.
+     |  
+     |  ----------------------------------------------------------------------
+     |  Static methods inherited from wandb.sdk.data_types.base_types.media.Media:
+     |  
+     |  captions(media_items: Sequence[ForwardRef('Media')]) -> Union[bool, Sequence[Optional[str]]]
+     |  
+     |  path_is_reference(path: Optional[str]) -> bool
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes inherited from wandb.sdk.data_types.base_types.media.Media:
+     |  
+     |  __hash__ = None
+     |  
+     |  ----------------------------------------------------------------------
+     |  Methods inherited from wandb.sdk.data_types.base_types.wb_value.WBValue:
+     |  
+     |  __ne__(self, other: object) -> bool
+     |      Return self!=value.
+     |  
+     |  to_data_array(self) -> List[Any]
+     |      Convert the object to a list of primitives representing the underlying data.
+     |  
+     |  ----------------------------------------------------------------------
+     |  Class methods inherited from wandb.sdk.data_types.base_types.wb_value.WBValue:
+     |  
+     |  with_suffix(name: str, filetype: str = 'json') -> str from builtins.type
+     |      Get the name with the appropriate suffix.
+     |      
+     |      Args:
+     |          name (str): the name of the file
+     |          filetype (str, optional): the filetype to use. Defaults to "json".
+     |      
+     |      Returns:
+     |          str: a filename which is suffixed with it's `_log_type` followed by the
+     |              filetype.
+     |  
+     |  ----------------------------------------------------------------------
+     |  Static methods inherited from wandb.sdk.data_types.base_types.wb_value.WBValue:
+     |  
+     |  init_from_json(json_obj: dict, source_artifact: 'Artifact') -> Optional[ForwardRef('WBValue')]
+     |      Initialize a `WBValue` from a JSON blob based on the class that creatd it.
+     |      
+     |      Looks through all subclasses and tries to match the json obj with the class
+     |      which created it. It will then call that subclass' `from_json` method.
+     |      Importantly, this function will set the return object's `source_artifact`
+     |      attribute to the passed in source artifact. This is critical for artifact
+     |      bookkeeping. If you choose to create a wandb.Value via it's `from_json` method,
+     |      make sure to properly set this `artifact_source` to avoid data duplication.
+     |      
+     |      Args:
+     |          json_obj (dict): A JSON dictionary to deserialize. It must contain a `_type`
+     |              key. This is used to lookup the correct subclass to use.
+     |          source_artifact (wandb.Artifact): An artifact which will hold any additional
+     |              resources which were stored during the `to_json` function.
+     |      
+     |      Returns:
+     |          wandb.Value: a newly created instance of a subclass of wandb.Value
+     |  
+     |  type_mapping() -> 'TypeMappingType'
+     |      Return a map from `_log_type` to subclass. Used to lookup correct types for deserialization.
+     |      
+     |      Returns:
+     |          dict: dictionary of str:class
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors inherited from wandb.sdk.data_types.base_types.wb_value.WBValue:
+     |  
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |  
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+
+FUNCTIONS
+    agent(sweep_id, function=None, entity=None, project=None, count=None)
+        Run a function or program with configuration parameters specified by server.
+        
+        Generic agent entrypoint, used for CLI or jupyter.
+        
+        Arguments:
+            sweep_id: (dict) Sweep ID generated by CLI or sweep API
+            function: (func, optional) A function to call instead of the "program"
+                specifed in the config.
+            entity: (str, optional) W&B Entity
+            project: (str, optional) W&B Project
+            count: (int, optional) the number of trials to run.
+        
+        Examples:
+            Run a sample sweep over a function:
+            <!--yeadoc-test:one-parameter-sweep-agent-->
+            ```python
+            import wandb
+        
+            sweep_configuration = {
+                "name": "my-awesome-sweep",
+                "metric": {"name": "accuracy", "goal": "maximize"},
+                "method": "grid",
+                "parameters": {"a": {"values": [1, 2, 3, 4]}},
+            }
+        
+        
+            def my_train_func():
+                # read the current value of parameter "a" from wandb.config
+                wandb.init()
+                a = wandb.config.a
+        
+                wandb.log({"a": a, "accuracy": a + 1})
+        
+        
+            sweep_id = wandb.sweep(sweep_configuration)
+        
+            # run the sweep
+            wandb.agent(sweep_id, function=my_train_func)
+            ```
+    
+    controller(sweep_id_or_config: Union[str, Dict, NoneType] = None, entity: Optional[str] = None, project: Optional[str] = None)
+        Public sweep controller constructor.
+        
+        Usage:
+            ```python
+            import wandb
+        
+            tuner = wandb.controller(...)
+            print(tuner.sweep_config)
+            print(tuner.sweep_id)
+            tuner.configure_search(...)
+            tuner.configure_stopping(...)
+            ```
+    
+    init(job_type: Optional[str] = None, dir: Union[str, ForwardRef('os.PathLike[str]'), NoneType] = None, config: Union[Dict, str, NoneType] = None, project: Optional[str] = None, entity: Optional[str] = None, reinit: Optional[bool] = None, tags: Optional[Sequence] = None, group: Optional[str] = None, name: Optional[str] = None, notes: Optional[str] = None, magic: Union[dict, str, bool, NoneType] = None, config_exclude_keys: Optional[List[str]] = None, config_include_keys: Optional[List[str]] = None, anonymous: Optional[str] = None, mode: Optional[str] = None, allow_val_change: Optional[bool] = None, resume: Union[bool, str, NoneType] = None, force: Optional[bool] = None, tensorboard: Optional[bool] = None, sync_tensorboard: Optional[bool] = None, monitor_gym: Optional[bool] = None, save_code: Optional[bool] = None, id: Optional[str] = None, settings: Union[wandb.sdk.wandb_settings.Settings, Dict[str, Any], NoneType] = None) -> Union[wandb.sdk.wandb_run.Run, wandb.sdk.lib.disabled.RunDisabled, NoneType]
+        Start a new run to track and log to W&B.
+        
+        In an ML training pipeline, you could add `wandb.init()`
+        to the beginning of your training script as well as your evaluation
+        script, and each piece would be tracked as a run in W&B.
+        
+        `wandb.init()` spawns a new background process to log data to a run, and it
+        also syncs data to wandb.ai by default, so you can see live visualizations.
+        
+        Call `wandb.init()` to start a run before logging data with `wandb.log()`:
+        <!--yeadoc-test:init-method-log-->
+        ```python
+        import wandb
+        
+        wandb.init()
+        # ... calculate metrics, generate media
+        wandb.log({"accuracy": 0.9})
+        ```
+        
+        `wandb.init()` returns a run object, and you can also access the run object
+        via `wandb.run`:
+        <!--yeadoc-test:init-and-assert-global-->
+        ```python
+        import wandb
+        
+        run = wandb.init()
+        
+        assert run is wandb.run
+        ```
+        
+        At the end of your script, we will automatically call `wandb.finish` to
+        finalize and cleanup the run. However, if you call `wandb.init` from a
+        child process, you must explicitly call `wandb.finish` at the end of the
+        child process.
+        
+        For more on using `wandb.init()`, including detailed examples, check out our
+        [guide and FAQs](https://docs.wandb.ai/guides/track/launch).
+        
+        Arguments:
+            project: (str, optional) The name of the project where you're sending
+                the new run. If the project is not specified, the run is put in an
+                "Uncategorized" project.
+            entity: (str, optional) An entity is a username or team name where
+                you're sending runs. This entity must exist before you can send runs
+                there, so make sure to create your account or team in the UI before
+                starting to log runs.
+                If you don't specify an entity, the run will be sent to your default
+                entity, which is usually your username. Change your default entity
+                in [your settings](https://wandb.ai/settings) under "default location
+                to create new projects".
+            config: (dict, argparse, absl.flags, str, optional)
+                This sets `wandb.config`, a dictionary-like object for saving inputs
+                to your job, like hyperparameters for a model or settings for a data
+                preprocessing job. The config will show up in a table in the UI that
+                you can use to group, filter, and sort runs. Keys should not contain
+                `.` in their names, and values should be under 10 MB.
+                If dict, argparse or absl.flags: will load the key value pairs into
+                    the `wandb.config` object.
+                If str: will look for a yaml file by that name, and load config from
+                    that file into the `wandb.config` object.
+            save_code: (bool, optional) Turn this on to save the main script or
+                notebook to W&B. This is valuable for improving experiment
+                reproducibility and to diff code across experiments in the UI. By
+                default this is off, but you can flip the default behavior to on
+                in [your settings page](https://wandb.ai/settings).
+            group: (str, optional) Specify a group to organize individual runs into
+                a larger experiment. For example, you might be doing cross
+                validation, or you might have multiple jobs that train and evaluate
+                a model against different test sets. Group gives you a way to
+                organize runs together into a larger whole, and you can toggle this
+                on and off in the UI. For more details, see our
+                [guide to grouping runs](https://docs.wandb.com/guides/runs/grouping).
+            job_type: (str, optional) Specify the type of run, which is useful when
+                you're grouping runs together into larger experiments using group.
+                For example, you might have multiple jobs in a group, with job types
+                like train and eval. Setting this makes it easy to filter and group
+                similar runs together in the UI so you can compare apples to apples.
+            tags: (list, optional) A list of strings, which will populate the list
+                of tags on this run in the UI. Tags are useful for organizing runs
+                together, or applying temporary labels like "baseline" or
+                "production". It's easy to add and remove tags in the UI, or filter
+                down to just runs with a specific tag.
+                If you are resuming a run, its tags will be overwritten by the tags
+                you pass to `wandb.init()`. If you want to add tags to a resumed run
+                without overwriting its existing tags, use `run.tags += ["new_tag"]`
+                after `wandb.init()`.
+            name: (str, optional) A short display name for this run, which is how
+                you'll identify this run in the UI. By default, we generate a random
+                two-word name that lets you easily cross-reference runs from the
+                table to charts. Keeping these run names short makes the chart
+                legends and tables easier to read. If you're looking for a place to
+                save your hyperparameters, we recommend saving those in config.
+            notes: (str, optional) A longer description of the run, like a `-m` commit
+                message in git. This helps you remember what you were doing when you
+                ran this run.
+            dir: (str or pathlib.Path, optional) An absolute path to a directory where
+                metadata will be stored. When you call `download()` on an artifact,
+                this is the directory where downloaded files will be saved. By default,
+                this is the `./wandb` directory.
+            resume: (bool, str, optional) Sets the resuming behavior. Options:
+                `"allow"`, `"must"`, `"never"`, `"auto"` or `None`. Defaults to `None`.
+                Cases:
+                - `None` (default): If the new run has the same ID as a previous run,
+                    this run overwrites that data.
+                - `"auto"` (or `True`): if the previous run on this machine crashed,
+                    automatically resume it. Otherwise, start a new run.
+                - `"allow"`: if id is set with `init(id="UNIQUE_ID")` or
+                    `WANDB_RUN_ID="UNIQUE_ID"` and it is identical to a previous run,
+                    wandb will automatically resume the run with that id. Otherwise,
+                    wandb will start a new run.
+                - `"never"`: if id is set with `init(id="UNIQUE_ID")` or
+                    `WANDB_RUN_ID="UNIQUE_ID"` and it is identical to a previous run,
+                    wandb will crash.
+                - `"must"`: if id is set with `init(id="UNIQUE_ID")` or
+                    `WANDB_RUN_ID="UNIQUE_ID"` and it is identical to a previous run,
+                    wandb will automatically resume the run with the id. Otherwise,
+                    wandb will crash.
+                See [our guide to resuming runs](https://docs.wandb.com/guides/runs/resuming)
+                for more.
+            reinit: (bool, optional) Allow multiple `wandb.init()` calls in the same
+                process. (default: `False`)
+            magic: (bool, dict, or str, optional) The bool controls whether we try to
+                auto-instrument your script, capturing basic details of your run
+                without you having to add more wandb code. (default: `False`)
+                You can also pass a dict, json string, or yaml filename.
+            config_exclude_keys: (list, optional) string keys to exclude from
+                `wandb.config`.
+            config_include_keys: (list, optional) string keys to include in
+                `wandb.config`.
+            anonymous: (str, optional) Controls anonymous data logging. Options:
+                - `"never"` (default): requires you to link your W&B account before
+                    tracking the run, so you don't accidentally create an anonymous
+                    run.
+                - `"allow"`: lets a logged-in user track runs with their account, but
+                    lets someone who is running the script without a W&B account see
+                    the charts in the UI.
+                - `"must"`: sends the run to an anonymous account instead of to a
+                    signed-up user account.
+            mode: (str, optional) Can be `"online"`, `"offline"` or `"disabled"`. Defaults to
+                online.
+            allow_val_change: (bool, optional) Whether to allow config values to
+                change after setting the keys once. By default, we throw an exception
+                if a config value is overwritten. If you want to track something
+                like a varying learning rate at multiple times during training, use
+                `wandb.log()` instead. (default: `False` in scripts, `True` in Jupyter)
+            force: (bool, optional) If `True`, this crashes the script if a user isn't
+                logged in to W&B. If `False`, this will let the script run in offline
+                mode if a user isn't logged in to W&B. (default: `False`)
+            sync_tensorboard: (bool, optional) Synchronize wandb logs from tensorboard or
+                tensorboardX and save the relevant events file. (default: `False`)
+            monitor_gym: (bool, optional) Automatically log videos of environment when
+                using OpenAI Gym. (default: `False`)
+                See [our guide to this integration](https://docs.wandb.com/guides/integrations/openai-gym).
+            id: (str, optional) A unique ID for this run, used for resuming. It must
+                be unique in the project, and if you delete a run you can't reuse
+                the ID. Use the `name` field for a short descriptive name, or `config`
+                for saving hyperparameters to compare across runs. The ID cannot
+                contain the following special characters: `/\#?%:`.
+                See [our guide to resuming runs](https://docs.wandb.com/guides/runs/resuming).
+        
+        Examples:
+        ### Set where the run is logged
+        
+        You can change where the run is logged, just like changing
+        the organization, repository, and branch in git:
+        ```python
+        import wandb
+        
+        user = "geoff"
+        project = "capsules"
+        display_name = "experiment-2021-10-31"
+        
+        wandb.init(entity=user, project=project, name=display_name)
+        ```
+        
+        ### Add metadata about the run to the config
+        
+        Pass a dictionary-style object as the `config` keyword argument to add
+        metadata, like hyperparameters, to your run.
+        <!--yeadoc-test:init-set-config-->
+        ```python
+        import wandb
+        
+        config = {"lr": 3e-4, "batch_size": 32}
+        config.update({"architecture": "resnet", "depth": 34})
+        wandb.init(config=config)
+        ```
+        
+        Raises:
+            Error: if some unknown or internal error happened during the run initialization.
+            AuthenticationError: if the user failed to provide valid credentials.
+            CommError: if there was a problem communicating with the WandB server.
+            UsageError: if the user provided invalid arguments.
+            KeyboardInterrupt: if user interrupts the run.
+        
+        Returns:
+            A `Run` object.
+    
+    join = finish(exit_code: Optional[int] = None, quiet: Optional[bool] = None) -> None
+        Mark a run as finished, and finish uploading all data.
+        
+        This is used when creating multiple runs in the same process.
+        We automatically call this method when your script exits.
+        
+        Arguments:
+            exit_code: Set to something other than 0 to mark a run as failed
+            quiet: Set to true to minimize log output
+    
+    link_model = wandb.link_model(self, path: Union[str, ForwardRef('os.PathLike[str]')], registered_model_name: str, name: Optional[str] = None, aliases: Optional[List[str]] = None) -> None
+        Log a model artifact version and link it to a registered model in the model registry.
+        
+        The linked model version will be visible in the UI for the specified registered model.
+        
+        Steps:
+            - Check if 'name' model artifact has been logged. If so, use the artifact version that matches the files
+            located at 'path' or log a new version. Otherwise log files under 'path' as a new model artifact, 'name'
+            of type 'model'.
+            - Check if registered model with name 'registered_model_name' exists in the 'model-registry' project.
+            If not, create a new registered model with name 'registered_model_name'.
+            - Link version of model artifact 'name' to registered model, 'registered_model_name'.
+            - Attach aliases from 'aliases' list to the newly linked model artifact version.
+        
+        Arguments:
+            path: (str) A path to the contents of this model,
+                can be in the following forms:
+                    - `/local/directory`
+                    - `/local/directory/file.txt`
+                    - `s3://bucket/path`
+            registered_model_name: (str) - the name of the registered model that the model is to be linked to.
+                A registered model is a collection of model versions linked to the model registry, typically representing a
+                team's specific ML Task. The entity that this registered model belongs to will be derived from the run
+                name: (str, optional) - the name of the model artifact that files in 'path' will be logged to. This will
+                default to the basename of the path prepended with the current run id  if not specified.
+            aliases: (List[str], optional) - alias(es) that will only be applied on this linked artifact
+                inside the registered model.
+                The alias "latest" will always be applied to the latest version of an artifact that is linked.
+        
+        Examples:
+            ```python
+            run.link_model(
+                path="/local/directory",
+                registered_model_name="my_reg_model",
+                name="my_model_artifact",
+                aliases=["production"],
+            )
+            ```
+        
+            Invalid usage
+            ```python
+            run.link_model(
+                path="/local/directory",
+                registered_model_name="my_entity/my_project/my_reg_model",
+                name="my_model_artifact",
+                aliases=["production"],
+            )
+        
+            run.link_model(
+                path="/local/directory",
+                registered_model_name="my_reg_model",
+                name="my_entity/my_project/my_model_artifact",
+                aliases=["production"],
+            )
+            ```
+        
+        Raises:
+            AssertionError: if registered_model_name is a path or
+                if model artifact 'name' is of a type that does not contain the substring 'model'
+            ValueError: if name has invalid special characters
+        
+        Returns:
+            None
+    
+    log = wandb.log(self, data: Dict[str, Any], step: Optional[int] = None, commit: Optional[bool] = None, sync: Optional[bool] = None) -> None
+        Log a dictionary of data to the current run's history.
+        
+        Use `wandb.log` to log data from runs, such as scalars, images, video,
+        histograms, plots, and tables.
+        
+        See our [guides to logging](https://docs.wandb.ai/guides/track/log) for
+        live examples, code snippets, best practices, and more.
+        
+        The most basic usage is `wandb.log({"train-loss": 0.5, "accuracy": 0.9})`.
+        This will save the loss and accuracy to the run's history and update
+        the summary values for these metrics.
+        
+        Visualize logged data in the workspace at [wandb.ai](https://wandb.ai),
+        or locally on a [self-hosted instance](https://docs.wandb.ai/guides/hosting)
+        of the W&B app, or export data to visualize and explore locally, e.g. in
+        Jupyter notebooks, with [our API](https://docs.wandb.ai/guides/track/public-api-guide).
+        
+        In the UI, summary values show up in the run table to compare single values across runs.
+        Summary values can also be set directly with `wandb.run.summary["key"] = value`.
+        
+        Logged values don't have to be scalars. Logging any wandb object is supported.
+        For example `wandb.log({"example": wandb.Image("myimage.jpg")})` will log an
+        example image which will be displayed nicely in the W&B UI.
+        See the [reference documentation](https://docs.wandb.com/ref/python/data-types)
+        for all of the different supported types or check out our
+        [guides to logging](https://docs.wandb.ai/guides/track/log) for examples,
+        from 3D molecular structures and segmentation masks to PR curves and histograms.
+        `wandb.Table`s can be used to logged structured data. See our
+        [guide to logging tables](https://docs.wandb.ai/guides/data-vis/log-tables)
+        for details.
+        
+        Logging nested metrics is encouraged and is supported in the W&B UI.
+        If you log with a nested dictionary like `wandb.log({"train":
+        {"acc": 0.9}, "val": {"acc": 0.8}})`, the metrics will be organized into
+        `train` and `val` sections in the W&B UI.
+        
+        wandb keeps track of a global step, which by default increments with each
+        call to `wandb.log`, so logging related metrics together is encouraged.
+        If it's inconvenient to log related metrics together
+        calling `wandb.log({"train-loss": 0.5}, commit=False)` and then
+        `wandb.log({"accuracy": 0.9})` is equivalent to calling
+        `wandb.log({"train-loss": 0.5, "accuracy": 0.9})`.
+        
+        `wandb.log` is not intended to be called more than a few times per second.
+        If you want to log more frequently than that it's better to aggregate
+        the data on the client side or you may get degraded performance.
+        
+        Arguments:
+            data: (dict, optional) A dict of serializable python objects i.e `str`,
+                `ints`, `floats`, `Tensors`, `dicts`, or any of the `wandb.data_types`.
+            commit: (boolean, optional) Save the metrics dict to the wandb server
+                and increment the step.  If false `wandb.log` just updates the current
+                metrics dict with the data argument and metrics won't be saved until
+                `wandb.log` is called with `commit=True`.
+            step: (integer, optional) The global step in processing. This persists
+                any non-committed earlier steps but defaults to not committing the
+                specified step.
+            sync: (boolean, True) This argument is deprecated and currently doesn't
+                change the behaviour of `wandb.log`.
+        
+        Examples:
+            For more and more detailed examples, see
+            [our guides to logging](https://docs.wandb.com/guides/track/log).
+        
+            ### Basic usage
+            <!--yeadoc-test:init-and-log-basic-->
+            ```python
+            import wandb
+        
+            run = wandb.init()
+            run.log({"accuracy": 0.9, "epoch": 5})
+            ```
+        
+            ### Incremental logging
+            <!--yeadoc-test:init-and-log-incremental-->
+            ```python
+            import wandb
+        
+            run = wandb.init()
+            run.log({"loss": 0.2}, commit=False)
+            # Somewhere else when I'm ready to report this step:
+            run.log({"accuracy": 0.8})
+            ```
+        
+            ### Histogram
+            <!--yeadoc-test:init-and-log-histogram-->
+            ```python
+            import numpy as np
+            import wandb
+        
+            # sample gradients at random from normal distribution
+            gradients = np.random.randn(100, 100)
+            run = wandb.init()
+            run.log({"gradients": wandb.Histogram(gradients)})
+            ```
+        
+            ### Image from numpy
+            <!--yeadoc-test:init-and-log-image-numpy-->
+            ```python
+            import numpy as np
+            import wandb
+        
+            run = wandb.init()
+            examples = []
+            for i in range(3):
+                pixels = np.random.randint(low=0, high=256, size=(100, 100, 3))
+                image = wandb.Image(pixels, caption=f"random field {i}")
+                examples.append(image)
+            run.log({"examples": examples})
+            ```
+        
+            ### Image from PIL
+            <!--yeadoc-test:init-and-log-image-pillow-->
+            ```python
+            import numpy as np
+            from PIL import Image as PILImage
+            import wandb
+        
+            run = wandb.init()
+            examples = []
+            for i in range(3):
+                pixels = np.random.randint(low=0, high=256, size=(100, 100, 3), dtype=np.uint8)
+                pil_image = PILImage.fromarray(pixels, mode="RGB")
+                image = wandb.Image(pil_image, caption=f"random field {i}")
+                examples.append(image)
+            run.log({"examples": examples})
+            ```
+        
+            ### Video from numpy
+            <!--yeadoc-test:init-and-log-video-numpy-->
+            ```python
+            import numpy as np
+            import wandb
+        
+            run = wandb.init()
+            # axes are (time, channel, height, width)
+            frames = np.random.randint(low=0, high=256, size=(10, 3, 100, 100), dtype=np.uint8)
+            run.log({"video": wandb.Video(frames, fps=4)})
+            ```
+        
+            ### Matplotlib Plot
+            <!--yeadoc-test:init-and-log-matplotlib-->
+            ```python
+            from matplotlib import pyplot as plt
+            import numpy as np
+            import wandb
+        
+            run = wandb.init()
+            fig, ax = plt.subplots()
+            x = np.linspace(0, 10)
+            y = x * x
+            ax.plot(x, y)  # plot y = x^2
+            run.log({"chart": fig})
+            ```
+        
+            ### PR Curve
+            ```python
+            import wandb
+        
+            run = wandb.init()
+            run.log({"pr": wandb.plots.precision_recall(y_test, y_probas, labels)})
+            ```
+        
+            ### 3D Object
+            ```python
+            import wandb
+        
+            run = wandb.init()
+            run.log(
+                {
+                    "generated_samples": [
+                        wandb.Object3D(open("sample.obj")),
+                        wandb.Object3D(open("sample.gltf")),
+                        wandb.Object3D(open("sample.glb")),
+                    ]
+                }
+            )
+            ```
+        
+        Raises:
+            wandb.Error: if called before `wandb.init`
+            ValueError: if invalid data is passed
+    
+    log_model = wandb.log_model(self, path: Union[str, ForwardRef('os.PathLike[str]')], name: Optional[str] = None, aliases: Optional[List[str]] = None) -> None
+        Logs a model artifact containing the contents inside the 'path' to a run and marks it as an output to this run.
+        
+        Arguments:
+            path: (str) A path to the contents of this model,
+                can be in the following forms:
+                    - `/local/directory`
+                    - `/local/directory/file.txt`
+                    - `s3://bucket/path`
+            name: (str, optional) A name to assign to the model artifact that the file contents will be added to.
+                The string must contain only the following alphanumeric characters: dashes, underscores, and dots.
+                This will default to the basename of the path prepended with the current
+                run id  if not specified.
+            aliases: (list, optional) Aliases to apply to the created model artifact,
+                    defaults to `["latest"]`
+        
+        Examples:
+            ```python
+            run.log_model(
+                path="/local/directory",
+                name="my_model_artifact",
+                aliases=["production"],
+            )
+            ```
+        
+            Invalid usage
+            ```python
+            run.log_model(
+                path="/local/directory",
+                name="my_entity/my_project/my_model_artifact",
+                aliases=["production"],
+            )
+            ```
+        
+        Raises:
+            ValueError: if name has invalid special characters
+        
+        Returns:
+            None
+    
+    save = wandb.save(self, glob_str: Optional[str] = None, base_path: Optional[str] = None, policy: 'PolicyName' = 'live') -> Union[bool, List[str]]
+        Ensure all files matching `glob_str` are synced to wandb with the policy specified.
+        
+        Arguments:
+            glob_str: (string) a relative or absolute path to a unix glob or regular
+                path.  If this isn't specified the method is a noop.
+            base_path: (string) the base path to run the glob relative to
+            policy: (string) one of `live`, `now`, or `end`
+                - live: upload the file as it changes, overwriting the previous version
+                - now: upload the file once now
+                - end: only upload file when the run ends
+    
+    setup(settings: Union[ForwardRef('wandb.sdk.wandb_settings.Settings'), Dict[str, Any], NoneType] = None) -> Optional[ForwardRef('_WandbSetup')]
+    
+    sweep(sweep: Union[dict, Callable], entity: Optional[str] = None, project: Optional[str] = None) -> str
+        Initialize a hyperparameter sweep.
+        
+        To generate hyperparameter suggestions from the sweep and use them
+        to train a model, call `wandb.agent` with the sweep_id returned by
+        this command. For command line functionality, see the command line
+        tool `wandb sweep` (https://docs.wandb.ai/ref/cli/wandb-sweep).
+        
+        Args:
+          sweep: dict, SweepConfig, or callable. The sweep configuration
+            (or configuration generator). If a dict or SweepConfig,
+            should conform to the W&B sweep config specification
+            (https://docs.wandb.ai/guides/sweeps/define-sweep-configuration). If a
+            callable, should take no arguments and return a dict that
+            conforms to the W&B sweep config spec.
+          entity: str (optional). An entity is a username or team name
+            where you're sending runs. This entity must exist before you
+            can send runs there, so make sure to create your account or
+            team in the UI before starting to log runs.  If you don't
+            specify an entity, the run will be sent to your default
+            entity, which is usually your username. Change your default
+            entity in [Settings](https://wandb.ai/settings) under "default
+            location to create new projects".
+          project: str (optional). The name of the project where you're
+            sending the new run. If the project is not specified, the
+            run is put in an "Uncategorized" project.
+        
+        Returns:
+          sweep_id: str. A unique identifier for the sweep.
+        
+        Examples:
+            Basic usage
+            <!--yeadoc-test:one-parameter-sweep-->
+            ```python
+            import wandb
+        
+            sweep_configuration = {
+                "name": "my-awesome-sweep",
+                "metric": {"name": "accuracy", "goal": "maximize"},
+                "method": "grid",
+                "parameters": {"a": {"values": [1, 2, 3, 4]}},
+            }
+        
+        
+            def my_train_func():
+                # read the current value of parameter "a" from wandb.config
+                wandb.init()
+                a = wandb.config.a
+        
+                wandb.log({"a": a, "accuracy": a + 1})
+        
+        
+            sweep_id = wandb.sweep(sweep_configuration)
+        
+            # run the sweep
+            wandb.agent(sweep_id, function=my_train_func)
+            ```
+    
+    use_model = wandb.use_model(self, name: str) -> wandb.sdk.lib.paths.FilePathStr
+        Download the files logged in a model artifact 'name'.
+        
+        Arguments:
+            name: (str) A model artifact name. 'name' must match the name of an existing logged
+                model artifact.
+                May be prefixed with entity/project/. Valid names
+                can be in the following forms:
+                    - model_artifact_name:version
+                    - model_artifact_name:alias
+                    - model_artifact_name:digest.
+        
+        Examples:
+            ```python
+            run.use_model(
+                name="my_model_artifact:latest",
+            )
+        
+            run.use_model(
+                name="my_project/my_model_artifact:v0",
+            )
+        
+            run.use_model(
+                name="my_entity/my_project/my_model_artifact:<digest>",
+            )
+            ```
+        
+            Invalid usage
+            ```python
+            run.use_model(
+                name="my_entity/my_project/my_model_artifact",
+            )
+            ```
+        
+        Raises:
+            AssertionError: if model artifact 'name' is of a type that does not contain the substring 'model'.
+        
+        Returns:
+            path: (str) path to downloaded model artifact file(s).
+
+DATA
+    __all__ = ('__version__', 'init', 'setup', 'save', 'sweep', 'controlle...
+    __annotations__ = {'run': typing.Optional[ForwardRef('wandb_sdk.wandb_...
+    config = <wandb.sdk.lib.preinit.PreInitObject object>
+        Config object.
+        
+        Config objects are intended to hold all of the hyperparameters associated with
+        a wandb run and are saved with the run object when `wandb.init` is called.
+        
+        We recommend setting `wandb.config` once at the top of your training experiment or
+        setting the config as a parameter to init, ie. `wandb.init(config=my_config_dict)`
+        
+        You can create a file called `config-defaults.yaml`, and it will automatically be
+        loaded into `wandb.config`. See https://docs.wandb.com/guides/track/config#file-based-configs.
+        
+        You can also load a config YAML file with your custom name and pass the filename
+        into `wandb.init(config="special_config.yaml")`.
+        See https://docs.wandb.com/guides/track/config#file-based-configs.
+        
+        Examples:
+            Basic usage
+            ```
+            wandb.config.epochs = 4
+            wandb.init()
+            for x in range(wandb.config.epochs):
+                # train
+            ```
+        
+            Using wandb.init to set config
+            ```
+            wandb.init(config={"epochs": 4, "batch_size": 32})
+            for x in range(wandb.config.epochs):
+                # train
+            ```
+        
+            Nested configs
+            ```
+            wandb.config['train']['epochs'] = 4
+            wandb.init()
+            for x in range(wandb.config['train']['epochs']):
+                # train
+            ```
+        
+            Using absl flags
+            ```
+            flags.DEFINE_string(‘model’, None, ‘model to run’) # name, default, help
+            wandb.config.update(flags.FLAGS) # adds all absl flags to config
+            ```
+        
+            Argparse flags
+            ```python
+            wandb.init()
+            wandb.config.epochs = 4
+        
+            parser = argparse.ArgumentParser()
+            parser.add_argument(
+                "-b",
+                "--batch-size",
+                type=int,
+                default=8,
+                metavar="N",
+                help="input batch size for training (default: 8)",
+            )
+            args = parser.parse_args()
+            wandb.config.update(args)
+            ```
+        
+            Using TensorFlow flags (deprecated in tensorflow v2)
+            ```python
+            flags = tf.app.flags
+            flags.DEFINE_string("data_dir", "/tmp/data")
+            flags.DEFINE_integer("batch_size", 128, "Batch size.")
+            wandb.config.update(flags.FLAGS)  # adds all of the tensorflow flags to config
+            ```
+    
+    summary = <wandb.sdk.lib.preinit.PreInitObject object>
+        Track single values for each metric for each run.
+        
+        By default, a metric's summary is the last value of its History.
+        
+        For example, `wandb.log({'accuracy': 0.9})` will add a new step to History and
+        update Summary to the latest value. In some cases, it's more useful to have
+        the maximum or minimum of a metric instead of the final value. You can set
+        history manually `(wandb.summary['accuracy'] = best_acc)`.
+        
+        In the UI, summary metrics appear in the table to compare across runs.
+        Summary metrics are also used in visualizations like the scatter plot and
+        parallel coordinates chart.
+        
+        After training has completed, you may want to save evaluation metrics to a
+        run. Summary can handle numpy arrays and PyTorch/TensorFlow tensors. When
+        you save one of these types to Summary, we persist the entire tensor in a
+        binary file and store high level metrics in the summary object, such as min,
+        mean, variance, and 95th percentile.
+        
+        Examples:
+            ```python
+            wandb.init(config=args)
+        
+            best_accuracy = 0
+            for epoch in range(1, args.epochs + 1):
+                test_loss, test_accuracy = test()
+                if test_accuracy > best_accuracy:
+                    wandb.run.summary["best_accuracy"] = test_accuracy
+                    best_accuracy = test_accuracy
+            ```
+
+VERSION
+    0.16.1
+
+FILE
+    /home/ahoope5/anaconda3/envs/gym/lib/python3.11/site-packages/wandb/__init__.py
+
+

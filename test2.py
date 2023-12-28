@@ -3,7 +3,7 @@ import os
 import json
 import traceback
 import optuna
-from sumo_mmrl import Agent, DQN, Env, Logger
+from sumo_mmrl import Agent,Env
 import sqlalchemy
 import wandb 
 wandb.init(project='sumo_mmrl', entity='aaronrls')
@@ -26,7 +26,7 @@ def objective(trial):
     learning_rate = trial.suggest_float("learning_rate", 1e-5, 1e-1, log=True)
     gamma = trial.suggest_float("gamma", 0.8, 0.9999, log=True)
     epsilon_decay = trial.suggest_float("epsilon_decay", 0.9, 0.9999, log=True)
-    batch_size = trial.suggest_categorical("batch_size", [32, 64, 128, 256, 512, 1024])
+    batch_size = trial.suggest_categorical("batch_size", [32, 64, 128, 256, 512, 1024, 2048])
     memory_size = trial.suggest_categorical("memory_size", [10000, 20000, 50000, 100000])
     epsilon_max = trial.suggest_float("epsilon_max", 0.8, 1.0,log=True)
     epsilon_min = trial.suggest_float("epsilon_min", 0.01, 0.1,log=True)
@@ -74,6 +74,7 @@ def objective(trial):
         if cumulative_reward > best_reward:
             best_reward = cumulative_reward
             no_improvement_count = 0
+            dagent.save_model(str(episode))
         else:
             no_improvement_count += 1
             if no_improvement_count >= trial.suggest_int("early_stopping_patience", 1000, 5000, log=True):

@@ -40,7 +40,7 @@ class Agent:
         # if os.path.exists(path + PATH):
         #     self.target_net.load_state_dict(torch.load(path + PATH))
         self.config_id = self.generate_config_id(learning_rate, gamma, epsilon_decay, epsilon_max, epsilon_min, memory_size, n_layers, layer_size, activation, batch_size)
-        self.load_model()
+        
 
         self.criterion = nn.HuberLoss()
 
@@ -158,19 +158,58 @@ class Agent:
         config_str = '_'.join(map(str, args))
         return config_str
 
-    def save_model(self):
-        save_path = f"model_{self.config_id}.pt"
-        torch.save(self.policy_net.state_dict(), save_path)
-        if self.wandb_run:
-            self.wandb_run.save(save_path)  # Save the model file to WandB
+    def save_model(self, episode_num):
+        # Define the filename for the model
+        filename = f"model"
+        
+        filename += f"_ep{episode_num}"
+        filename += ".pt"
 
-    def load_model(self):
-        load_path = f"model_{self.config_id}.pt"
-        if os.path.exists(load_path):
-            self.policy_net.load_state_dict(torch.load(load_path, map_location=self.device))
-            self.policy_net.to(self.device)
-            if self.wandb_run:
-                self.wandb_run.log({"Model Loaded": load_path})
+
+        # Save model to a temporary file
+        temp_model_path = os.path.join(wandb.run.dir, filename)
+        torch.save(self.policy_net.state_dict(), temp_model_path)
+
+        # Create a new artifact
+        artifact = wandb.Artifact(name=f"model-{episode_num}", type='model', description="Trained model")
+
+        # Add the file to the artifact's contents
+        artifact.add_file(temp_model_path)
+
+        # Log the artifact to W&B and associate it with the current run
+        wandb.run.log_artifact(artifact)
+
+        # Optionally, remove the temporary file if you don't want it saved locally
+        os.remove(temp_model_path)
+
+
+    def load_model(self, artifact_name=None):
+        """
+        Load the model state dictionary from a WandB artifact.
+
+        Parameters:
+        - artifact_name: The name of the artifact to load. If not provided, it tries to load
+                         using the configuration ID.
+        """
+
+        # Construct the artifact name if not provided
+        artifact_name = artifact_name or f"model-{self.config_id}:latest"
+
+        # Use the WandB API to retrieve the artifact
+        artifact = self.wandb_run.use_artifact(artifact_name)
+
+        # Download the artifact's files and get the model file path
+        artifact_dir = artifact.download()
+
+        # In most cases, the file is saved as "model.pt" or a similar name. Update this accordingly.
+        model_file = 'model.pt'
+
+        # Construct the full path to the model file
+        model_path = os.path.join(artifact_dir, model_file)
+
+        # Load the model state
+        self.policy_net.load_state_dict(torch.load(model_path, map_location=self.device))
+        self.policy_net.to(self.device)
 
 
     def decay(self):

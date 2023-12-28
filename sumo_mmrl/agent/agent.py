@@ -10,7 +10,7 @@ import wandb
 
 
 class Agent:
-    def __init__(self, state_size, action_size, path,wandb_run=None, learning_rate=None, gamma=None, epsilon_decay=None, epsilon_max=None, epsilon_min=None, memory_size=None, layer_sizes=None, activation=None, batch_size=None, gpu_id=None):
+    def __init__(self, state_size, action_size, path,wandb_run,learning_rate=None, gamma=None, epsilon_decay=None, epsilon_max=None, epsilon_min=None, memory_size=None, layer_sizes=None, activation=None, batch_size=None):
         self.wandb_run = wandb_run
         self.path = path
         self.direction_choices = ['r', 's', 'l', 't']
@@ -28,15 +28,11 @@ class Agent:
         self.epsilon_min = epsilon_min if epsilon_min is not None else config["hyperparameters"]["epsilon_min"]
 
         
-        self.device = torch.device(f"cuda:{gpu_id}" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         self.policy_net = DQN(state_size, action_size, layer_sizes, activation).to(self.device)
         self.target_net = DQN(state_size, action_size, layer_sizes, activation).to(self.device)
 
-        # if os.path.exists(path + PATH):
-        #     self.target_net.load_state_dict(torch.load(path + PATH))
-        
-        
 
         self.criterion = nn.HuberLoss()
 
@@ -52,9 +48,6 @@ class Agent:
 
 
     def choose_action(self, state, options):
-
-     
-       
 
         action, index, valid, q_values = self.exploration_strategy.choose_action(state, options)
         return action, index, valid, q_values
@@ -97,10 +90,6 @@ class Agent:
         reward = reward.unsqueeze(-1) if reward.dim() == 1 else reward
         done = done.unsqueeze(-1) if done.dim() == 1 else done
 
-        # self.policy_net.train()
-        # self.target_net.eval()
-        # print("state", state.shape)
-
 
         # Get current Q values from the policy network
         current_q_values = self.policy_net(state).gather(1, action)
@@ -122,18 +111,19 @@ class Agent:
         torch.nn.utils.clip_grad_value_(self.policy_net.parameters(), 100)
         self.optimizer.step()
         if self.wandb_run:
-            self.wandb_run.log({
-            "Loss": loss.item(),
-            "Max Gradient Norm": max_grad_norm,
-            "Epsilon": self.get_epsilon(),
-            "Current Q Values Mean": current_q_values.mean().item(),
-            "Expected Q Values Mean": expected_q_values.mean().item(),
+            logs = {
+                "Loss": loss.item(),
+                "Max Gradient Norm": max_grad_norm,
+                "Epsilon": self.get_epsilon(),
+                "Current Q Values Mean": current_q_values.mean().item(),
+                "Expected Q Values Mean": expected_q_values.mean().item(),
+            }
             
-            })
-        if self.wandb_run:
+            # Log gradients and weights for the first parameter group (assuming you have multiple parameter groups)
             for name, param in self.policy_net.named_parameters():
-                self.wandb_run.log({f"Gradients/{name}":wandb.Histogram(param.grad.cpu().detach().numpy())})
-                self.wandb_run.log({f"Weights/{name}": wandb.Histogram(param.cpu().detach().numpy())})
+                if param.requires_grad:
+                    logs[f"Gradients/{name}"] = param.grad.norm().item()
+                    logs[f"Weights/{name}"] = param.norm().item()
 
 
 

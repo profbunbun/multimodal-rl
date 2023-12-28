@@ -2,6 +2,7 @@
 import os
 import json
 import traceback
+from concurrent.futures import ProcessPoolExecutor
 import optuna
 from sumo_mmrl import Agent,Env
 import sqlalchemy
@@ -20,12 +21,12 @@ SUMOCONFIG = config['training_settings']['sumoconfig']
 NUM_VEHIC = config['training_settings']['num_vehic']
 TYPES = config['training_settings']['types']
 LOG_PATH = config['training_settings']['log_dir_path']
-GPUS = 2
+
 
 # Define the objective function for Optuna
 def objective(trial):
     # Suggested hyperparameters
-    gpu_id = trial.number % GPUS
+
     learning_rate = trial.suggest_float("learning_rate", 1e-5, 1e-1, log=True)
     gamma = trial.suggest_float("gamma", 0.8, 0.9999, log=True)
     epsilon_decay = trial.suggest_float("epsilon_decay", 0.999, 0.9999, log=True)
@@ -37,10 +38,11 @@ def objective(trial):
     n_layers = trial.suggest_int('n_layers', 1, 5, log=True)  # For example, between 1 and 5 layers
     layer_sizes = [trial.suggest_int(f'n_units_l{i}', 16, 128) for i in range(n_layers)]  # Each layer size between 16 and 128
 
-    # layer_size = trial.suggest_categorical("layer_size", [64, 128, 256])
+
     activation = trial.suggest_categorical("activation", ["relu", "tanh","leaky_relu"])
     env = Env(EXPERIMENT_PATH, SUMOCONFIG, NUM_VEHIC, TYPES)
-    dagent = Agent(12, 4, EXPERIMENT_PATH,wandb , learning_rate, gamma, epsilon_decay, epsilon_max, epsilon_min, memory_size, layer_sizes, activation, batch_size, gpu_id)
+    dagent = Agent(12, 4, EXPERIMENT_PATH,wandb , learning_rate, gamma, epsilon_decay, epsilon_max, epsilon_min, memory_size, layer_sizes, activation, batch_size)
+
     wandb.init(project='sumo_mmrl', entity='aaronrls')
     wandb.config.update({"learning_rate": learning_rate, "gamma": gamma, "epsilon_decay": epsilon_decay, "batch_size": batch_size, "memory_size": memory_size, "epsilon_max": epsilon_max, "epsilon_min": epsilon_min, "n_layers": n_layers, "layer_sizes": layer_sizes, "activation": activation})
     
@@ -49,17 +51,17 @@ def objective(trial):
 
     for episode in range(EPISODES):
         cumulative_reward = 0
-        env.render("libsumo" if episode % 100 != 0 else "libsumo")
+        env.render("libsumo")
         state, stage, legal_actions = env.reset()
         while stage != "done":
             action, action_index, validator, q_values = dagent.choose_action(state, legal_actions)
             next_state, new_reward, stage, legal_actions = env.step(action, validator)
-            # if env.get_global_step() % 2 == 0:
-            wandb.log({"location": env.get_vehicle_location_edge_id(),
-                    "best_choice": env.get_best_choice(),
-                    "agent choice": action,
-                    "q_values": q_values,
-                    "out lanes": env.get_out_lanes(),})
+            if env.get_global_step() % 2 == 0:
+                wandb.log({"location": env.get_vehicle_location_edge_id(),
+                        "best_choice": env.get_best_choice(),
+                        "agent choice": action,
+                        "q_values": q_values,
+                        "out lanes": env.get_out_lanes(),})
             dagent.remember(state, action_index, new_reward, next_state, done=(stage == "done"))
             cumulative_reward += new_reward
             if len(dagent.memory) > batch_size:
@@ -130,7 +132,7 @@ def get_next_study_name(storage_url, base_name="study"):
     
 def main():
     # Set up Optuna study
-    pruner = HyperbandPruner()
+    pruner = optuna.pruners.MedianPruner()
     storage_path = "sqlite:///db.sqlite3"
     new_study_name = get_next_study_name(storage_path, base_name="study",)
     study = optuna.create_study(
@@ -139,7 +141,9 @@ def main():
         direction="maximize",
         pruner=pruner,
     )
-    study.optimize(objective, n_trials=100, n_jobs=GPUS)
+
+    study.optimize(objective, n_trials=100)
+
     print(f"Best value: {study.best_value} (params: {study.best_params})")
 
 if __name__ == "__main__":

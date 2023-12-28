@@ -29,7 +29,8 @@ class Env:
 
         self.sumo_con = SUMOConnection(
             path + sumocon
-        )  # This handlies our communication
+        )
+
         # with the TRACI simulation interface (??REDUNDANT?)
         self.ruff_rider = RideSelect()  # This is object to select the vehicle
         self.edge_position = (
@@ -76,6 +77,7 @@ class Env:
 
     def reset(self):
         '''reset everything '''
+        
         self.steps = 0
         self.agent_step = 0
         self.accumulated_reward = 0

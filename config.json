@@ -10,7 +10,7 @@
   "training_settings": {
       "batch_size": 32,
       "memory_size": 100000,
-      "episodes": 50000,
+      "episodes": 5000,
       "experiment_path": "Experiments/3x3",
       "log_dir_path": "Experiments/3x3/logger",
       "sumoconfig": "/Nets/3x3b.sumocfg",

@@ -25,7 +25,7 @@ def objective(trial):
     # Suggested hyperparameters
     learning_rate = trial.suggest_float("learning_rate", 1e-5, 1e-1, log=True)
     gamma = trial.suggest_float("gamma", 0.8, 0.9999, log=True)
-    epsilon_decay = trial.suggest_float("epsilon_decay", 0.9, 0.9999, log=True)
+    epsilon_decay = trial.suggest_float("epsilon_decay", 0.99, 0.9999, log=True)
     batch_size = trial.suggest_categorical("batch_size", [32, 64, 128, 256, 512, 1024, 2048])
     memory_size = trial.suggest_categorical("memory_size", [10000, 20000, 50000, 100000])
     epsilon_max = trial.suggest_float("epsilon_max", 0.8, 1.0,log=True)
@@ -51,11 +51,11 @@ def objective(trial):
         while stage != "done":
             action, action_index, validator, q_values = dagent.choose_action(state, legal_actions)
             next_state, new_reward, stage, legal_actions = env.step(action, validator)
-            wandb.log({"location": env.get_vehicle_location_edge_id,
-                       "best_choice": env.get_best_choice,
+            wandb.log({"location": env.get_vehicle_location_edge_id(),
+                       "best_choice": env.get_best_choice(),
                        "agent choice": action,
                        "q_values": q_values,
-                       "out lanes": env.get_out_lanes,})
+                       "out lanes": env.get_out_lanes(),})
             dagent.remember(state, action_index, new_reward, next_state, done=(stage == "done"))
             cumulative_reward += new_reward
             if len(dagent.memory) > batch_size:
@@ -86,7 +86,7 @@ def objective(trial):
             dagent.save_model(str(episode))
         else:
             no_improvement_count += 1
-            if no_improvement_count >= trial.suggest_int("early_stopping_patience", 1000, 5000, log=True):
+            if no_improvement_count >= trial.suggest_int("early_stopping_patience", 2500, 3000, log=True):
                 print("Early stopping triggered.")
                 break
 

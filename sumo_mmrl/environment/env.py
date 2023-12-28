@@ -252,7 +252,7 @@ class Env:
         return self.destination_edge
     
     def get_vehicle_location_edge_id(self):
-        return self.vehicle.get_road()
+        return self.vehicle.get_lane()
     
     def get_best_choice(self):
         return self.best_choice

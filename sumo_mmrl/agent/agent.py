@@ -9,13 +9,8 @@ import hashlib
 import wandb
 
 
-
-
-
-# PATH = "/logger/model.pt"
-
 class Agent:
-    def __init__(self, state_size, action_size, path,wandb_run=None, learning_rate=None, gamma=None, epsilon_decay=None, epsilon_max=None, epsilon_min=None, memory_size=None, layer_sizes=None, activation=None, batch_size=None):
+    def __init__(self, state_size, action_size, path,wandb_run=None, learning_rate=None, gamma=None, epsilon_decay=None, epsilon_max=None, epsilon_min=None, memory_size=None, layer_sizes=None, activation=None, batch_size=None, gpu_id=None):
         self.wandb_run = wandb_run
         self.path = path
         self.direction_choices = ['r', 's', 'l', 't']
@@ -33,7 +28,8 @@ class Agent:
         self.epsilon_min = epsilon_min if epsilon_min is not None else config["hyperparameters"]["epsilon_min"]
 
         
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device(f"cuda:{gpu_id}" if torch.cuda.is_available() else "cpu")
+
         self.policy_net = DQN(state_size, action_size, layer_sizes, activation).to(self.device)
         self.target_net = DQN(state_size, action_size, layer_sizes, activation).to(self.device)
 

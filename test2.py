@@ -20,10 +20,12 @@ SUMOCONFIG = config['training_settings']['sumoconfig']
 NUM_VEHIC = config['training_settings']['num_vehic']
 TYPES = config['training_settings']['types']
 LOG_PATH = config['training_settings']['log_dir_path']
+GPUS = 2
 
 # Define the objective function for Optuna
 def objective(trial):
     # Suggested hyperparameters
+    gpu_id = trial.number % GPUS
     learning_rate = trial.suggest_float("learning_rate", 1e-5, 1e-1, log=True)
     gamma = trial.suggest_float("gamma", 0.8, 0.9999, log=True)
     epsilon_decay = trial.suggest_float("epsilon_decay", 0.999, 0.9999, log=True)
@@ -38,7 +40,7 @@ def objective(trial):
     # layer_size = trial.suggest_categorical("layer_size", [64, 128, 256])
     activation = trial.suggest_categorical("activation", ["relu", "tanh","leaky_relu"])
     env = Env(EXPERIMENT_PATH, SUMOCONFIG, NUM_VEHIC, TYPES)
-    dagent = Agent(12, 4, EXPERIMENT_PATH,wandb , learning_rate, gamma, epsilon_decay, epsilon_max, epsilon_min, memory_size, layer_sizes, activation, batch_size)
+    dagent = Agent(12, 4, EXPERIMENT_PATH,wandb , learning_rate, gamma, epsilon_decay, epsilon_max, epsilon_min, memory_size, layer_sizes, activation, batch_size, gpu_id)
     wandb.init(project='sumo_mmrl', entity='aaronrls')
     wandb.config.update({"learning_rate": learning_rate, "gamma": gamma, "epsilon_decay": epsilon_decay, "batch_size": batch_size, "memory_size": memory_size, "epsilon_max": epsilon_max, "epsilon_min": epsilon_min, "n_layers": n_layers, "layer_sizes": layer_sizes, "activation": activation})
     
@@ -64,6 +66,7 @@ def objective(trial):
                 dagent.replay(batch_size, episode, env.get_global_step())
                 dagent.soft_update()
             state = next_state
+            
 
         # Log episode details
         wandb.log({
@@ -75,7 +78,9 @@ def objective(trial):
                                     "agent_steps": env.get_global_step(),
                                     "simulation_steps": env.get_steps_per_episode(),
                                         })
-       
+        trial.report(cumulative_reward, episode)
+        if trial.should_prune():
+            raise optuna.exceptions.TrialPruned()
 
         dagent.decay()
         env.close(episode, cumulative_reward, dagent.get_epsilon())  # Close the environment properly
@@ -84,13 +89,8 @@ def objective(trial):
 
         if cumulative_reward > best_reward:
             best_reward = cumulative_reward
-            no_improvement_count = 0
             dagent.save_model(str(episode))
-        else:
-            no_improvement_count += 1
-            if no_improvement_count >= trial.suggest_int("early_stopping_patience", 2500, 3000, log=True):
-                print("Early stopping triggered.")
-                break
+        
 
         
     wandb.finish()   
@@ -139,7 +139,7 @@ def main():
         direction="maximize",
         pruner=pruner,
     )
-    study.optimize(objective, n_trials=100)
+    study.optimize(objective, n_trials=100, n_jobs=GPUS)
     print(f"Best value: {study.best_value} (params: {study.best_params})")
 
 if __name__ == "__main__":

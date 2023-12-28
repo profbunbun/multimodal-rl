@@ -8,3 +8,8 @@ sumo_mmrl/utils/__pycache__/
 sumo_mmrl/__pycache__/
 
 Experiments/
+*.log
+*.csv
+wandb/
+db.sqlite3
+db.sqlite3

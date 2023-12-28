@@ -259,7 +259,10 @@ class Env:
     
     def get_out_lanes(self):
         return self.vehicle.get_out_dict()
+    
     def get_life(self):
         return self.life
+    
+    
     
     

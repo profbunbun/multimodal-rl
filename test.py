@@ -74,7 +74,7 @@ def main():
             dagent.decay()
             steps_per_episode.append(env.get_steps_per_episode())
             env.close(episode, accumulated_reward, dagent.get_epsilon())
-            dagent.save()
+            
             episode_data = {
                 'episode': episode,
                 'epsilon': dagent.get_epsilon(),

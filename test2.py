@@ -5,7 +5,8 @@ import traceback
 import optuna
 from sumo_mmrl import Agent, DQN, Env, Logger
 import sqlalchemy
-
+import wandb 
+wandb.init(project='sumo_mmrl', entity='aaronrls')
 # Load configuration
 with open('config.json') as f:
     config = json.load(f)
@@ -23,23 +24,24 @@ LOG_PATH = config['training_settings']['log_dir_path']
 def objective(trial):
     # Suggested hyperparameters
     learning_rate = trial.suggest_float("learning_rate", 1e-5, 1e-1, log=True)
-    gamma = trial.suggest_float("gamma", 0.8, 0.9999)
-    epsilon_decay = trial.suggest_float("epsilon_decay", 0.9, 0.9999)
-    batch_size = trial.suggest_categorical("batch_size", [32, 64, 128, 256, 512])
+    gamma = trial.suggest_float("gamma", 0.8, 0.9999, log=True)
+    epsilon_decay = trial.suggest_float("epsilon_decay", 0.9, 0.9999, log=True)
+    batch_size = trial.suggest_categorical("batch_size", [32, 64, 128, 256, 512, 1024])
     memory_size = trial.suggest_categorical("memory_size", [10000, 20000, 50000, 100000])
-    epsilon_max = trial.suggest_float("epsilon_max", 0.8, 1.0)
-    epsilon_min = trial.suggest_float("epsilon_min", 0.01, 0.1)
-    n_layers = trial.suggest_int("n_layers", 1, 3)
+    epsilon_max = trial.suggest_float("epsilon_max", 0.8, 1.0,log=True)
+    epsilon_min = trial.suggest_float("epsilon_min", 0.01, 0.1,log=True)
+    n_layers = trial.suggest_int("n_layers", 1, 3,log=True)
     layer_size = trial.suggest_categorical("layer_size", [64, 128, 256])
-    activation = trial.suggest_categorical("activation", ["relu", "tanh"])
+    activation = trial.suggest_categorical("activation", ["relu", "tanh","leaky_relu"])
     env = Env(EXPERIMENT_PATH, SUMOCONFIG, NUM_VEHIC, TYPES)
-    dagent = Agent(12, 4, EXPERIMENT_PATH,  learning_rate, gamma, epsilon_decay, epsilon_max, epsilon_min, memory_size, n_layers, layer_size, activation, batch_size)
-
-    cumulative_reward = 0
+    dagent = Agent(12, 4, EXPERIMENT_PATH,wandb , learning_rate, gamma, epsilon_decay, epsilon_max, epsilon_min, memory_size, n_layers, layer_size, activation, batch_size)
+    wandb.config.update({"learning_rate": learning_rate, "gamma": gamma, "epsilon_decay": epsilon_decay, "batch_size": batch_size, "memory_size": memory_size, "epsilon_max": epsilon_max, "epsilon_min": epsilon_min, "n_layers": n_layers, "layer_size": layer_size, "activation": activation})
+    
     best_reward = float('-inf')  # Track the best reward for early stopping
     no_improvement_count = 0  # Count episodes with no improvement
 
     for episode in range(EPISODES):
+        cumulative_reward = 0
         env.render("libsumo" if episode % 100 != 0 else "libsumo")
         state, stage, legal_actions = env.reset()
         while stage != "done":
@@ -53,6 +55,15 @@ def objective(trial):
             state = next_state
 
         # Log episode details
+        wandb.log({
+                            "cumulative_reward": cumulative_reward,
+                            "epsilon": dagent.get_epsilon(),
+                                "explore_ratio": dagent.get_exploration_stats()[0],
+                                "exploit_ratio": dagent.get_exploration_stats()[1],
+                                    "episode": episode,
+                                    "agent_steps": env.get_global_step(),
+                                    "simulation_steps": env.get_steps_per_episode(),
+                                        })
        
 
         dagent.decay()
@@ -65,10 +76,12 @@ def objective(trial):
             no_improvement_count = 0
         else:
             no_improvement_count += 1
-            if no_improvement_count >= trial.suggest_int("early_stopping_patience", 1000, 10000):
+            if no_improvement_count >= trial.suggest_int("early_stopping_patience", 1000, 5000, log=True):
                 print("Early stopping triggered.")
                 break
 
+        
+    wandb.finish()   
     return cumulative_reward  # The objective value to maximize
 
 def get_next_study_name(storage_url, base_name="study"):
@@ -102,23 +115,7 @@ def get_next_study_name(storage_url, base_name="study"):
     new_study_name = f"{base_name}_{max_num + 1}"
     return new_study_name
 
-    # Get all existing study names.
-    all_study_names = [study.study_name for study in optuna.study.get_all_study_summaries(storage=storage)]
     
-    # Find the highest existing study number.
-    max_num = 0
-    for name in all_study_names:
-        if name.startswith(base_name):
-            try:
-                num = int(name[len(base_name):])
-                max_num = max(max_num, num)
-            except ValueError:
-                continue
-
-    # Create a new unique study name.
-    new_study_name = f"{base_name}_{max_num + 1}"
-    return new_study_name
-
 def main():
     # Set up Optuna study
     storage_path = "sqlite:///db.sqlite3"

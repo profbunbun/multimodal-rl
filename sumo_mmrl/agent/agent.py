@@ -6,6 +6,7 @@ from .dqn import DQN
 from . import exploration, memory
 import json 
 import hashlib
+import wandb
 
 
 
@@ -14,8 +15,8 @@ import hashlib
 # PATH = "/logger/model.pt"
 
 class Agent:
-    def __init__(self, state_size, action_size, path, learning_rate=None, gamma=None, epsilon_decay=None, epsilon_max=None, epsilon_min=None, memory_size=None, n_layers=None, layer_size=None, activation=None, batch_size=None):
-        self.logger = None
+    def __init__(self, state_size, action_size, path,wandb_run=None, learning_rate=None, gamma=None, epsilon_decay=None, epsilon_max=None, epsilon_min=None, memory_size=None, n_layers=None, layer_size=None, activation=None, batch_size=None):
+        self.wandb_run = wandb_run
         self.path = path
         self.direction_choices = ['r', 's', 'l', 't']
         with open("config.json", "r") as config_file:
@@ -77,23 +78,9 @@ class Agent:
         next_states = torch.tensor(next_states, device=self.device, dtype=torch.float32)
         dones = torch.tensor(dones, device=self.device, dtype=torch.float32)
 
-        loss_item, max_grad_norm, current_q_values, expected_q_values = self.perform_training_step(states, actions, rewards, next_states, dones)
-        # if self.logger:
-        #     training_data = {
-        #         'episode': current_episode,  # Current episode
-        #         'agent_step': current_step,  # Current step of the agent
-        #         'batch_size': batch_size,  # Size of the batch
-        #         'loss': loss_item,  # Loss from the current training step
-        #         'q_values': [q.tolist() for q in current_q_values],  # Q values from the policy network
-        #         'target_q_values': [q.tolist() for q in expected_q_values],  # Target Q values for loss calculation
-        #         'epsilon': self.get_epsilon(),  # Current epsilon for exploration
-        #         'learning_rate': self.learning_rate,  # Current learning rate
-        #         'gradient_norms': [p.grad.data.norm(2).item() for p in self.policy_net.parameters() if p.grad is not None],  # Gradient norms
-        #         'max_gradient_norm': max_grad_norm,  # Maximum gradient norm
-        #         'replay_memory_size': len(self.memory)  # Size of the replay memory
-        #     }
-        #     self.logger.log_training(training_data)
-        return loss_item
+        self.perform_training_step(states, actions, rewards, next_states, dones)
+
+
 
     def perform_training_step(self, state, action, reward, next_state, done):
         # Check if the inputs are already tensors. If not, convert them.
@@ -136,10 +123,22 @@ class Agent:
         self.optimizer.zero_grad()
         loss.backward()
         max_grad_norm = max(p.grad.data.norm(2).item() for p in self.policy_net.parameters() if p.grad is not None)
-        torch.nn.utils.clip_grad_norm_(self.policy_net.parameters(), .5)
+        torch.nn.utils.clip_grad_value_(self.policy_net.parameters(), 100)
         self.optimizer.step()
+        if self.wandb_run:
+            self.wandb_run.log({
+            "Loss": loss.item(),
+            "Max Gradient Norm": max_grad_norm,
+            "Epsilon": self.get_epsilon(),
+            "Current Q Values Mean": current_q_values.mean().item(),
+            "Expected Q Values Mean": expected_q_values.mean().item(),
+            
+            })
+        if self.wandb_run:
+            for name, param in self.policy_net.named_parameters():
+                self.wandb_run.log({f"Gradients/{name}":wandb.Histogram(param.grad.cpu().detach().numpy())})
+                self.wandb_run.log({f"Weights/{name}": wandb.Histogram(param.cpu().detach().numpy())})
 
-        return loss.item(), max_grad_norm, current_q_values, expected_q_values
 
 
 
@@ -157,26 +156,21 @@ class Agent:
     def generate_config_id(self, *args):
         """Generate a unique hash for the given configuration."""
         config_str = '_'.join(map(str, args))
-        return hashlib.md5(config_str.encode()).hexdigest()
+        return config_str
 
-    def save_model(self, episode_num=None):
-        """Save the model uniquely based on its configuration and episode number."""
-        filename = f"model_{self.config_id}"
-        if episode_num is not None:
-            filename += f"_ep{episode_num}"
-        filename += ".pt"
-        save_path = os.path.join(self.path, filename)
+    def save_model(self):
+        save_path = f"model_{self.config_id}.pt"
         torch.save(self.policy_net.state_dict(), save_path)
-        print(f"Model saved to {save_path}")
+        if self.wandb_run:
+            self.wandb_run.save(save_path)  # Save the model file to WandB
 
     def load_model(self):
-        """Load the model if a file matching the configuration exists."""
-        filename = f"model_{self.config_id}.pt"
-        load_path = os.path.join(self.path, filename)
+        load_path = f"model_{self.config_id}.pt"
         if os.path.exists(load_path):
             self.policy_net.load_state_dict(torch.load(load_path, map_location=self.device))
             self.policy_net.to(self.device)
-            print(f"Model loaded from {load_path}")
+            if self.wandb_run:
+                self.wandb_run.log({"Model Loaded": load_path})
 
 
     def decay(self):
@@ -185,15 +179,7 @@ class Agent:
     def get_epsilon(self):
         return self.exploration_strategy.epsilon
     
-    # def get_model_info(self):
-    #     """Returns detailed information about the policy network."""
-    #     model = DQN(12, 4)
-    #     model.load_state_dict(torch.load(self.path + PATH))
-    #     state_info = self.get_model_state_dict_as_string(model)
-    #     opt_info = self.get_optimizer_state_dict_as_string(self.optimizer)
-        
-
-        return state_info, opt_info
+   
 
     def get_model_state_dict_as_string(self, model):
         model_info = "Model's state_dict:\n"
@@ -213,3 +199,7 @@ class Agent:
         self.epsilon_decay = epsilon_decay
         self.optimizer = optim.RMSprop(self.policy_net.parameters(), lr=self.learning_rate, momentum=0.9)
         self.exploration_strategy = exploration.Explorer(self.policy_net, self.epsilon_max, self.epsilon_decay, self.epsilon_min)
+
+    def get_exploration_stats(self):
+        """Calculate the exploration vs exploitation statistics."""
+        return self.exploration_strategy.get_exploration_stats()

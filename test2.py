@@ -1,5 +1,6 @@
 ''' main driver '''
 import json
+import sys
 import optuna
 from sumo_mmrl import Agent,Env
 import sqlalchemy
@@ -152,15 +153,37 @@ def get_next_study_name(storage_url, base_name="study"):
     
 def main():
     # Set up Optuna study
+    if len(sys.argv) > 1:
+        study_name = sys.argv[1]  # Get the study name from the command line
+    else:
+        study_name = None
     pruner = optuna.pruners.MedianPruner()
     storage_path = "sqlite:///db.sqlite3"
-    new_study_name = get_next_study_name(storage_path, base_name="study",)
-    study = optuna.create_study(
-        storage=storage_path,
-        study_name=new_study_name,
-        direction="maximize",
-        pruner=pruner,
-    )
+    if study_name:
+        try:
+            # Try to load the existing study
+            study = optuna.load_study(study_name=study_name, storage=storage_path)
+            print(f"Resuming study {study_name}")
+        except Exception as e:
+            # Handle exceptions, such as if the study doesn't exist
+            print(f"Failed to resume study {study_name}: {e}")
+            print("Creating a new study instead.")
+            study_name = get_next_study_name(storage_path, base_name="study")
+            study = optuna.create_study(
+                storage=storage_path,
+                study_name=study_name,
+                direction="maximize",
+                pruner=pruner,
+            )
+    else:
+        # No study name provided, create a new one
+        study_name = get_next_study_name(storage_path, base_name="study")
+        study = optuna.create_study(
+            storage=storage_path,
+            study_name=study_name,
+            direction="maximize",
+            pruner=pruner,
+        )
     study.optimize(objective, n_trials=100, callbacks=[wandbc])
 
     print(f"Best value: {study.best_value} (params: {study.best_params})")

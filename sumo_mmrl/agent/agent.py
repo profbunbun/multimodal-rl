@@ -123,20 +123,15 @@ class Agent:
         torch.nn.utils.clip_grad_norm_(self.policy_net.parameters(), 1)
         self.optimizer.step()
         if self.wandb_run:
-            logs = {
-                "Loss": loss.item(),
-                "Max Gradient Norm": max_grad_norm,
-                "Epsilon": self.get_epsilon(),
-                "Current Q Values Mean": current_q_values.mean().item(),
-                "Expected Q Values Mean": expected_q_values.mean().item(),
-            }
-            
-            # Log gradients and weights for the first parameter group (assuming you have multiple parameter groups)
+            self.wandb_run.log({
+            "Loss": loss.item(),
+            "Max Gradient Norm": max_grad_norm
+            })
+        if self.wandb_run:
             for name, param in self.policy_net.named_parameters():
-                if param.requires_grad:
-                    logs[f"Gradients/{name}"] = param.grad.norm().item()
-                    logs[f"Weights/{name}"] = param.norm().item()
-            self.wandb_run.log(logs)
+                self.wandb_run.log({f"Policy Gradients/{name}":wandb.Histogram(param.grad.cpu().detach().numpy())})
+
+
 
 
 

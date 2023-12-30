@@ -10,37 +10,49 @@ import wandb
 
 
 class Agent:
-    def __init__(self, state_size, action_size, path,wandb_run,learning_rate=None, gamma=None, epsilon_decay=None, epsilon_max=None, epsilon_min=None, memory_size=None, layer_sizes=None, activation=None, batch_size=None):
-        self.wandb_run = wandb_run
-        self.path = path
-        self.direction_choices = ['r', 's', 'l', 't']
-        with open("config.json", "r") as config_file:
-            config = json.load(config_file)
+    def __init__(self, state_size, 
+                 action_size, 
+                 path,
+                 wandb_run,
+                 learning_rate=None, 
+                 gamma=None, 
+                 epsilon_decay=None, 
+                 epsilon_max=None, 
+                 epsilon_min=None, 
+                 memory_size=None, 
+                 layer_sizes=None, 
+                 activation=None, 
+                 batch_size=None,
+                 soft_update_factor=None,
+                 ):
+            self.wandb_run = wandb_run
+            self.path = path
+            self.direction_choices = ['r', 's', 'l', 't']
 
-        self.memory_size = memory_size if memory_size is not None else config["training_settings"]["memory_size"]
-        self.gamma = gamma if gamma is not None else config["hyperparameters"]["gamma"]
-        self.learning_rate = learning_rate if learning_rate is not None else config["hyperparameters"]["learning_rate"]
-        self.epsilon_decay = epsilon_decay if epsilon_decay is not None else config["hyperparameters"]["epsilon_decay"]
+            self.memory_size = memory_size 
+            self.gamma = gamma 
+            self.learning_rate = learning_rate 
+            self.epsilon_decay = epsilon_decay 
 
-        self.soft_update_factor = config["hyperparameters"]["soft_update_factor"]
-        self.batch_size = batch_size if batch_size is not None else config["training_settings"]["batch_size"]
-        self.epsilon_max = epsilon_max if epsilon_max is not None else config["hyperparameters"]["epsilon_max"]
-        self.epsilon_min = epsilon_min if epsilon_min is not None else config["hyperparameters"]["epsilon_min"]
+            self.soft_update_factor = soft_update_factor
+            self.batch_size = batch_size 
+            self.epsilon_max = epsilon_max 
+            self.epsilon_min = epsilon_min 
+            self.soft_update_factor = soft_update_factor 
+            
+            self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-        
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-        self.policy_net = DQN(state_size, action_size, layer_sizes, activation).to(self.device)
-        self.target_net = DQN(state_size, action_size, layer_sizes, activation).to(self.device)
+            self.policy_net = DQN(state_size, action_size, layer_sizes, activation).to(self.device)
+            self.target_net = DQN(state_size, action_size, layer_sizes, activation).to(self.device)
 
 
-        self.criterion = nn.HuberLoss()
+            self.criterion = nn.HuberLoss()
 
-        self.optimizer = optim.RMSprop(self.policy_net.parameters(),
-                                       lr=self.learning_rate, momentum=0.9)
+            self.optimizer = optim.RMSprop(self.policy_net.parameters(),
+                                        lr=self.learning_rate, momentum=0.9)
 
-        self.exploration_strategy = exploration.Explorer(self.policy_net, self.epsilon_max, self.epsilon_decay, self.epsilon_min)
-        self.memory = memory.Memory(self.memory_size)
+            self.exploration_strategy = exploration.Explorer(self.policy_net, self.epsilon_max, self.epsilon_decay, self.epsilon_min)
+            self.memory = memory.Memory(self.memory_size)
 
     def remember(self, state, action, reward, next_state, done):
         
@@ -52,7 +64,7 @@ class Agent:
         action, index, valid, q_values = self.exploration_strategy.choose_action(state, options)
         return action, index, valid, q_values
 
-    def replay(self, batch_size, current_episode, current_step):
+    def replay(self, batch_size):
         minibatch = self.memory.replay_batch(batch_size)
         if len(minibatch) == 0:
             return None

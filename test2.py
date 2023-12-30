@@ -4,6 +4,7 @@ import optuna
 from sumo_mmrl import Agent,Env
 import sqlalchemy
 import wandb 
+from optuna.integration.wandb import WeightsAndBiasesCallback
 
 # Load configuration
 with open('config.json') as f:
@@ -11,31 +12,36 @@ with open('config.json') as f:
 
 # Configuration parameters
 EPISODES = config['training_settings']['episodes']
-BATCH_SIZE = config['training_settings']['batch_size']
 EXPERIMENT_PATH = config['training_settings']['experiment_path']
 SUMOCONFIG = config['training_settings']['sumoconfig']
 NUM_VEHIC = config['training_settings']['num_vehic']
 TYPES = config['training_settings']['types']
-LOG_PATH = config['training_settings']['log_dir_path']
+wandb_kwargs= {"project":"sumo_mmrl","entity":"aaronrls"}
+wandbc = WeightsAndBiasesCallback(metric_name='cumulative_reward',wandb_kwargs=wandb_kwargs)
 
 
-# Define the objective function for Optuna
+
+@wandbc.track_in_wandb()
 def objective(trial):
     # Suggested hyperparameters
 
-    learning_rate = trial.suggest_float("learning_rate", 1e-5, 1e-1, log=True)
+    learning_rate = trial.suggest_categorical("learning_rate", [0.0001, 0.001, 0.01, 0.1])
     gamma = trial.suggest_float("gamma", 0.8, 0.9999, log=True)
-    epsilon_decay = trial.suggest_float("epsilon_decay", 0.999, 0.9999, log=True)
-    batch_size = trial.suggest_categorical("batch_size", [32, 64, 128, 256, 512, 1024, 2048])
-    memory_size = trial.suggest_categorical("memory_size", [10000, 20000, 50000, 100000])
-    epsilon_max = trial.suggest_float("epsilon_max", 0.9, 1.0,log=True)
-    epsilon_min = trial.suggest_float("epsilon_min", 0.01, 0.1,log=True)
-    n_layers = trial.suggest_int('n_layers', 1, 5, log=True) 
-    layer_sizes = [trial.suggest_int(f'n_units_l{i}', 16, 128) for i in range(n_layers)]
-    activation = trial.suggest_categorical("activation", ["relu", "tanh","leaky_relu"])
+    epsilon_decay = trial.suggest_categorical("epsilon_decay", [0.0001, 0.001, 0.01, 0.1])
+    batch_size = trial.suggest_categorical("batch_size", [128, 256, 512, 1024])
+    memory_size = trial.suggest_categorical("memory_size", [50000, 100000])
+    epsilon_max = trial.suggest_categorical("epsilon_max", [0.95, 0.975, 1.0])
+    epsilon_min = trial.suggest_categorical("epsilon_min", [0.01, 0.05, 0.1])
+    n_layers = trial.suggest_categorical("n_layers", [1, 2])
+    layer_sizes = [trial.suggest_categorical (f"layer_{i}_size", [16,32]) for i in range(n_layers)]
+    activation = trial.suggest_categorical("activation", ["relu"])
+    soft_update_factor = trial.suggest_categorical("soft_update_factor", [0.001, 0.01, 0.1])
+
+    # activation = trial.suggest_categorical("activation", ["relu", "tanh","leaky_relu"])
 
     env = Env(EXPERIMENT_PATH, SUMOCONFIG, NUM_VEHIC, TYPES)
-    wandb.init(project='sumo_mmrl', entity='aaronrls')
+    
+
     dagent = Agent(12, 4, EXPERIMENT_PATH,
                     wandb,
                     learning_rate,
@@ -45,7 +51,9 @@ def objective(trial):
                     epsilon_min, 
                     memory_size, 
                     layer_sizes, 
-                    activation, batch_size)
+                    activation, 
+                    batch_size,
+                    soft_update_factor)
     
     wandb.config.update({
         "learning_rate": learning_rate, 
@@ -77,7 +85,7 @@ def objective(trial):
             dagent.remember(state, action_index, new_reward, next_state, done=(stage == "done"))
             cumulative_reward += new_reward
             if len(dagent.memory) > batch_size:
-                dagent.replay(batch_size, episode, env.get_global_step())
+                dagent.replay(batch_size)
                 dagent.soft_update()
             state = next_state
 
@@ -107,7 +115,7 @@ def objective(trial):
             best_reward = cumulative_reward
             dagent.save_model(str(episode))
   
-    wandb.finish()   
+    wandbc.finish()   
     return cumulative_reward  # The objective value to maximize
 
 def get_next_study_name(storage_url, base_name="study"):
@@ -153,8 +161,7 @@ def main():
         direction="maximize",
         pruner=pruner,
     )
-
-    study.optimize(objective, n_trials=100)
+    study.optimize(objective, n_trials=100, callbacks=[wandbc])
 
     print(f"Best value: {study.best_value} (params: {study.best_params})")
 

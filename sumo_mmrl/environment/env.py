@@ -8,10 +8,10 @@ from .ride_select import RideSelect
 from .outmask import OutMask
 from .bus_stop import StopFinder
 from .observation import Observation
-from .vehicle_manager import VehicleManager  # Import VehicleManager
-from .person_manager import PersonManager # Import PersonManager
+from .vehicle_manager import VehicleManager 
+from .person_manager import PersonManager 
 from .reward_calculator import RewardCalculator
-from .utils import Utils
+from .env_utils import Utils
 from .step_manager import StepManager
 
 
@@ -31,16 +31,12 @@ class Env:
             path + sumocon
         )
 
-
         self.ride_selector = RideSelect()  
         self.edge_position = (
             self.parser.get_edge_pos_dic()
-        )  # This creates the x y positions of all the lanes
-
+        )  
         self.sumo = None  
-        
         self.path = path  
-
         self.steps = 0
         self.agent_step = 0
         self.accumulated_reward = 0
@@ -50,23 +46,14 @@ class Env:
         self.old_dist = None
         self.rewards = []
         self.epsilon_hist = []
-
         self.vehicle = None
         self.person = None
-
         self.p_index = 0
         self.distcheck = 0
-
-        self.edge_distance = None  # manhatten distance to destination
-
-        self.destination_edge = None  # changes for each stage destination goal
-
-        self.num_of_vehicles = num_of_vehic  # number community
-        # vehicles to select from
-
-        self.types = types  # types of passangers
-        # and vehicles to pair for a trip
-        # self.parser.get_route_edges()
+        self.edge_distance = None
+        self.destination_edge = None
+        self.num_of_vehicles = num_of_vehic
+        self.types = types
         self.stage = "reset"
         self.bussroute = self.parser.get_route_edges()
         self.life = 20
@@ -113,12 +100,9 @@ class Env:
 
     
     def step(self, action, validator):
-        '''next step for environment'''
 
         self.steps = int(self.sumo.simulation.getTime())
         self.agent_step += 1
-
-        # Using StepManager for null steps
         self.make_choice_flag, self.old_edge = self.step_manager.null_step(self.vehicle, self.make_choice_flag, self.old_edge)
 
         if self.life <= 0:
@@ -133,27 +117,22 @@ class Env:
             vedge_loc[0], vedge_loc[1], dest_edge_loc[0], dest_edge_loc[1]
         )
 
-        # Calculate reward
         self.reward, self.make_choice_flag, self.distcheck, self.life = self.reward_calculator.calculate_reward(
             self.old_dist, edge_distance, self.stage, self.destination_edge, vedge, self.make_choice_flag, self.life)
 
         if validator == 1:
             if self.make_choice_flag:
-                # Using StepManager to perform action
                 self.best_choice = self.step_manager.perform_step(self.vehicle, action, self.destination_edge)
                 self.make_choice_flag = False
                 self.life -= 1
 
-            # Update stage using StageManager
             self.stage, self.destination_edge = self.stage_manager.update_stage(
                 self.stage, self.destination_edge, vedge, self.person
             )
 
             choices = self.vehicle.get_out_dict()
-
             dest_loc = self.edge_position[self.destination_edge]
             state = self.obs.get_state(self.sumo,self.agent_step, self.vehicle, dest_loc, self.life, self.distcheck)
-
             self.old_edge = vedge
             self.old_dist = edge_distance
             return state, self.reward, self.stage, choices
@@ -163,12 +142,8 @@ class Env:
         self.stage = "done"
         self.reward = -0.15
         self.make_choice_flag = False
-
         dest_loc = self.edge_position[self.destination_edge]
-
         state = self.obs.get_state(self.sumo,self.agent_step, self.vehicle, dest_loc, self.life, self.distcheck)
-
-
         self.accumulated_reward += self.reward
         return state, self.reward, self.stage, choices
 
@@ -197,7 +172,7 @@ class Env:
         self.epsilon_hist.append(current_epsilon)
 
         avg_reward = np.mean(self.rewards[-100:])
-        smoothed_rewards = self.smooth_data(self.rewards, 100)
+        smoothed_rewards = Utils.smooth_data(self.rewards, 100)
 
         print_info = {
             "EP": episode,
@@ -211,38 +186,11 @@ class Env:
 
         x = list(range(1, len(self.rewards) + 1))
         file_name = self.path + "/Graphs/sumo-agent.png"
-        self.plotter.plot_learning(x, smoothed_rewards, self.epsilon_hist, file_name)
+        Utils.plot_learning_curve(x, smoothed_rewards, self.epsilon_hist, file_name)
+        # self.plotter.plot_learning(x, smoothed_rewards, self.epsilon_hist, file_name)
         return avg_reward
-    def smooth_data(self, data, window_size):
-        """Smooth data using a simple moving average."""
-        if not data: return []
-
-        smoothed = []
-        running_total = 0
-        non_numeric_count = 0
-
-        for i, value in enumerate(data):
-            if value is not None:
-                running_total += value
-            else:
-                non_numeric_count += 1
-
-            if i >= window_size:
-                if data[i - window_size] is not None:
-                    running_total -= data[i - window_size]
-                else:
-                    non_numeric_count -= 1
-
-            count = min(i + 1, window_size) - non_numeric_count
-            if count > 0:
-                smoothed.append(running_total / count)
-            else:
-                smoothed.append(None)  # or some default/fallback value
-
-        if non_numeric_count > 0:
-            print(f"Warning: Found {non_numeric_count} non-numeric values. Some smoothing results may be None.")
-
-        return smoothed
+    
+   
     
     def get_steps_per_episode(self):
         return self.sumo.simulation.getTime()

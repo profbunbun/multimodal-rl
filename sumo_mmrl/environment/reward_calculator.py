@@ -12,9 +12,7 @@ class RewardCalculator:
         elif old_dist < edge_distance:
             reward = -0.02
             distcheck = 0
-        # elif old_dist == edge_distance:
-        #     reward = 0.01
-        #     distcheck = 0
+
 
         if vedge == destination_edge:
             life += 10

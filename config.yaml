@@ -11,6 +11,23 @@ training_settings:
   num_vehic: 1                           # The number of vehicles to simulate
   types: 1                               # The number of types of vehicles
   max_steps_per_episode: 1000            # Maximum steps per episode
+  initial_life: 20                       # Starting life points for the agent
+  penalty: -0.15                         # Penalty for invalid or detrimental actions
+  smoothing_window: 100                  # Window size for smoothing reward curves
+
+# Environment settings.
+env:
+  num_of_vehicles: 1                     # Default number of vehicles in the environment
+  num_of_people: 1                       # Default number of people in the environment
+  types_of_passengers: 1                 # Default types or classes of passengers
+
+# Rendering and Simulation.
+rendering:
+  default_mode: "no_gui"                 # Default mode for rendering (gui, libsumo, no_gui)
+
+# Graph Output.
+graph_output:
+  graph_path: "/Graphs/sumo-agent.png"  # Default path where learning curve graphs should be saved
 
 # Optuna optimization settings.
 optuna:

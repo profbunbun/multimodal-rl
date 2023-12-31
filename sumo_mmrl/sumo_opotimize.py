@@ -7,18 +7,13 @@ from sumo_mmrl import Agent, Env
 def create_env(config):
     """
     Create and return the simulation environment based on the provided configuration.
-
     :param config: The configuration dictionary with environment settings.
     :type config: dict
     :return: An instance of the SUMO simulation environment.
     :rtype: Env
     """
-    experiment_path = config['training_settings']['experiment_path']
-    sumoconfig = config['training_settings']['sumoconfig']
-    num_vehic = config['training_settings']['num_vehic']
-    types = config['training_settings']['types']
 
-    return Env(experiment_path, sumoconfig, num_vehic, types)
+    return Env(config)
 
 
 def create_agent(trial,wandb_run, config):

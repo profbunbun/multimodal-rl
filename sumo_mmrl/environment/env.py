@@ -19,39 +19,34 @@ class Env:
     '''RL Enviroment'''
     def __init__(self, path, sumocon, num_of_vehic, types):
         self.obs = Observation()
-        self.plotter = Plotter()  # for plotting results
+        self.plotter = Plotter()  
         self.out_mask = OutMask()
         self.finder = StopFinder()
 
-        self.parser = NetParser(  # This is all the stuff to create the
-            path + sumocon  # different map network dictionaries
+        self.parser = NetParser( 
+            path + sumocon  
         )
 
         self.sumo_con = SUMOConnection(
             path + sumocon
-        )  # This handlies our communication
-        # with the TRACI simulation interface (??REDUNDANT?)
-        self.ruff_rider = RideSelect()  # This is object to select the vehicle
+        )
+
+
+        self.ride_selector = RideSelect()  
         self.edge_position = (
             self.parser.get_edge_pos_dic()
         )  # This creates the x y positions of all the lanes
 
-        self.sumo = None  # this becomes the sumo conection used after GUI
-        # or command line is decided
-        self.path = path  # path to the experiment folder  for simulation data
+        self.sumo = None  
+        
+        self.path = path  
 
         self.steps = 0
         self.agent_step = 0
         self.accumulated_reward = 0
         self.reward = 0
-
-        self.make_choice_flag = False  # changes if agent is in a valid
-        # state to make a decison:
-        # not an intersection,
-        # one choice on new lane
-
-        self.old_edge = None  # location variable to check
-        # against new position. For make choice flag
+        self.make_choice_flag = False 
+        self.old_edge = None  
         self.old_dist = None
         self.rewards = []
         self.epsilon_hist = []
@@ -82,6 +77,7 @@ class Env:
 
     def reset(self):
         '''reset everything '''
+        
         self.steps = 0
         self.agent_step = 0
         self.accumulated_reward = 0
@@ -100,7 +96,7 @@ class Env:
         people = self.person_manager.create_people()
 
         self.person = people[0]
-        vid_selected = self.ruff_rider.select(vehicles, self.person)
+        vid_selected = self.ride_selector.select(vehicles, self.person)
         self.vehicle = vehicles[int(vid_selected)]
         self.sumo.simulationStep()
         self.old_dist = 0
@@ -190,10 +186,6 @@ class Env:
         elif mode == "no_gui":
             self.sumo = self.sumo_con.connect_no_gui()
     
-    def get_steps_per_episode(self):
-        return self.sumo.simulation.getTime()
-    def get_global_step(self):
-        return self.agent_step
 
     def close(self, episode, accu, current_epsilon):
         '''close connection and print graph'''
@@ -251,15 +243,28 @@ class Env:
             print(f"Warning: Found {non_numeric_count} non-numeric values. Some smoothing results may be None.")
 
         return smoothed
+    
+    def get_steps_per_episode(self):
+        return self.sumo.simulation.getTime()
+    
+    def get_global_step(self):
+        return self.agent_step
+    
     def get_destination_edge_id(self):
         return self.destination_edge
     
     def get_vehicle_location_edge_id(self):
-        return self.vehicle.get_road()
+        return self.vehicle.get_lane()
     
     def get_best_choice(self):
         return self.best_choice
+    
     def get_out_lanes(self):
-        return self.vehicle.get_out_dict() 
+        return self.vehicle.get_out_dict()
+    
+    def get_life(self):
+        return self.life
+    
+    
     
     

@@ -1,0 +1,15 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+sumo_mmrl/agent/__pycache__/
+sumo_mmrl/environment/__pycache__/
+sumo_mmrl/utils/__pycache__/
+sumo_mmrl/__pycache__/
+
+Experiments/
+*.log
+*.csv
+wandb/
+db.sqlite3
+db.sqlite3

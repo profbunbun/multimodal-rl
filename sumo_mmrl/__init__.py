@@ -2,5 +2,7 @@
 from .environment.connect import SUMOConnection
 from .environment.plot_util import Plotter
 from .agent.agent import Agent
-from .utils.logger import Logger
+from .utilities.utils import Utils
+from .agent.dqn import DQN
+from .environment.env import Env
 

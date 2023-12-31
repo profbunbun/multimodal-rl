@@ -3,33 +3,51 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class DQN(nn.Module):
-    def __init__(self, state_size, action_size):
+    def __init__(self, state_size, action_size, layer_sizes, activation_function):
         super(DQN, self).__init__()
-        self.layer1 = nn.Linear(state_size, 32)
-        self.layer2 = nn.Linear(32, 64)
-        self.layer2b = nn.Linear(64, 32)
-        self.layer2c = nn.Linear(32, 16)
-        self.layer3 = nn.Linear(16, action_size)
+        
+        # Verify that layer_sizes is a list and has at least one layer size
+        assert isinstance(layer_sizes, list) and len(layer_sizes) > 0, "layer_sizes must be a list with at least one element"
 
-        # self.dropout1 = nn.Dropout(p=0.1)
-        # self.dropout2 = nn.Dropout(p=0.1)
-        # self.dropout3 = nn.Dropout(p=0.1)
+        # Create a list to hold all the layers
+        self.layers = nn.ModuleList()
+        
+        # Input layer
+        previous_layer_size = state_size
+        for layer_size in layer_sizes:
+            self.layers.append(nn.Linear(previous_layer_size, layer_size))
+            previous_layer_size = layer_size
+        
+        # Output layer
+        self.layers.append(nn.Linear(previous_layer_size, action_size))
 
-        # self.apply(self.init_weights)
+        # Initialize weights
+        self.layers.apply(self.init_weights)
+        
+        # Set activation function
+        self.activation_function = self.get_activation_function(activation_function)
 
     def forward(self, x_net):
-        x_net = F.relu(self.layer1(x_net))
-        # x_net = self.dropout1(x_net)
-        x_net = F.relu(self.layer2(x_net))
-        # x_net = self.dropout2(x_net)
-        x_net = F.relu(self.layer2b(x_net))
-        # x_net = self.dropout3(x_net)
-        x_net = F.relu(self.layer2c(x_net))
-        x_net = self.layer3(x_net)
-        # x_net = F.log_softmax(x_net, dim=1) 
+        # Pass the input through each layer except the last
+        for layer in self.layers[:-1]:
+            x_net = self.activation_function(layer(x_net))
+        
+        # No activation for the last layer
+        x_net = self.layers[-1](x_net)
+        
         return x_net
     
     def init_weights(self, m):
         if isinstance(m, nn.Linear):
             nn.init.xavier_uniform_(m.weight)
             nn.init.constant_(m.bias, 0.1)
+    
+    def get_activation_function(self, name):
+        if name == 'relu':
+            return F.relu
+        elif name == 'leaky_relu':
+            return F.leaky_relu
+        elif name == 'tanh':
+            return torch.tanh
+        else:
+            raise ValueError(f"Unsupported activation function: {name}")

@@ -2,7 +2,7 @@
 import json
 import sys
 import optuna
-from sumo_mmrl import Agent,Env
+from sumo_mmrl import Agent, Env, Utils
 import sqlalchemy
 import wandb 
 from optuna.integration.wandb import WeightsAndBiasesCallback

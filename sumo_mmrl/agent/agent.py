@@ -4,8 +4,6 @@ import torch.nn as nn
 import torch.optim as optim
 from .dqn import DQN
 from . import exploration, memory
-import json 
-import hashlib
 import wandb
 
 
@@ -130,12 +128,7 @@ class Agent:
         if self.wandb_run:
             for name, param in self.policy_net.named_parameters():
                 self.wandb_run.log({f"Policy Gradients/{name}":wandb.Histogram(param.grad.cpu().detach().numpy())})
-
-
-
-
-
-
+                self.wandb_run.log({f"Policy Weights/{name}":wandb.Histogram(param.cpu().detach().numpy())})
     def soft_update(self):
         target_net_state_dict = self.target_net.state_dict()
         policy_net_state_dict = self.policy_net.state_dict()

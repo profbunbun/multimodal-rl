@@ -28,17 +28,18 @@ def objective(trial):
 
     learning_rate = trial.suggest_categorical("learning_rate", [0.0001, 0.001, 0.01, 0.1])
     gamma = trial.suggest_float("gamma", 0.8, 0.9999, log=True)
-    epsilon_decay = trial.suggest_categorical("epsilon_decay", [0.0001, 0.001, 0.01, 0.1])
+    epsilon_decay = trial.suggest_categorical("epsilon_decay", [0.995, 0.999, 0.9995])
     batch_size = trial.suggest_categorical("batch_size", [128, 256, 512, 1024])
     memory_size = trial.suggest_categorical("memory_size", [50000, 100000])
-    epsilon_max = trial.suggest_categorical("epsilon_max", [0.95, 0.975, 1.0])
+    epsilon_max = trial.suggest_categorical("epsilon_max", [0.9, 0.95, 0.975, 1.0])
     epsilon_min = trial.suggest_categorical("epsilon_min", [0.01, 0.05, 0.1])
-    n_layers = trial.suggest_categorical("n_layers", [1, 2])
-    layer_sizes = [trial.suggest_categorical (f"layer_{i}_size", [16,32]) for i in range(n_layers)]
-    activation = trial.suggest_categorical("activation", ["relu"])
+    n_layers = trial.suggest_categorical("n_layers", [1])
+    layer_sizes = [trial.suggest_categorical (f"layer_{i}_size", [32]) for i in range(n_layers)]
+    activation = trial.suggest_categorical("activation", ["relu", "tanh", "leaky_relu"])
     soft_update_factor = trial.suggest_categorical("soft_update_factor", [0.001, 0.01, 0.1])
+    # momentum = trial.suggest_categorical("momentum", [0.9])
 
-    # activation = trial.suggest_categorical("activation", ["relu", "tanh","leaky_relu"])
+
 
     env = Env(EXPERIMENT_PATH, SUMOCONFIG, NUM_VEHIC, TYPES)
     
@@ -116,7 +117,7 @@ def objective(trial):
             best_reward = cumulative_reward
             dagent.save_model(str(episode))
   
-    wandbc.finish()   
+    wandb.finish()   
     return cumulative_reward  # The objective value to maximize
 
 def get_next_study_name(storage_url, base_name="study"):

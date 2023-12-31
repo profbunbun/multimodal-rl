@@ -1,7 +1,7 @@
 {
 
   "training_settings": {
-      "episodes": 30000,
+      "episodes": 20000,
       "experiment_path": "Experiments/3x3",
       "sumoconfig": "/Nets/3x3b.sumocfg",
       "num_vehic": 1,

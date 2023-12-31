@@ -5,4 +5,5 @@ from .agent.agent import Agent
 from .utilities.utils import Utils
 from .agent.dqn import DQN
 from .environment.env import Env
+from . import sumo_opotimize
 

@@ -41,10 +41,7 @@ class Vehicle:
         return self.cur_loc
 
     def get_lane_id(self):
- 
-        self.current_lane = self.sumo.vehicle.getLaneID(self.vehicle_id)
-        self.cur_loc = self.current_lane
-        return self.cur_loc
+        return self.sumo.vehicle.getLaneID(self.vehicle_id)
 
     def location(self):
 

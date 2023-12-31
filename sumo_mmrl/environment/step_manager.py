@@ -20,6 +20,9 @@ class StepManager:
         while not make_choice_flag:
             self.sumo_interface.simulationStep()
             vedge = vehicle.get_road()
+            # vedge_id = vehicle.get_lane_id()
+            # junction_list=self.sumo_interface.junction.getIDList()
+            # print(junction_list)
 
             if (":" in vedge) or (old_edge == vedge):
                 make_choice_flag = False

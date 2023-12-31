@@ -73,7 +73,8 @@ def objective(trial):
     
     for episode in range(EPISODES):
         cumulative_reward = 0
-        env.render("libsumo")
+        # env.render("libsumo")
+        env.render("no_gui")
         state, stage, legal_actions = env.reset()
         while stage != "done":
             action, action_index, validator, q_values = dagent.choose_action(state, legal_actions)

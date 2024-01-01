@@ -67,7 +67,7 @@ def objective(trial):
         "epsilon_min": epsilon_min, 
         "n_layers": n_layers, 
         "layer_sizes": layer_sizes, 
-        "activation": activation})
+        "activation": activation}, allow_val_change=True)
     
     best_reward = float('-inf') 
     

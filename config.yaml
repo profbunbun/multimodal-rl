@@ -1,0 +1,54 @@
+# Global Configuration for the SUMO MMRL project.
+global:
+  project_name: "sumo_mmrl"  # Name of the project
+  entity: "aaronrls"         # User or team name
+
+# Training configuration settings.
+training_settings:
+  episodes: 20000                        # The number of episodes to run
+  experiment_path: "Experiments/3x3"     # Path to the experiment directory
+  sumoconfig: "/Nets/3x3b.sumocfg"       # Configuration file for SUMO
+  num_vehic: 1                           # The number of vehicles to simulate
+  types: 1                               # The number of types of vehicles
+  max_steps_per_episode: 1000            # Maximum steps per episode
+  initial_life: 20                       # Starting life points for the agent
+  penalty: -0.15                         # Penalty for invalid or detrimental actions
+  smoothing_window: 100                  # Window size for smoothing reward curves
+
+# Environment settings.
+env:
+  num_of_vehicles: 1                     # Default number of vehicles in the environment
+  num_of_people: 1                       # Default number of people in the environment
+  types_of_passengers: 1                 # Default types or classes of passengers
+
+# Rendering and Simulation.
+rendering:
+  default_mode: "no_gui"                 # Default mode for rendering (gui, libsumo, no_gui)
+
+# Graph Output.
+graph_output:
+  graph_path: "/Graphs/sumo-agent.png"  # Default path where learning curve graphs should be saved
+
+# Optuna optimization settings.
+optuna:
+  n_trials: 100                          # The number of trials to run
+  storage_path: "sqlite:///db.sqlite3"   # Database URL for Optuna
+  study_name: null                       # Study name, null will generate a new name
+
+# Hyperparameter ranges for the agent (used in the `create_agent` function).
+agent_hyperparameters:
+  learning_rate: [0.0001, 0.001, 0.01, 0.1]
+  gamma: [0.8, 0.9999]                   # Continuous range, will use log scale
+  epsilon_decay: [0.995, 0.999, 0.9995]
+  batch_size: [128, 256, 512, 1024]
+  memory_size: [50000, 100000]
+  epsilon_max: [0.9, 0.95, 0.975, 1.0]
+  epsilon_min: [0.01, 0.05, 0.1]
+  n_layers: [1]                          # Consider expanding if more layers are needed
+  layer_sizes: [32]                      # Consider expanding if more sizes are needed
+  activation: ["relu", "tanh", "leaky_relu"]
+  soft_update_factor: [0.001, 0.01, 0.1]
+
+# Logging configuration for Weights & Biases.
+wandb:
+  metric_name: "cumulative_reward"       # Primary metric for tracking

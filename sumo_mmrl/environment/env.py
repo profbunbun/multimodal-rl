@@ -188,7 +188,7 @@ class Env:
             if self.make_choice_flag:
                 self.best_choice = self.step_manager.perform_step(self.vehicle, action, self.destination_edge)
                 self.make_choice_flag = False
-                self.life -= 1
+                self.life -= 0.01
 
             self.stage, self.destination_edge = self.stage_manager.update_stage(
                 self.stage, self.destination_edge, vedge, self.person

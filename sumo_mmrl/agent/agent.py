@@ -117,18 +117,18 @@ class Agent:
         # Optimize the model
         self.optimizer.zero_grad()
         loss.backward()
-        max_grad_norm = max(p.grad.data.norm(2).item() for p in self.policy_net.parameters() if p.grad is not None)
-        torch.nn.utils.clip_grad_norm_(self.policy_net.parameters(), 1)
+        # max_grad_norm = max(p.grad.data.norm(2).item() for p in self.policy_net.parameters() if p.grad is not None)
+        # torch.nn.utils.clip_grad_norm_(self.policy_net.parameters(), 1)
         self.optimizer.step()
-        if self.wandb_run:
-            self.wandb_run.log({
-            "Loss": loss.item(),
-            "Max Gradient Norm": max_grad_norm
-            })
-        if self.wandb_run:
-            for name, param in self.policy_net.named_parameters():
-                self.wandb_run.log({f"Policy Gradients/{name}":wandb.Histogram(param.grad.cpu().detach().numpy())})
-                self.wandb_run.log({f"Policy Weights/{name}":wandb.Histogram(param.cpu().detach().numpy())})
+        # if self.wandb_run:
+        #     self.wandb_run.log({
+        #     "Loss": loss.item(),
+        #     "Max Gradient Norm": max_grad_norm
+        #     })
+        # if self.wandb_run:
+        #     for name, param in self.policy_net.named_parameters():
+        #         self.wandb_run.log({f"Policy Gradients/{name}":wandb.Histogram(param.grad.cpu().detach().numpy())})
+        #         self.wandb_run.log({f"Policy Weights/{name}":wandb.Histogram(param.cpu().detach().numpy())})
     def soft_update(self):
         target_net_state_dict = self.target_net.state_dict()
         policy_net_state_dict = self.policy_net.state_dict()
@@ -148,7 +148,6 @@ class Agent:
     def save_model(self, episode_num):
         # Define the filename for the model
         filename = f"model"
-        
         filename += f"_ep{episode_num}"
         filename += ".pt"
 

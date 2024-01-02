@@ -34,7 +34,8 @@ def objective(trial):
     env = so.create_env(config=config)
     dagent= so.create_agent(trial,wandb,config=config)
     wandb_trial_config = so.prepare_wandb_config(trial, config)
-    wandb.config.update(wandb_trial_config)
+    wandb.config.update(wandb_trial_config,allow_val_change=True)
+    wandb.watch([dagent.policy_net, dagent.target_net], log="all", log_freq=10)
     best_reward = float('-inf') 
     
     for episode in range(EPISODES):

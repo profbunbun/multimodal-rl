@@ -29,10 +29,10 @@ def create_agent(trial,wandb_run, config):
     """
     # Extract hyperparameters from the trial object
     experiment_path = config['training_settings']['experiment_path']
-    learning_rate = trial.suggest_categorical("learning_rate", config['agent_hyperparameters']['learning_rate'])
-    learning_rate = trial.suggest_categorical("learning_rate", config['agent_hyperparameters']['learning_rate'])
-    gamma = trial.suggest_float("gamma", *config['agent_hyperparameters']['gamma'], log=True)
-    epsilon_decay = trial.suggest_categorical("epsilon_decay", config['agent_hyperparameters']['epsilon_decay'])
+    learning_rate = trial.suggest_float("learning_rate", *config['agent_hyperparameters']['learning_rate'])
+    
+    gamma = trial.suggest_float("gamma", *config['agent_hyperparameters']['gamma'])
+    epsilon_decay = trial.suggest_float("epsilon_decay", *config['agent_hyperparameters']['epsilon_decay'])
     batch_size = trial.suggest_categorical("batch_size", config['agent_hyperparameters']['batch_size'])
     memory_size = trial.suggest_categorical("memory_size", config['agent_hyperparameters']['memory_size'])
     epsilon_max = trial.suggest_categorical("epsilon_max", config['agent_hyperparameters']['epsilon_max'])
@@ -103,14 +103,14 @@ def log_environment_details(env, action, q_values):
     :type q_values: list
     """
     step = env.get_global_step()
-    if step % 2 == 0:
-        wandb.log({
-            "location": env.get_vehicle_location_edge_id(),
-            "best_choice": env.get_best_choice(),
-            "agent choice": action,
-            "q_values": q_values,
-            "out lanes": env.get_out_lanes(),
-        })
+
+    wandb.log({
+        "location": env.get_vehicle_location_edge_id(),
+        "best_choice": env.get_best_choice(),
+        "agent choice": action,
+        "q_values": q_values,
+        "out lanes": env.get_out_lanes(),
+    })
 def log_episode_summary(episode,env, cumulative_reward, agent):
     """
     Log the summary of the episode to Weights & Biases.
@@ -125,8 +125,6 @@ def log_episode_summary(episode,env, cumulative_reward, agent):
     wandb.log({
         "cumulative_reward": cumulative_reward,
         "epsilon": agent.get_epsilon(),
-        "explore_ratio": agent.get_exploration_stats()[0],
-        "exploit_ratio": agent.get_exploration_stats()[1],
         "episode": episode,
         "agent_steps": env.get_global_step(),
         "simulation_steps": env.get_steps_per_episode(),

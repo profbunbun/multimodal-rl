@@ -5,13 +5,13 @@ global:
 
 # Training configuration settings.
 training_settings:
-  episodes: 20000                        # The number of episodes to run
+  episodes: 10000                       # The number of episodes to run
   experiment_path: "Experiments/3x3"     # Path to the experiment directory
   sumoconfig: "/Nets/3x3b.sumocfg"       # Configuration file for SUMO
   num_vehic: 1                           # The number of vehicles to simulate
   types: 1                               # The number of types of vehicles
   max_steps_per_episode: 1000            # Maximum steps per episode
-  initial_life: 20                       # Starting life points for the agent
+  initial_life: .20                       # Starting life points for the agent
   penalty: -0.15                         # Penalty for invalid or detrimental actions
   smoothing_window: 100                  # Window size for smoothing reward curves
 
@@ -37,16 +37,16 @@ optuna:
 
 # Hyperparameter ranges for the agent (used in the `create_agent` function).
 agent_hyperparameters:
-  learning_rate: [0.0001, 0.001, 0.01, 0.1]
-  gamma: [0.8, 0.9999]                   # Continuous range, will use log scale
-  epsilon_decay: [0.995, 0.999, 0.9995]
-  batch_size: [128, 256, 512, 1024]
-  memory_size: [50000, 100000]
-  epsilon_max: [0.9, 0.95, 0.975, 1.0]
-  epsilon_min: [0.01, 0.05, 0.1]
-  n_layers: [1]                          # Consider expanding if more layers are needed
-  layer_sizes: [32]                      # Consider expanding if more sizes are needed
-  activation: ["relu", "tanh", "leaky_relu"]
+  learning_rate: [0.0001, 0.001]
+  gamma: [0.99, 0.9999]                  # Continuous range, will use log scale
+  epsilon_decay: [0.9995, 0.9999]
+  batch_size: [1024]
+  memory_size: [100000]
+  epsilon_max:  [1.0]
+  epsilon_min: [0.01]
+  n_layers: [1]                         # Consider expanding if more layers are needed
+  layer_sizes: [16]                      # Consider expanding if more sizes are needed
+  activation: ["relu"]
   soft_update_factor: [0.001, 0.01, 0.1]
 
 # Logging configuration for Weights & Biases.

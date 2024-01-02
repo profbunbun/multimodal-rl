@@ -14,12 +14,27 @@ else:
 
 
 class SUMOConnection:
+    '''
+    SUMOConnection class for managing connections to the SUMO simulation.
+
+    Attributes:
+        label (str): Unique label for the connection.
+        sumocfg (str): Path to the SUMO configuration file.
+        sumo_ (SUMO object): The SUMO simulation object.
+        sumo_cmd (list): Command list to start SUMO.
+    '''
 
 
     
     CONNECTION_LABEL = 0
 
     def __init__(self, sumocfg: str) -> None:
+        '''
+        Initializes the SUMOConnection object.
+
+        :param sumocfg: Path to the SUMO configuration file.
+        :type sumocfg: str
+        '''
         self.label = str(SUMOConnection.CONNECTION_LABEL)
         SUMOConnection.CONNECTION_LABEL += 1
         self.sumocfg = sumocfg

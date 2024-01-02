@@ -11,8 +11,21 @@ SLIGHT_LEFT = "L"
 SLIGHT_RIGHT = "R"
 
 class Vehicle:
+    """
+    Vehicle class representing a vehicle in the simulation.
+
+    :param str vehicle_id: Unique identifier for the vehicle.
+    :param dict out_dict: Dictionary of outgoing edges.
+    :param dict index_dict: Dictionary of edge indices.
+    :param dict edge_position: Dictionary of edge positions.
+    :param sumo: SUMO simulation instance.
+    :param int i: Arbitrary parameter for vehicle type.
+    """
 
     def __init__(self, vehicle_id, out_dict, index_dict, edge_position, sumo, i) -> None:
+        """
+        Initialize a Vehicle instance with the given parameters.
+        """
 
         self.direction_choices = [RIGHT, STRAIGHT, LEFT,TURN_AROUND]
         # self.direction_choices =
@@ -35,29 +48,61 @@ class Vehicle:
         self.cur_loc = self.current_lane.partition("_")[0]
 
     def get_lane(self):
+        """
+        Get the current lane of the vehicle.
+
+        :return: Current lane ID.
+        :rtype: str
+        """
  
         self.current_lane = self.sumo.vehicle.getLaneID(self.vehicle_id)
         self.cur_loc = self.current_lane.partition("_")[0]
         return self.cur_loc
 
     def get_lane_id(self):
+        """
+        Get the full lane ID of the vehicle.
+
+        :return: Full lane ID.
+        :rtype: str
+        """
  
         self.current_lane = self.sumo.vehicle.getLaneID(self.vehicle_id)
         self.cur_loc = self.current_lane
         return self.cur_loc
 
     def location(self):
+        """
+        Get the current location of the vehicle.
+
+        :return: Current (x, y) position of the vehicle.
+        :rtype: list
+        """
 
         vpos = self.sumo.vehicle.getPosition(self.vehicle_id)
         return [vpos[0], vpos[1]]
 
     def get_out_dict(self):
+        """
+        Get the dictionary of possible outgoing edges from the current lane.
+        
+        :return: Dictionary of outgoing edges.
+        :rtype: dict
+        """
  
         lane = self.get_lane()
         options = self.out_dict[lane]
         return options
 
     def set_destination(self, action, destination_edge):
+        """
+        Set the destination of the vehicle based on the given action.
+
+        :param str action: Action to be taken.
+        :param str destination_edge: Destination edge ID.
+        :return: Target lane after action.
+        :rtype: str
+        """
 
         # self.sumo.vehicle.changeTarget(self.vehicle_id, destination_edge.partition("_")[0])
         # route = self.sumo.vehicle.getRoute(self.vehicle_id)
@@ -73,25 +118,48 @@ class Vehicle:
         return target_lane
 
     def pickup(self):
+        """
+        Perform a pickup action for the vehicle.
+        """
 
         reservation = self.sumo.person.getTaxiReservations(0)
         reservation_id = reservation[0]
         self.sumo.vehicle.dispatchTaxi(self.vehicle_id,"0")
         # print(reservation_id)
         
-    def get_road(self):    
+    def get_road(self):  
+        """
+        Get the current road ID of the vehicle.
+
+        :return: Current road ID.
+        :rtype: str
+        """  
         return self.sumo.vehicle.getRoadID(self.vehicle_id)
 
-    def random_relocate(self):    
+    def random_relocate(self):
+        """
+        Relocate the vehicle to a random lane.
+        """    
         new_lane=random.choice(list(self.index_dict.keys()))      
         self.sumo.vehicle.changeTarget(self.vehicle_id,edgeID=new_lane)
         self.sumo.vehicle.moveTo(self.vehicle_id,new_lane+"_0",5)
 
     def get_type(self):
+        """
+        Get the type parameter of the vehicle.
+
+        :return: Type of the vehicle.
+        :rtype: str
+        """
         return self.sumo.vehicle.getParameter(self.vehicle_id,
                                               "type")
         
     def teleport(self, dest):
+        """
+        Teleport the vehicle to the specified destination.
+
+        :param str dest: Destination edge ID.
+        """
         self.sumo.vehicle.changeTarget(self.vehicle_id, edgeID=dest)
         self.sumo.vehicle.moveTo(self.vehicle_id, dest+"_0", 5)
     

@@ -2,7 +2,14 @@ import numpy as np
 import torch as T
 
 class Explorer:
-    """Class for managing exploration and exploitation in a reinforcement learning agent."""
+    """
+    Explorer class for managing exploration and exploitation in a reinforcement learning agent.
+
+    :param torch.nn.Module policy: The policy network used for exploitation.
+    :param float epsilon_max: The maximum epsilon for exploration.
+    :param float decay_rate: The rate at which epsilon decays.
+    :param float epsilon_min: The minimum epsilon for exploration.
+    """
 
     def __init__(self, policy, epsilon_max=1, decay_rate=0.999, epsilon_min=0.1):
         """
@@ -26,7 +33,12 @@ class Explorer:
         self.last_reward = None
 
     def explore(self):
-        """Randomly select an action."""
+        """
+        Randomly select an action.
+
+        :return: The selected action.
+        :rtype: str
+        """
         action = np.random.choice(self.direction_choices)
         self.explore_count += 1
         return action
@@ -35,11 +47,9 @@ class Explorer:
         """
         Select action based on the policy network.
 
-        Args:
-            state: The current state in an appropriate format (e.g., list, array, tensor).
-        
-        Returns:
-            The chosen action based on the policy network's output.
+        :param list state: The current state in an appropriate format (e.g., list, array, tensor).
+        :return: The chosen action based on the policy network's output and the action values.
+        :rtype: tuple
         """
         # Convert state to tensor if it's not already and ensure it's on the correct device
         if not isinstance(state, T.Tensor):
@@ -67,12 +77,10 @@ class Explorer:
         """
         Choose an action based on epsilon-greedy strategy.
 
-        Args:
-            state: The current state.
-            options: Available actions.
-
-        Returns:
-            The chosen action, its index, and a validity flag.
+        :param list state: The current state.
+        :param list options: Available actions.
+        :return: The chosen action, its index, and a validity flag.
+        :rtype: tuple
         """
         q_values = None
         randy = np.random.rand()
@@ -85,11 +93,18 @@ class Explorer:
         return action, self.direction_choices.index(action), valid, q_values
 
     def update_epsilon(self):
-        """Update epsilon value using exponential decay."""
+        """
+        Update epsilon value using exponential decay.
+        """
         self.epsilon = max(self.epsilon * self.decay_rate, self.epsilon_min)
 
     def get_exploration_stats(self):
-        """Calculate the exploration vs exploitation statistics."""
+        """
+        Calculate the exploration vs exploitation statistics.
+
+        :return: Tuple containing explore ratio and exploit ratio.
+        :rtype: tuple
+        """
         total = self.explore_count + self.exploit_count
         if total > 0:
             explore_ratio = self.explore_count / total
@@ -99,7 +114,11 @@ class Explorer:
         return explore_ratio, exploit_ratio
 
     def save_stats(self, filename):
-        """Save the current exploration vs exploitation stats to a file."""
+        """
+        Save the current exploration vs exploitation stats to a file.
+
+        :param str filename: The name of the file to save the stats to.
+        """
         explore_ratio, exploit_ratio = self.get_exploration_stats()
         with open(filename, 'a') as file:
             file.write(f"{explore_ratio}, {exploit_ratio}\n")

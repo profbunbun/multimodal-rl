@@ -1,5 +1,12 @@
 class StepManager:
+    
+
     def __init__(self, sumo_interface):
+        """
+        StepManager class for managing simulation steps.
+
+        :param sumo_interface: Interface to the SUMO simulation.
+        """
         self.sumo_interface = sumo_interface
 
     def null_step(self, vehicle, make_choice_flag, old_edge):

@@ -15,58 +15,79 @@ from .step_manager import StepManager
 
 
 class Env:
-    '''
-    RL Environment for managing and simulating the interaction between vehicles, passengers, and the SUMO environment.
-    
-    Attributes:
-        config (dict): Configuration settings for the environment.
-        path (str): Path to the experiment files.
-        sumo_config_path (str): Path to the SUMO configuration files.
-        num_of_vehicles (int): Number of vehicles in the environment.
-        types_of_passengers (list): Types of passengers in the environment.
-        graph_path (str): Path to the graph output files.
-        life (int): Initial life of the agent.
-        penalty (float): Penalty for wrong actions.
-        smoothing_window (int): Window size for smoothing the rewards.
-        obs (Observation): Observation object to capture the environment's state.
-        out_mask (OutMask): Object to manage the action space.
-        finder (StopFinder): Object to manage bus stops.
-        parser (NetParser): Object to parse the network files.
-        sumo_con (SUMOConnection): Object to manage the SUMO connection.
-        ride_selector (RideSelect): Object to select the ride for the passengers.
-        edge_position (dict): Dictionary of edge positions.
-        sumo (SUMO): SUMO simulation object.
-        steps (int): Current simulation step.
-        agent_step (int): Current step of the agent.
-        accumulated_reward (float): Accumulated reward of the agent.
-        make_choice_flag (bool): Flag to indicate if the agent should make a choice.
-        old_edge (str): ID of the previous edge the vehicle was on.
-        old_dist (float): Previous distance to the destination.
-        rewards (list): List of rewards per episode.
-        epsilon_hist (list): History of epsilon values for exploration.
-        vehicle (Vehicle): Current vehicle object.
-        person (Person): Current person object.
-        p_index (int): Index of the current person.
-        distcheck (float): Distance checker for the current step.
-        edge_distance (float): Distance to the destination edge.
-        destination_edge (str): ID of the destination edge.
-        stage (str): Current stage of the environment.
-        bussroute (list): List of edges for the bus route.
-        reward_calculator (RewardCalculator): Object to calculate rewards.
+    """
+RL Environment for managing and simulating the interaction between vehicles, passengers, and the SUMO environment.
 
-    Methods:
-        reset(): Resets the environment to the initial state.
-        step(action, validator): Performs a step in the environment based on the given action.
-        render(mode): Renders the environment based on the given mode.
-        close(episode, accu, current_epsilon): Closes the environment and prints out the graph of rewards.
-        get_steps_per_episode(): Returns the number of steps per episode.
-        get_global_step(): Returns the global step count.
-        get_destination_edge_id(): Returns the ID of the destination edge.
-        get_vehicle_location_edge_id(): Returns the ID of the vehicle's current edge.
-        get_best_choice(): Returns the best choice made by the agent.
-        get_out_lanes(): Returns the outgoing lanes from the current edge.
-        get_life(): Returns the current life of the agent.
-    '''
+Attributes:
+    :param dict config: Configuration settings for the environment.
+    :param str path: Path to the experiment files.
+    :param str sumo_config_path: Path to the SUMO configuration files.
+    :param int num_of_vehicles: Number of vehicles in the environment.
+    :param list types_of_passengers: Types of passengers in the environment.
+    :param str graph_path: Path to the graph output files.
+    :param int life: Initial life of the agent.
+    :param float penalty: Penalty for wrong actions.
+    :param int smoothing_window: Window size for smoothing the rewards.
+    :param Observation obs: Observation object to capture the environment's state.
+    :param OutMask out_mask: Object to manage the action space.
+    :param StopFinder finder: Object to manage bus stops.
+    :param NetParser parser: Object to parse the network files.
+    :param SUMOConnection sumo_con: Object to manage the SUMO connection.
+    :param RideSelect ride_selector: Object to select the ride for the passengers.
+    :param dict edge_position: Dictionary of edge positions.
+    :param SUMO sumo: SUMO simulation object.
+    :param int steps: Current simulation step.
+    :param int agent_step: Current step of the agent.
+    :param float accumulated_reward: Accumulated reward of the agent.
+    :param bool make_choice_flag: Flag to indicate if the agent should make a choice.
+    :param str old_edge: ID of the previous edge the vehicle was on.
+    :param float old_dist: Previous distance to the destination.
+    :param list rewards: List of rewards per episode.
+    :param list epsilon_hist: History of epsilon values for exploration.
+    :param Vehicle vehicle: Current vehicle object.
+    :param Person person: Current person object.
+    :param int p_index: Index of the current person.
+    :param float distcheck: Distance checker for the current step.
+    :param float edge_distance: Distance to the destination edge.
+    :param str destination_edge: ID of the destination edge.
+    :param str stage: Current stage of the environment.
+    :param list bussroute: List of edges for the bus route.
+    :param RewardCalculator reward_calculator: Object to calculate rewards.
+
+Methods:
+    reset(): 
+        Resets the environment to the initial state.
+
+    step(action, validator): 
+        Performs a step in the environment based on the given action.
+
+    render(mode): 
+        Renders the environment based on the given mode.
+
+    close(episode, accu, current_epsilon): 
+        Closes the environment and prints out the graph of rewards.
+
+    get_steps_per_episode(): 
+        Returns the number of steps per episode.
+
+    get_global_step(): 
+        Returns the global step count.
+
+    get_destination_edge_id(): 
+        Returns the ID of the destination edge.
+
+    get_vehicle_location_edge_id(): 
+        Returns the ID of the vehicle's current edge.
+
+    get_best_choice(): 
+        Returns the best choice made by the agent.
+
+    get_out_lanes(): 
+        Returns the outgoing lanes from the current edge.
+
+    get_life(): 
+        Returns the current life of the agent.
+"""
     def __init__(self, config):
         '''
         Initializes the RL Environment with the given configuration.

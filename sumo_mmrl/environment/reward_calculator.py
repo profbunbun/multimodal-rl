@@ -39,7 +39,7 @@ class RewardCalculator:
         #     distcheck = 0
 
         if vedge == destination_edge:
-            life += 10
+            life += 0.25
             if stage == "pickup":
                 reward = 0.3
 

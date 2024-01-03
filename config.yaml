@@ -11,7 +11,7 @@ training_settings:
   num_vehic: 1                           # The number of vehicles to simulate
   types: 1                               # The number of types of vehicles
   max_steps_per_episode: 1000            # Maximum steps per episode
-  initial_life: .20                       # Starting life points for the agent
+  initial_life: .25                       # Starting life points for the agent
   penalty: -0.15                         # Penalty for invalid or detrimental actions
   smoothing_window: 100                  # Window size for smoothing reward curves
 

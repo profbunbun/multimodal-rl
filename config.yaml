@@ -5,7 +5,7 @@ global:
 
 # Training configuration settings.
 training_settings:
-  episodes: 10000                       # The number of episodes to run
+  episodes: 20000                       # The number of episodes to run
   experiment_path: "Experiments/3x3"     # Path to the experiment directory
   sumoconfig: "/Nets/3x3b.sumocfg"       # Configuration file for SUMO
   num_vehic: 1                           # The number of vehicles to simulate
@@ -40,14 +40,14 @@ agent_hyperparameters:
   learning_rate: [0.0001, 0.001]
   gamma: [0.99, 0.9999]                  # Continuous range, will use log scale
   epsilon_decay: [0.9995, 0.9999]
-  batch_size: [1024]
+  batch_size: [64]
   memory_size: [100000]
   epsilon_max:  [1.0]
   epsilon_min: [0.01]
   n_layers: [1]                         # Consider expanding if more layers are needed
-  layer_sizes: [16]                      # Consider expanding if more sizes are needed
+  layer_sizes: [8]                      # Consider expanding if more sizes are needed
   activation: ["relu"]
-  soft_update_factor: [0.001, 0.01, 0.1]
+  soft_update_factor: [0.001, 0.01]
 
 # Logging configuration for Weights & Biases.
 wandb:

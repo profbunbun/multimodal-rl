@@ -44,7 +44,7 @@ class Observation:
         state.append(self.normalize(vloc[1], self.min_y, self.max_y))
         state.append(self.normalize(destination_loc[0], self.min_x, self.max_x))
         state.append(self.normalize(destination_loc[1], self.min_y, self.max_y))
-        state.append(step)
+        state.append(step * 0.0001)
         state.append(self.manhat_dist(vloc[0], vloc[1], destination_loc[0], destination_loc[1]))  
         state.extend(self.out_mask.get_outmask_valid(choices))
         state.append(life)

@@ -1,6 +1,8 @@
 import random
 
 
+
+
 class Memory:
     """
     Circular buffer memory using a list.
@@ -12,7 +14,7 @@ class Memory:
         self.memory = [None] * memory_size  # Preallocate memory
         self.position = 0  # Current position in the circular buffer
 
-    def remember(self, state, action, reward, next_state, done):
+    def remember(self, state, action, next_state, reward, done):
         """
         Add memory to the circular buffer.
 
@@ -22,7 +24,7 @@ class Memory:
         :param list next_state: The next state of the environment.
         :param bool done: Whether the episode is finished.
         """
-        self.memory[self.position] = (state, action, reward, next_state, done)
+        self.memory[self.position] = (state, action, next_state, reward, done)
         self.position = (self.position + 1) % self.memory_size  # Wrap-around
 
     def replay_batch(self, batch_size):

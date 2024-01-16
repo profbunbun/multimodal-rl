@@ -9,7 +9,8 @@ import optuna
 from sumo_mmrl import  Utils
 import wandb
 from optuna.integration.wandb import WeightsAndBiasesCallback
-from sumo_mmrl import sumo_opotimize as so
+from sumo_mmrl.utilities import sim_manager as so
+import numpy as np
 
 config = Utils.load_yaml_config('config.yaml')
 EPISODES = config['training_settings']['episodes']
@@ -37,7 +38,8 @@ def objective(trial):
     wandb.config.update(wandb_trial_config,allow_val_change=True)
     wandb.watch([dagent.policy_net, dagent.target_net], log="all", log_freq=10)
     best_reward = float('-inf') 
-    
+    batch_rewards = []
+    batch_avg_reward = 0
     for episode in range(EPISODES):
         
         cumulative_reward = 0
@@ -46,32 +48,45 @@ def objective(trial):
         while stage != "done":
             action, action_index, validator, q_values = dagent.choose_action(state, legal_actions)
             next_state, new_reward, stage, legal_actions = env.step(action, validator)
-            so.log_environment_details(env, action, q_values)
+            # so.log_environment_details(env, action, q_values)
             dagent.remember(state, action_index, new_reward, next_state, done=(stage == "done"))
             cumulative_reward += new_reward
             if len(dagent.memory) > dagent.batch_size:
                 dagent.replay(dagent.batch_size)
-                dagent.soft_update()
+                # dagent.soft_update()
+                dagent.hard_update()
             state = next_state
 
-        so.log_episode_summary(episode, env, cumulative_reward, dagent)
         
-        trial.report(cumulative_reward, episode)
-        if trial.should_prune():
-            raise optuna.exceptions.TrialPruned()
 
         dagent.decay()
-        env.close(episode, cumulative_reward, dagent.get_epsilon())
+
+        batch_rewards.append(cumulative_reward)
+        batch_np = np.array(batch_rewards)
+        batch_avg_reward = batch_np.mean() 
         
-        if episode % 30 == 0:
-            dagent.hard_update()
+        so.log_episode_summary(episode, env, cumulative_reward, dagent, batch_avg_reward)
+
+        # env.close(episode, cumulative_reward, dagent.get_epsilon())
+        # env.quiet_close()
+        
+        # if episode % 5 == 0:
+        #     dagent.hard_update()
 
         if cumulative_reward > best_reward:
             best_reward = cumulative_reward
             dagent.save_model(str(episode))
+        
   
-    wandb.finish()   
-    return cumulative_reward 
+
+        trial.report(batch_avg_reward, episode)
+        if trial.should_prune():
+            raise optuna.exceptions.TrialPruned()
+    wandb.finish()
+ 
+
+
+    return batch_avg_reward
 
  
 def main():

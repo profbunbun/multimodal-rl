@@ -74,13 +74,16 @@ class NetParser:
         net = self._clean_path()
         edge_position_dict = {}
         all_edges = net.getEdges()
+        dims = []
         for current_edge in all_edges:
             current_edge_id = current_edge.getID()
 
             if current_edge_id in edge_position_dict:
                 print(current_edge_id + " already exists!")
             else:
-                edge_start, edge_end = current_edge.getShape()
+                dims = list(current_edge.getShape())
+                edge_start = dims[0]
+                edge_end = dims[1]
                 x = (edge_start[0] + edge_end[0]) / 2
 
                 y = (edge_start[1] + edge_end[1]) / 2
@@ -168,7 +171,7 @@ class NetParser:
         :rtype: list
         '''
         edge_ids = []
-        for route in sumolib.xml.parse_fast("Experiments/3x3/Nets/3x3_2.rou.xml", 'route', ['id','edges']):
+        for route in sumolib.xml.parse_fast("Experiments/balt1/osm_pt.rou.xml", 'route', ['id','edges']):
             if 'bus' in route.id:
                 edge_ids = route.edges.split()
         # print (edge_ids)

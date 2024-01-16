@@ -153,10 +153,12 @@ Methods:
         self.make_choice_flag = True
         out_dict = self.parser.get_out_dic()
         index_dict = self.parser.get_edge_index()
+
         self.vehicle_manager = VehicleManager(self.config['env']['num_of_vehicles'], self.edge_position, self.sumo, out_dict, index_dict)
         self.person_manager = PersonManager(self.config['env']['num_of_people'], self.edge_position, self.sumo, index_dict)
         self.stage_manager = StageManager(self.finder, self.edge_position, self.sumo, self.bussroute)
         self.step_manager = StepManager(self.sumo)
+
         self.stage = self.stage_manager.get_initial_stage()
         vehicles = self.vehicle_manager.create_vehicles()
         people = self.person_manager.create_people()
@@ -171,6 +173,7 @@ Methods:
         self.destination_edge = self.person.get_road()
         dest_loc = self.edge_position[self.destination_edge]
         state = self.obs.get_state(self.sumo, self.agent_step, self.vehicle, dest_loc, self.life, self.distcheck)
+
         return state, self.stage, choices, 
 
     
@@ -207,7 +210,7 @@ Methods:
 
         if validator == 1:
             if self.make_choice_flag:
-                self.best_choice = self.step_manager.perform_step(self.vehicle, action, self.destination_edge)
+                self.best_choice, vedge = self.step_manager.perform_step(self.vehicle, action, self.destination_edge)
                 self.make_choice_flag = False
                 self.life -= 0.01
 
@@ -215,7 +218,16 @@ Methods:
                 self.stage, self.destination_edge, vedge, self.person
             )
 
-            choices = self.vehicle.get_out_dict()
+            if self.stage == "done": # means successfull final dropoff
+                reward += 0.99
+                print("successfull dropoff")
+
+            choices = self.vehicle.get_out_dict() # this is the issue here!!!!!!!!!!!!!
+            if choices == None:
+                self.make_choice_flag, self.old_edge = self.step_manager.null_step(self.vehicle, self.make_choice_flag, self.old_edge)
+                vedge = self.vehicle.get_road()
+                choices = self.vehicle.get_out_dict()
+
             dest_loc = self.edge_position[self.destination_edge]
             state = self.obs.get_state(self.sumo,self.agent_step, self.vehicle, dest_loc, self.life, self.distcheck)
             self.old_edge = vedge
@@ -288,8 +300,14 @@ Methods:
         x = list(range(1, len(self.rewards) + 1))
         file_name = self.path + "/Graphs/sumo-agent.png"
         Utils.plot_learning_curve(x, smoothed_rewards, self.epsilon_hist, file_name)
-        return avg_reward
+        return
     
+    def quiet_close(self):
+        '''
+        Closes the environment without printing out the graph of rewards.
+        '''
+        self.sumo.close()
+        return
    
     
     def get_steps_per_episode(self):
@@ -354,4 +372,12 @@ Methods:
         :rtype: int
         '''
         return self.life
+    def get_legal_actions(self):
+        '''
+        Returns the legal actions of the agent.
+
+        :return: Legal actions.
+        :rtype: list
+        '''
+        return self.vehicle.get_out_dict()
     

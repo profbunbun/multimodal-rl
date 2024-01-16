@@ -27,9 +27,9 @@ class Vehicle:
         Initialize a Vehicle instance with the given parameters.
         """
 
-        self.direction_choices = [RIGHT, STRAIGHT, LEFT,TURN_AROUND]
-        # self.direction_choices =
-        # [STRAIGHT, TURN_AROUND, SLIGHT_RIGHT, RIGHT, SLIGHT_LEFT, LEFT]
+        self.direction_choices = [RIGHT, STRAIGHT, LEFT]
+        # self.direction_choices = [RIGHT, STRAIGHT, LEFT, TURN_AROUND]
+        # self.direction_choices = [STRAIGHT, TURN_AROUND, SLIGHT_RIGHT, RIGHT, SLIGHT_LEFT, LEFT]
         self.vehicle_id = vehicle_id
         self.out_dict = out_dict
         self.index_dict = index_dict
@@ -91,7 +91,11 @@ class Vehicle:
         """
  
         lane = self.get_lane()
-        options = self.out_dict[lane]
+        if lane not in self.out_dict.keys():
+            options = None
+        else:
+             options = self.out_dict[lane]
+
         return options
 
     def set_destination(self, action, destination_edge):

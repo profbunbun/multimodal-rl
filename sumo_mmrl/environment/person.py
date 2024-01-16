@@ -1,4 +1,4 @@
-# import random
+import random
 
 
 class Person:
@@ -21,13 +21,13 @@ class Person:
         self.sumo = sumo
         self.index_dict = index_dict
         self.edge_position = edge_position
-        self.new_lane = list(self.index_dict.keys())[21]
-        # self.new_lane = random.choice(list(self.index_dict.keys()))
-        # self.destination = "6009995#2"
-        self.destination = list(self.index_dict.keys())[24]
+        # self.new_lane = list(self.index_dict.keys())[21]
+        self.new_lane = random.choice(list(self.index_dict.keys()))
+        self.destination = "-463787633#1"
+        # self.destination = list(self.index_dict.keys())[0]
         # self.destination = random.choice(list(self.index_dict.keys()))
 
-        self.sumo.person.add(person_id, self.destination, 20)
+        self.sumo.person.add(person_id, "547782537#2", 20)
 
         self.sumo.person.appendDrivingStage(person_id,
                                             self.destination,

@@ -46,4 +46,5 @@ class StepManager:
         """
         best_choice = vehicle.set_destination(action, destination_edge)
         self.sumo_interface.simulationStep()
-        return best_choice
+        vedge = vehicle.get_road()
+        return best_choice, vedge

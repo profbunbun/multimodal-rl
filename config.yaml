@@ -5,13 +5,13 @@ global:
 
 # Training configuration settings.
 training_settings:
-  episodes: 20000                       # The number of episodes to run
-  experiment_path: "Experiments/3x3"     # Path to the experiment directory
-  sumoconfig: "/Nets/3x3b.sumocfg"       # Configuration file for SUMO
+  episodes: 10000                       # The number of episodes to run
+  experiment_path: "Experiments/balt1/"     # Path to the experiment directory
+  sumoconfig: "osm.sumocfg"       # Configuration file for SUMO
   num_vehic: 1                           # The number of vehicles to simulate
   types: 1                               # The number of types of vehicles
   max_steps_per_episode: 1000            # Maximum steps per episode
-  initial_life: .25                       # Starting life points for the agent
+  initial_life: .1                       # Starting life points for the agent
   penalty: -0.15                         # Penalty for invalid or detrimental actions
   smoothing_window: 100                  # Window size for smoothing reward curves
 
@@ -37,18 +37,18 @@ optuna:
 
 # Hyperparameter ranges for the agent (used in the `create_agent` function).
 agent_hyperparameters:
-  learning_rate: [0.0001, 0.001]
-  gamma: [0.99, 0.9999]                  # Continuous range, will use log scale
-  epsilon_decay: [0.9995, 0.9999]
-  batch_size: [64]
-  memory_size: [100000]
-  epsilon_max:  [1.0]
-  epsilon_min: [0.01]
-  n_layers: [1]                         # Consider expanding if more layers are needed
-  layer_sizes: [8]                      # Consider expanding if more sizes are needed
-  activation: ["relu"]
-  soft_update_factor: [0.001, 0.01]
+  learning_rate: 0.0001
+  gamma: 0.9999                
+  epsilon_decay: 0.9995
+  batch_size: 128
+  memory_size: 100000
+  epsilon_max:  1.0
+  epsilon_min: 0.0
+  n_layers: 2                       # Consider expanding if more layers are needed
+  layer_sizes: 8                    # Consider expanding if more sizes are needed
+  activation: "leaky_relu"
+
 
 # Logging configuration for Weights & Biases.
 wandb:
-  metric_name: "cumulative_reward"       # Primary metric for tracking
+  metric_name: "batch_avg_reward"       # Primary metric for tracking

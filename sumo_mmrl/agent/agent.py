@@ -29,7 +29,7 @@ class Agent:
     def __init__(self, state_size, 
                  action_size, 
                  path,
-                 wandb_run,
+
                  learning_rate=None, 
                  gamma=None, 
                  epsilon_decay=None, 
@@ -41,7 +41,7 @@ class Agent:
                  batch_size=None,
                  soft_update_factor=None,
                  ):
-            self.wandb_run = wandb_run
+
             self.path = path
             self.direction_choices = ['r', 's', 'l', 't']
 
@@ -58,8 +58,8 @@ class Agent:
             
             self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-            self.policy_net = DQN(state_size, action_size, layer_sizes, activation).to(self.device)
-            self.target_net = DQN(state_size, action_size, layer_sizes, activation).to(self.device)
+            self.policy_net = DQN(state_size, action_size).to(self.device)
+            self.target_net = DQN(state_size, action_size).to(self.device)
 
 
             self.criterion = nn.HuberLoss()
@@ -95,7 +95,7 @@ class Agent:
         """
 
         action, index, valid, q_values = self.exploration_strategy.choose_action(state, options)
-        return action, index, valid, q_values
+        return action, index, valid
 
     def replay(self, batch_size):
         """
@@ -108,7 +108,7 @@ class Agent:
         if len(minibatch) == 0:
             return None
 
-        states, actions, rewards, next_states, dones = zip(*minibatch)
+        states, actions, next_states, rewards, dones = zip(*minibatch)
 
         states = [torch.tensor(s, device=self.device, dtype=torch.float32) for s in states]
         actions = torch.tensor(actions, device=self.device, dtype=torch.long)
@@ -116,11 +116,11 @@ class Agent:
         next_states = torch.tensor(next_states, device=self.device, dtype=torch.float32)
         dones = torch.tensor(dones, device=self.device, dtype=torch.float32)
 
-        self.perform_training_step(states, actions, rewards, next_states, dones)
+        self.perform_training_step(states, actions, next_states, rewards, dones)
 
 
 
-    def perform_training_step(self, state, action, reward, next_state, done):
+    def perform_training_step(self, state, action, next_state, reward, done):
         """
         Perform a training step using the given experience batch.
 
@@ -147,9 +147,11 @@ class Agent:
         reward = reward.unsqueeze(-1) if reward.dim() == 1 else reward
         done = done.unsqueeze(-1) if done.dim() == 1 else done
 
+        q_values = self.policy_net(state)
 
 
-        current_q_values = self.policy_net(state).gather(1, action)
+
+        current_q_values = torch.gather(q_values, 1, action)
         next_q_values = self.target_net(next_state).detach()
         max_next_q_values = next_q_values.max(1)[0].unsqueeze(1)
         expected_q_values = reward + self.gamma * max_next_q_values * (1 - done)
@@ -159,15 +161,7 @@ class Agent:
 
         self.optimizer.step()
      
-    def soft_update(self):
-        """
-        Soft update the target network's weights with the policy network's weights.
-        """
-        target_net_state_dict = self.target_net.state_dict()
-        policy_net_state_dict = self.policy_net.state_dict()
-        for key in policy_net_state_dict:
-            target_net_state_dict[key] = policy_net_state_dict[key] * self.soft_update_factor + target_net_state_dict[key] * (1 - self.soft_update_factor)
-        self.target_net.load_state_dict(target_net_state_dict)
+
 
     def hard_update(self):
         """
@@ -197,47 +191,24 @@ class Agent:
         filename += f"_ep{episode_num}"
         filename += ".pt"
 
-
-        # Save model to a temporary file
-        temp_model_path = os.path.join(wandb.run.dir, filename)
+        temp_model_path = os.path.join(self.path, filename)
         torch.save(self.policy_net.state_dict(), temp_model_path)
 
-        # Create a new artifact
-        artifact = wandb.Artifact(name=f"model-{episode_num}", type='model', description="Trained model")
-
-        # Add the file to the artifact's contents
-        artifact.add_file(temp_model_path)
-
-        # Log the artifact to W&B and associate it with the current run
-        wandb.run.log_artifact(artifact)
-
-        # Optionally, remove the temporary file if you don't want it saved locally
-        os.remove(temp_model_path)
 
 
-    def load_model(self, artifact_name=None):
+    def load_model(self, ep_num):
         """
         Load the model state dictionary from a WandB artifact.
 
         :param str artifact_name: The name of the artifact to load, defaults to None.
         """
 
-        # Construct the artifact name if not provided
-        artifact_name = artifact_name or f"model-{self.config_id}:latest"
+        filename = f"model"
+        filename += f"_ep{ep_num}"
+        filename += ".pt"
 
-        # Use the WandB API to retrieve the artifact
-        artifact = self.wandb_run.use_artifact(artifact_name)
+        model_path = os.path.join(self.path, filename)
 
-        # Download the artifact's files and get the model file path
-        artifact_dir = artifact.download()
-
-        # In most cases, the file is saved as "model.pt" or a similar name. Update this accordingly.
-        model_file = 'model.pt'
-
-        # Construct the full path to the model file
-        model_path = os.path.join(artifact_dir, model_file)
-
-        # Load the model state
         self.policy_net.load_state_dict(torch.load(model_path, map_location=self.device))
         self.policy_net.to(self.device)
 
@@ -259,32 +230,6 @@ class Agent:
     
    
 
-    def get_model_state_dict_as_string(self, model):
-        """
-        Get the model's state dictionary as a formatted string.
-
-        :param torch.nn.Module model: The model to get the state dictionary from.
-        :return: Formatted string representing the model's state dictionary.
-        :rtype: str
-        """
-        model_info = "Model's state_dict:\n"
-        for param_tensor in model.state_dict():
-            model_info += f"{param_tensor}\t{model.state_dict()[param_tensor].size()}\n"
-        return model_info
-
-    def get_optimizer_state_dict_as_string(self, optimizer):
-        """
-        Get the optimizer's state dictionary as a formatted string.
-
-        :param torch.optim.Optimizer optimizer: The optimizer to get the state dictionary from.
-        :return: Formatted string representing the optimizer's state dictionary.
-        :rtype: str
-        """
-        optimizer_info = "Optimizer's state_dict:\n"
-        for var_name in optimizer.state_dict():
-            optimizer_info += f"{var_name}\t{optimizer.state_dict()[var_name]}\n"
-        return optimizer_info
-    
     def set_hyperparameters(self, learning_rate, gamma, epsilon_decay):
         """
         Set new values for the agent's hyperparameters.

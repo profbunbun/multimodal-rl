@@ -31,32 +31,32 @@ class RewardCalculator:
         if old_dist > edge_distance:
             reward = 0.025
             distcheck = 1
-        elif old_dist < edge_distance:
-            reward = -0.02
-            distcheck = 0
+        # elif old_dist < edge_distance:
+        #     reward = -0.02
+        #     distcheck = 0
         # elif old_dist == edge_distance:
         #     reward = 0.01
         #     distcheck = 0
 
         if vedge == destination_edge:
-            life += 0.25
+            life += 0.1
             if stage == "pickup":
-                reward = 0.3
+                reward = 0.8
 
                 make_choice_flag = True
 
             elif stage == "dropoff":
-                reward = 0.3
+                reward = 0.8
 
                 make_choice_flag = True
 
             elif stage == "onbus":
-                reward = 0.3
+                reward = 0.8
 
                 make_choice_flag = True
 
             elif stage == "final":
-                reward = 0.35
+                reward = 0.8
 
                 make_choice_flag = True
 

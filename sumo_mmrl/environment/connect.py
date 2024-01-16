@@ -75,6 +75,8 @@ class SUMOConnection:
             "sumo",
             "-c",
             self.sumocfg,
+            "--tls.actuated.jam-threshold",
+            "30"
         ]
         libsumo.start(self.sumo_cmd, label=self.label)
         self.sumo_ = libsumo

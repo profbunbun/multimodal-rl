@@ -69,7 +69,8 @@ class OutMask:
         The output mask is a list with values 1 for valid movements and 0 for invalid, in the order of right, straight, left, and to.
         """
 
-        outmask = [0, 0, 0, 0]
+        # outmask = [0, 0, 0, 0]
+        outmask = [0, 0, 0]
 
         for choice in choices.items():
             if choice[0] == "r":
@@ -81,8 +82,8 @@ class OutMask:
             elif choice[0] == "l":
                 outmask[2] = 1
 
-            elif choice[0] == "t":
-                outmask[3] = 1
+            # elif choice[0] == "t":
+            #     outmask[3] = 1
 
         return outmask
 

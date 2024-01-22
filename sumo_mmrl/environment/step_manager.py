@@ -44,7 +44,7 @@ class StepManager:
         vehicle: The vehicle object to apply the action to.
         action: The action to be taken by the vehicle.
         """
-        best_choice = vehicle.set_destination(action, destination_edge)
+        target = vehicle.set_destination(action, destination_edge)
         self.sumo_interface.simulationStep()
         vedge = vehicle.get_road()
-        return best_choice, vedge
+        return target, vedge

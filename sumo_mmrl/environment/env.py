@@ -191,7 +191,7 @@ Methods:
 
         self.steps = int(self.sumo.simulation.getTime())
         self.agent_step += 1
-        self.make_choice_flag, self.old_edge = self.step_manager.null_step(self.vehicle, self.make_choice_flag, self.old_edge)
+        # self.make_choice_flag, self.old_edge = self.step_manager.null_step(self.vehicle, self.make_choice_flag, self.old_edge)
 
         if self.life <= 0:
             self.stage = "done"
@@ -222,12 +222,11 @@ Methods:
                 reward += 0.99
                 print("successfull dropoff")
 
-            choices = self.vehicle.get_out_dict() # this is the issue here!!!!!!!!!!!!!
-            if choices == None:
-                self.make_choice_flag, self.old_edge = self.step_manager.null_step(self.vehicle, self.make_choice_flag, self.old_edge)
-                vedge = self.vehicle.get_road()
-                choices = self.vehicle.get_out_dict()
 
+
+            self.make_choice_flag, self.old_edge = self.step_manager.null_step(self.vehicle, self.make_choice_flag, self.old_edge)
+            vedge = self.vehicle.get_road()
+            choices = self.vehicle.get_out_dict()
             dest_loc = self.edge_position[self.destination_edge]
             state = self.obs.get_state(self.sumo,self.agent_step, self.vehicle, dest_loc, self.life, self.distcheck)
             self.old_edge = vedge

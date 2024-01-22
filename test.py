@@ -41,8 +41,8 @@ def main():
     for episode in range(EPISODES):
         
         cumulative_reward = 0
-        env.render("libsumo")
-        # env.render("gui")
+        # env.render("libsumo")
+        env.render("gui")
         state, stage, legal_actions = env.reset()
         
         while stage != "done":

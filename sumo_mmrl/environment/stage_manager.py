@@ -15,7 +15,7 @@ class StageManager:
         self.bussroute = bussroute
         self.stage = "pickup"
 
-    def update_stage(self, current_stage, destination_edge, vedge, person):
+    def update_stage(self, current_stage, destination_edge, vedge, person, vehicle):
         """
         Update the stage of a journey based on the current position and destination.
 
@@ -33,25 +33,28 @@ class StageManager:
         if vedge == destination_edge:
             # If the vehicle is at the destination edge, update the stage
             if current_stage == "pickup":
-                new_stage = "dropoff"
+                new_stage = "picked up"
                 
                 new_destination_edge = self.finder.find_begin_stop(
                     person.get_road(), self.edge_position, self.sumo
                 ).partition("_")[0]
                 print(new_stage)
 
-            elif current_stage == "dropoff":
+            elif current_stage == "picked up":
                 new_stage = "onbus"
-                next_route_edge = self.bussroute[1].partition("_")[0]
-                new_destination_edge = next_route_edge
-                print(new_stage)
 
-            elif current_stage == "onbus":
-                new_stage = "final"
                 end_stop = self.finder.find_end_stop(
                     person.destination, self.edge_position, self.sumo
                 ).partition("_")[0]
                 new_destination_edge = end_stop
+                vehicle.teleport(new_destination_edge)
+                self.sumo.simulationStep()
+
+                print(new_stage)
+
+            elif current_stage == "onbus":
+                new_stage = "final"
+                new_destination_edge = person.destination
                 print(new_stage)
 
             elif current_stage == "final":

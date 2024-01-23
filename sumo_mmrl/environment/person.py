@@ -17,17 +17,18 @@ class Person:
         Initialize a Person instance with the given parameters.
         """
         self.person_id = person_id
-        # start_edge = "-E1_0"
+        start_edge = "1w"
+        # start_edge = "547782537#2"
         self.sumo = sumo
         self.index_dict = index_dict
         self.edge_position = edge_position
         # self.new_lane = list(self.index_dict.keys())[21]
         self.new_lane = random.choice(list(self.index_dict.keys()))
-        self.destination = "-463787633#1"
-        # self.destination = list(self.index_dict.keys())[0]
+        # self.destination = "6002960#2"
+        self.destination = list(self.index_dict.keys())[0]
         # self.destination = random.choice(list(self.index_dict.keys()))
 
-        self.sumo.person.add(person_id, "547782537#2", 20)
+        self.sumo.person.add(person_id, start_edge, 20)
 
         self.sumo.person.appendDrivingStage(person_id,
                                             self.destination,

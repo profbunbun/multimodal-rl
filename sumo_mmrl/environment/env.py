@@ -205,29 +205,34 @@ Methods:
             vedge_loc[0], vedge_loc[1], dest_edge_loc[0], dest_edge_loc[1]
         )
 
-        reward, self.make_choice_flag, self.distcheck, self.life = self.reward_calculator.calculate_reward(
-            self.old_dist, edge_distance, self.stage, self.destination_edge, vedge, self.make_choice_flag, self.life)
 
         if validator == 1:
             if self.make_choice_flag:
-                self.best_choice, vedge = self.step_manager.perform_step(self.vehicle, action, self.destination_edge)
+                vedge = self.step_manager.perform_step(self.vehicle, action, self.destination_edge)
                 self.make_choice_flag = False
                 self.life -= 0.01
 
-            self.stage, self.destination_edge = self.stage_manager.update_stage(
-                self.stage, self.destination_edge, vedge, self.person
-            )
-
-            if self.stage == "done": # means successfull final dropoff
-                reward += 0.99
-                print("successfull dropoff")
+            
 
 
 
             self.make_choice_flag, self.old_edge = self.step_manager.null_step(self.vehicle, self.make_choice_flag, self.old_edge)
+
             vedge = self.vehicle.get_road()
             choices = self.vehicle.get_out_dict()
             dest_loc = self.edge_position[self.destination_edge]
+
+            reward, self.make_choice_flag, self.distcheck, self.life = self.reward_calculator.calculate_reward(
+                self.old_dist, edge_distance, self.stage, self.destination_edge, vedge, self.make_choice_flag, self.life)
+
+            self.stage, self.destination_edge = self.stage_manager.update_stage(
+                self.stage, self.destination_edge, vedge, self.person, self.vehicle
+            )
+            if self.stage == "done": 
+                reward += 0.99
+                print("successfull dropoff")
+            choices = self.vehicle.get_out_dict()
+
             state = self.obs.get_state(self.sumo,self.agent_step, self.vehicle, dest_loc, self.life, self.distcheck)
             self.old_edge = vedge
             self.old_dist = edge_distance
@@ -345,14 +350,7 @@ Methods:
         '''
         return self.vehicle.get_lane()
     
-    def get_best_choice(self):
-        '''
-        Returns the best choice made by the agent.
-
-        :return: Best choice.
-        :rtype: int/str
-        '''
-        return self.best_choice
+    
     
     def get_out_lanes(self):
         '''

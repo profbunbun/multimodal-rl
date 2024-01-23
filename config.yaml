@@ -6,13 +6,16 @@ global:
 # Training configuration settings.
 training_settings:
   episodes: 10000                       # The number of episodes to run
-  experiment_path: "Experiments/balt1/"     # Path to the experiment directory
-  sumoconfig: "osm.sumocfg"       # Configuration file for SUMO
+  experiment_path: "Experiments/3x3/"
+  # experiment_path: "Experiments/balt1/"     # Path to the experiment directory
+  sumoconfig: "Nets/3x3.sumocfg"    
+  # sumoconfig: "Nets/osm.sumocfg"       # Configuration file for SUMO
+  savepath: "models/"
   num_vehic: 1                           # The number of vehicles to simulate
   types: 1                               # The number of types of vehicles
   max_steps_per_episode: 1000            # Maximum steps per episode
-  initial_life: .1                       # Starting life points for the agent
-  penalty: -0.15                         # Penalty for invalid or detrimental actions
+  initial_life: .15                      # Starting life points for the agent
+  penalty: -0.2                        # Penalty for invalid or detrimental actions
   smoothing_window: 100                  # Window size for smoothing reward curves
 
 # Environment settings.
@@ -39,7 +42,7 @@ optuna:
 agent_hyperparameters:
   learning_rate: 0.0001
   gamma: 0.9999                
-  epsilon_decay: 0.9995
+  epsilon_decay: 0.995
   batch_size: 128
   memory_size: 100000
   epsilon_max:  1.0

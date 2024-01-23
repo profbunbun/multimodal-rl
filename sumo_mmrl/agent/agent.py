@@ -5,7 +5,8 @@ import torch.optim as optim
 from .dqn import DQN
 from . import exploration, memory
 import wandb
-
+from ..utilities.utils import Utils
+config = Utils.load_yaml_config('config.yaml')
 
 class Agent:
     """
@@ -29,21 +30,19 @@ class Agent:
     def __init__(self, state_size, 
                  action_size, 
                  path,
-
                  learning_rate=None, 
                  gamma=None, 
                  epsilon_decay=None, 
                  epsilon_max=None, 
                  epsilon_min=None, 
                  memory_size=None, 
-                 layer_sizes=None, 
-                 activation=None, 
+
                  batch_size=None,
                  soft_update_factor=None,
                  ):
 
             self.path = path
-            self.direction_choices = ['r', 's', 'l', 't']
+          
 
             self.memory_size = memory_size 
             self.gamma = gamma 
@@ -190,8 +189,9 @@ class Agent:
         filename = f"model"
         filename += f"_ep{episode_num}"
         filename += ".pt"
+        path = config['training_settings']['savepath']
 
-        temp_model_path = os.path.join(self.path, filename)
+        temp_model_path = os.path.join(self.path,path, filename)
         torch.save(self.policy_net.state_dict(), temp_model_path)
 
 
@@ -206,8 +206,9 @@ class Agent:
         filename = f"model"
         filename += f"_ep{ep_num}"
         filename += ".pt"
+        path = config['training_settings']['savepath']
 
-        model_path = os.path.join(self.path, filename)
+        model_path = os.path.join(self.path,path, filename)
 
         self.policy_net.load_state_dict(torch.load(model_path, map_location=self.device))
         self.policy_net.to(self.device)

@@ -27,9 +27,9 @@ class Vehicle:
         Initialize a Vehicle instance with the given parameters.
         """
 
-        self.direction_choices = [RIGHT, STRAIGHT, LEFT]
+        # self.direction_choices = [RIGHT, STRAIGHT, LEFT]
         # self.direction_choices = [RIGHT, STRAIGHT, LEFT, TURN_AROUND]
-        # self.direction_choices = [STRAIGHT, TURN_AROUND, SLIGHT_RIGHT, RIGHT, SLIGHT_LEFT, LEFT]
+        self.direction_choices = [SLIGHT_RIGHT, RIGHT, STRAIGHT, SLIGHT_LEFT, LEFT, TURN_AROUND]
         self.vehicle_id = vehicle_id
         self.out_dict = out_dict
         self.index_dict = index_dict

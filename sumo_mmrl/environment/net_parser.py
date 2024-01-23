@@ -171,7 +171,8 @@ class NetParser:
         :rtype: list
         '''
         edge_ids = []
-        for route in sumolib.xml.parse_fast("Experiments/balt1/osm_pt.rou.xml", 'route', ['id','edges']):
+        for route in sumolib.xml.parse_fast("Experiments/balt1/Nets/osm_pt.rou.xml", 'route', ['id','edges']):
+        # for route in sumolib.xml.parse_fast("Experiments/3x3/Nets/3x3.rou.xml", 'route', ['id','edges']):
             if 'bus' in route.id:
                 edge_ids = route.edges.split()
         # print (edge_ids)

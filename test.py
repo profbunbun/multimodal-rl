@@ -4,10 +4,6 @@ This module sets up and runs the training environment using Optuna for hyperpara
 and Weights & Biases for experiment tracking. It defines an objective function for the optimization
 process and a main function to initiate the study.
 """
-import os
-# os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
-# os.environ['TORCH_USE_CUDA_DSA'] = '1'
-import sys
 from sumo_mmrl import  Utils
 from sumo_mmrl.utilities import sim_manager as so
 import numpy as np
@@ -41,8 +37,9 @@ def main():
     for episode in range(EPISODES):
         
         cumulative_reward = 0
-        # env.render("libsumo")
-        env.render("gui")
+
+        env.render("libsumo")
+        # env.render("gui")
         state, stage, legal_actions = env.reset()
         
         while stage != "done":

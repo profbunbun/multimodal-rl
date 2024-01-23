@@ -97,6 +97,9 @@ class StopFinder:
 
         dic = self.get_stop_dists(begin_loc, loc_dic)
         stop = min(dic, key=dic.get)
+
+        lines = self.get_line(stop)
+        
         lane = con.busstop.getLaneID(stop)
         return lane
 
@@ -112,7 +115,7 @@ class StopFinder:
   
         # traci.busstop.getParameterWithKey()
         return self.con.busstop.getParameter(
-            stop_id, "lines"
+            stop_id, "line"
         )  # getParameterWithKey(stop_id,"busStop")
 
     def get_line_route(self, con):

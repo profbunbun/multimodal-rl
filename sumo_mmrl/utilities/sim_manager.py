@@ -40,7 +40,7 @@ def create_agent(config):
     layer_sizes = config['agent_hyperparameters']['layer_sizes']
     activation = config['agent_hyperparameters']['activation']
 
-    return Agent(11, 3, experiment_path,
+    return Agent(14, 6, experiment_path,
                     learning_rate,
                     gamma, 
                     epsilon_decay, 

@@ -63,15 +63,21 @@ class Explorer:
         state = state.unsqueeze(0)
 
         # Use the network in evaluation mode for single-sample inference
-        # self.policy_net.eval()
-        # with T.no_grad():
-        act_values = self.policy_net(state)
-        # self.policy_net.train()  # Revert to training mode
+        self.policy_net.eval()
+        with T.no_grad():
+            act_values = self.policy_net(state)
+        self.policy_net.train()  # Revert to training mode
 
         # Choose the action with the highest value
-        action = self.direction_choices[T.argmax(act_values, dim=1)]
+        index_choice = T.argmax(act_values)
+        num_of_choices = len(self.direction_choices)
+
+        if (index_choice + 1) <= num_of_choices:
+            action = self.direction_choices[index_choice]
+        else:
+            action  = None
         self.exploit_count += 1
-        return action, act_values
+        return action, act_values, index_choice
 
     def choose_action(self, state, options):
         """
@@ -85,12 +91,19 @@ class Explorer:
         q_values = None
         randy = np.random.rand()
         if randy < self.epsilon:
-            action = self.explore()
+            action= self.explore()
         else:
-            action, q_values = self.exploit(state)
+            action, q_values, index = self.exploit(state)
 
-        valid = int(action in options)
-        return action, self.direction_choices.index(action), valid, q_values
+        if action == None:
+            valid = 0
+
+        else:
+            valid = int(action in options)
+            index = self.direction_choices.index(action)
+
+        
+        return action, index, valid, q_values
 
     def update_epsilon(self):
         """

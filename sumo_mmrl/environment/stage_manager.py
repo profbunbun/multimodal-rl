@@ -48,14 +48,18 @@ class StageManager:
                 ).partition("_")[0]
                 new_destination_edge = end_stop
                 vehicle.teleport(new_destination_edge)
+                print('bus taken')
                 self.sumo.simulationStep()
 
+                new_destination_edge = person.destination
+                new_stage = "final"
+
                 print(new_stage)
 
-            elif current_stage == "onbus":
-                new_stage = "final"
-                new_destination_edge = person.destination
-                print(new_stage)
+            # elif current_stage == "onbus":
+            #     new_stage = "final"
+            #     new_destination_edge = person.destination
+            #     print(new_stage)
 
             elif current_stage == "final":
                 new_stage = "done"

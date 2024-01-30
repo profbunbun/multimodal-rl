@@ -3,6 +3,9 @@
 import wandb
 import optuna
 from sumo_mmrl import Agent, Env
+from ..environment.net_parser import NetParser
+
+
 
 def create_env(config):
     """
@@ -12,8 +15,17 @@ def create_env(config):
     :return: An instance of the SUMO simulation environment.
     :rtype: Env
     """
+    path = config['training_settings']['experiment_path']
+    sumo_config_path = path + config['training_settings']['sumoconfig']
+    parser = NetParser(sumo_config_path)
+    edge_locations = (
+            parser.get_edge_pos_dic()
+        )  
+    bussroute = parser.get_route_edges()
+    out_dict = parser.get_out_dic()
+    index_dict = parser.get_edge_index()
 
-    return Env(config)
+    return Env(config, edge_locations, bussroute, out_dict, index_dict)
 
 
 def create_agent(config):
@@ -47,8 +59,39 @@ def create_agent(config):
                     epsilon_max, 
                     epsilon_min, 
                     memory_size, 
-                    layer_sizes, 
-                    activation, 
+                    batch_size,)
+
+def create_trial_agent(config):
+    """
+    Create and return the agent with hyperparameters from the trial and configuration.
+
+    :param trial: The trial object from Optuna for hyperparameter optimization.
+    :type trial: optuna.trial.Trial
+    :param config: The configuration dictionary with agent settings.
+    :type config: dict
+    :return: An instance of the agent.
+    :rtype: Agent
+    """
+    # Extract hyperparameters from the trial object
+    experiment_path = config['training_settings']['experiment_path']
+    learning_rate = config['agent_hyperparameters']['learning_rate']
+    gamma = config['agent_hyperparameters']['gamma']
+    epsilon_decay = config['agent_hyperparameters']['epsilon_decay']
+    batch_size = config['agent_hyperparameters']['batch_size']
+    memory_size = config['agent_hyperparameters']['memory_size']
+    epsilon_max = config['agent_hyperparameters']['epsilon_max']
+    epsilon_min = config['agent_hyperparameters']['epsilon_min']
+    n_layers = config['agent_hyperparameters']['n_layers']
+    layer_sizes = config['agent_hyperparameters']['layer_sizes']
+    activation = config['agent_hyperparameters']['activation']
+
+    return Agent(14, 6, experiment_path,
+                    learning_rate,
+                    gamma, 
+                    epsilon_decay, 
+                    epsilon_max, 
+                    epsilon_min, 
+                    memory_size, 
                     batch_size,)
 
 
@@ -87,6 +130,7 @@ def prepare_wandb_config(trial, config):
     }
 
     return hyperparameters
+
 def log_environment_details(env, action, q_values):
     """
     Log environment details and agent actions to Weights & Biases.
@@ -127,3 +171,5 @@ def log_episode_summary(episode,env, cumulative_reward, agent, batch_avg_reward)
         "batch_avg_reward": batch_avg_reward
 
     })
+
+

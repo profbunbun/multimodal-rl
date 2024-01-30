@@ -75,8 +75,8 @@ class SUMOConnection:
             "sumo",
             "-c",
             self.sumocfg,
-            "--tls.actuated.jam-threshold",
-            "30"
+            "--no-warnings",
+            "true"
         ]
         libsumo.start(self.sumo_cmd, label=self.label)
         self.sumo_ = libsumo
@@ -107,47 +107,5 @@ class SUMOConnection:
         """
  
         self.sumo_.close()
-    
-    def busstopCheck(self):
-        """
-        Checks and returns the list of lanes that have bus stops.
 
-        :return: List of lanes with bus stops.
-        :rtype: list
-        """
-
-        lanes = []
-        stops = self.sumo_.busstop.getIDList()
-        for stop in stops:
-            lanes.append(self.sumo_.busstop.getLaneID(stop))
-        return lanes
-
-    def get_junction_list(self):
-        """
-        Retrieves the list of junction IDs from the simulation.
-
-        :return: List of junction IDs.
-        :rtype: list
-        """
-        return traci.constants.junction.getIDList()
-
-    def get_edge_list(self):
-        """
-        Retrieves the list of edge IDs from the simulation.
-
-        :return: List of edge IDs.
-        :rtype: list
-        """
-        return traci.constants.edge.getIDList()
-
-    def get_lane_list(self):
-        """
-        Retrieves the list of lane IDs from the simulation.
-
-        :return: List of lane IDs.
-        :rtype: list
-        """
-        return traci.constants.lane.getIDList()
-    
-    
     

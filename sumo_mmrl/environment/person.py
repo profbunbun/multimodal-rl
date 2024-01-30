@@ -18,13 +18,13 @@ class Person:
         """
         self.person_id = person_id
         start_edge = "1w"
-        # start_edge = "547782537#2"
+        # start_edge = "-521985670#5"
         self.sumo = sumo
         self.index_dict = index_dict
         self.edge_position = edge_position
         # self.new_lane = list(self.index_dict.keys())[21]
-        self.new_lane = random.choice(list(self.index_dict.keys()))
-        # self.destination = "6002960#2"
+        # self.new_lane = random.choice(list(self.index_dict.keys()))
+        # self.destination = "192469470#0"
         self.destination = list(self.index_dict.keys())[0]
         # self.destination = random.choice(list(self.index_dict.keys()))
 

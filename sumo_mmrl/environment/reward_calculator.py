@@ -11,7 +11,7 @@ class RewardCalculator:
         """
         self.edge_position = edge_position
 
-    def calculate_reward(self, old_dist, edge_distance, stage, destination_edge, vedge, make_choice_flag, life):
+    def calculate_reward(self, old_dist, edge_distance, destination_edge, vedge, make_choice_flag, life):
         """
         Calculate the reward based on distance and other factors.
 
@@ -40,24 +40,7 @@ class RewardCalculator:
 
         if vedge == destination_edge:
             life += 0.1
-            if stage == "pickup":
-                reward = 0.8
-
-                make_choice_flag = True
-
-            elif stage == "dropoff":
-                reward = 0.8
-
-                make_choice_flag = True
-
-            elif stage == "onbus":
-                reward = 0.8
-
-                make_choice_flag = True
-
-            elif stage == "final":
-                reward = 0.8
-
-                make_choice_flag = True
+            reward = 0.8
+            make_choice_flag = True
 
         return reward, make_choice_flag, distcheck, life

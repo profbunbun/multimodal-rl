@@ -1,6 +1,19 @@
 
 import xml.etree.ElementTree as ET
 import sumolib
+from functools import wraps
+import time
+
+def timeit(func):
+    @wraps(func)
+    def timeit_wrapper(*args, **kwargs):
+        start_time = time.perf_counter()
+        result = func(*args, **kwargs)
+        end_time = time.perf_counter()
+        total_time = end_time - start_time
+        print(f'Function {func.__name__}{args} {kwargs} Took {total_time:.4f} seconds')
+        return result
+    return timeit_wrapper
 
 
 class NetParser:
@@ -17,7 +30,7 @@ class NetParser:
         :param str sumocfg: Path to the SUMO configuration file.
         '''
         self.sumocfg = sumocfg
-
+    # @timeit
     def parse_net_files(self):
         '''
         Get the network file from the SUMO configuration file.
@@ -32,7 +45,7 @@ class NetParser:
             for network in infile.findall("net-file"):
                 network_file = str(network.get("value"))
             return network_file
-
+    # @timeit
     def _clean_path(self):
         '''
         Clean the file path for the network file.
@@ -46,7 +59,7 @@ class NetParser:
         path_.pop()
         path_b = "/".join(path_)
         return sumolib.net.readNet(path_b + "/" + net_file)
-
+    # @timeit
     def get_edges_info(self):
         '''
         Get a list of edges that allow passenger vehicles.
@@ -62,7 +75,7 @@ class NetParser:
             if current_edge.allows("passenger"):
                 edge_list.append(current_edge)
         return edge_list
-
+    # @timeit
     def get_edge_pos_dic(self):
         '''
         Get a dictionary of edge IDs and their XY coordinates at the center.
@@ -90,7 +103,7 @@ class NetParser:
 
                 edge_position_dict[current_edge_id] = x, y
         return edge_position_dict
-
+    # @timeit
     def get_out_dic(self):
         '''
         Get a dictionary of edges and their connecting edges.
@@ -119,7 +132,7 @@ class NetParser:
                     out_dict[
                         current_edge_id][dir_now] = current_out_edge.getID()
         return out_dict
-
+    # @timeit
     def get_edge_index(self):
         '''
         Get an indexed dictionary of edge IDs.
@@ -142,7 +155,7 @@ class NetParser:
                 index_dict[current_edge_id] = counter
                 counter += 1
         return index_dict
-
+    # @timeit
     def get_length_dic(self):
         '''
         Get a dictionary of edge IDs and their lengths.
@@ -162,7 +175,7 @@ class NetParser:
             else:
                 length_dict[current_edge_id] = current_edge.getLength()
         return length_dict
-
+    # @timeit
     def get_route_edges(self):
         '''
         Get a list of edge IDs from a specific route file.
@@ -177,7 +190,7 @@ class NetParser:
                 edge_ids = route.edges.split()
         # print (edge_ids)
         return edge_ids
-
+    # @timeit
     def get_max_manhattan(self):
         '''
         Calculate the maximum Manhattan distance between any two edges in the network.
@@ -205,12 +218,12 @@ class NetParser:
  
         print(maximum)
         return maximum
-
+    # @timeit
     def net_minmax(self):
         '''get net minmax xy coords for scaling input'''
         net = self._clean_path()
         return sumolib.net.Net.getBBoxXY(net)
-    
+    # @timeit
     def get_junctions(self):
         """Retrieve junctions and their internal edges from the network."""
         net = self._clean_path()

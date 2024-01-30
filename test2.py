@@ -4,6 +4,8 @@ This module sets up and runs the training environment using Optuna for hyperpara
 and Weights & Biases for experiment tracking. It defines an objective function for the optimization
 process and a main function to initiate the study.
 """
+import sys
+import optuna
 from sumo_mmrl import  Utils
 from sumo_mmrl.utilities import sim_manager as so
 import numpy as np
@@ -11,26 +13,20 @@ from functools import wraps
 import time
 import os
 from csv import writer
+import wandb
+from optuna.integration.wandb import WeightsAndBiasesCallback
 
-def timeit(func):
-    @wraps(func)
-    def timeit_wrapper(*args, **kwargs):
-        start_time = time.perf_counter()
-        result = func(*args, **kwargs)
-        end_time = time.perf_counter()
-        total_time = end_time - start_time
-        print(f'Function {func.__name__}Took {total_time:.4f} seconds')
-        return result
-    return timeit_wrapper
 
 config = Utils.load_yaml_config('config.yaml')
 EPISODES = config['training_settings']['episodes']
 logs_path = config['logs']['path']
 experiment_path = config['training_settings']['experiment_path']
 
+wandb_kwargs= {"project":"sumo_mmrl","entity":"aaronrls"}
+wandbc = WeightsAndBiasesCallback(metric_name='cumulative_reward',wandb_kwargs=wandb_kwargs)
 
-@timeit
-def main():
+@wandbc.track_in_wandb()
+def objective(trial):
     """
     Objective function for Optuna optimization.
 
@@ -45,12 +41,11 @@ def main():
     """
 
     env = so.create_env(config=config)
-    dagent= so.create_agent(config=config)
+    dagent= so.create_trial_agent(trial, config=config)
 
     best_reward = float('-inf') 
     batch_rewards = []
     batch_avg_reward = 0
-    # batch_info = np.empty([1,4])
     headers = ['Episodes','Reward','Epsilon','Steps']
 
     with open(os.path.join(experiment_path,logs_path),'a') as logger:
@@ -98,10 +93,30 @@ def main():
             if cumulative_reward > best_reward:
                 best_reward = cumulative_reward
                 dagent.save_model(str(episode))
+            
+            trial.report(batch_avg_reward, episode)
+            if trial.should_prune():
+                raise optuna.exceptions.TrialPruned()
+            
         logger.close()  
     return batch_avg_reward
 
+def main():
+    """
+    Main function to execute the optimization process.
 
+    This function parses the command line arguments for the study name, sets up the Optuna study,
+    and starts the optimization process. The results are printed to the console.
+    """
+
+    study_name = sys.argv[1] if len(sys.argv) > 1 else None
+    storage_path = config['optuna']['storage_path']
+    pruner = optuna.pruners.MedianPruner()
+    
+    study = Utils.setup_study(study_name, storage_path, pruner)
+    study.optimize(objective, n_trials=100, callbacks=[wandbc])
+
+    print(f"Best value: {study.best_value} (params: {study.best_params})")
 
 if __name__ == "__main__":
     main()

@@ -34,7 +34,7 @@ class Observation:
         self.max_x, self.max_y = bounding_box[1]
 
         # pad max and min with 1 to allow for vehicles to be on the edge
-        self.max_manhat_dist = ((self.max_x + 1) - (self.min_x - 1)) + ((self.max_y + 1) - (self.min_y - 1))
+        self.max_manhat_dist = abs((self.max_x + 1) - (self.min_x - 1)) + abs((self.max_y + 1) - (self.min_y - 1))
         
         vloc = vehicle.location()
         choices = vehicle.get_out_dict()

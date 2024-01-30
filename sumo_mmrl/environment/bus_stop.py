@@ -1,3 +1,5 @@
+
+
 class StopFinder:
     '''
     StopFinder class for finding bus stops and distances in the SUMO environment.
@@ -132,6 +134,3 @@ class StopFinder:
         # traci.route.getEdges()?
         return self.con.route.getEdges("bus_1")
 
-def set_bus_line(self):
-    
-    return

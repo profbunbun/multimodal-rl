@@ -2,7 +2,7 @@
 from .stage_manager import StageManager
 import numpy as np
 from .connect import SUMOConnection
-from .net_parser import NetParser
+# from .net_parser import NetParser
 from .ride_select import RideSelect
 from .outmask import OutMask
 from .bus_stop import StopFinder
@@ -12,6 +12,20 @@ from .person_manager import PersonManager
 from .reward_calculator import RewardCalculator
 from ..utilities.env_utils import Utils
 from .step_manager import StepManager
+
+from functools import wraps
+import time
+
+def timeit(func):
+    @wraps(func)
+    def timeit_wrapper(*args, **kwargs):
+        start_time = time.perf_counter()
+        result = func(*args, **kwargs)
+        end_time = time.perf_counter()
+        total_time = end_time - start_time
+        print(f'Function {func.__name__} Took {total_time:.4f} seconds')
+        return result
+    return timeit_wrapper
 
 
 class Env:
@@ -34,7 +48,7 @@ Attributes:
     :param NetParser parser: Object to parse the network files.
     :param SUMOConnection sumo_con: Object to manage the SUMO connection.
     :param RideSelect ride_selector: Object to select the ride for the passengers.
-    :param dict edge_position: Dictionary of edge positions.
+    :param dict edge_locations: Dictionary of edge positions.
     :param SUMO sumo: SUMO simulation object.
     :param int steps: Current simulation step.
     :param int agent_step: Current step of the agent.
@@ -88,7 +102,8 @@ Methods:
     get_life(): 
         Returns the current life of the agent.
 """
-    def __init__(self, config):
+    # @timeit
+    def __init__(self, config, edge_locations, bussroute, out_dict, index_dict):
         '''
         Initializes the RL Environment with the given configuration.
 
@@ -110,14 +125,12 @@ Methods:
         self.obs = Observation()
         self.out_mask = OutMask()
         self.finder = StopFinder()
-        self.parser = NetParser(self.sumo_config_path)
+        # self.parser = NetParser(self.sumo_config_path)
         self.sumo_con = SUMOConnection(self.sumo_config_path)
         self.ride_selector = RideSelect()  
-        self.edge_position = (
-            self.parser.get_edge_pos_dic()
-        )  
+        self.edge_locations = edge_locations
         self.sumo = None   
-        self.steps = 0
+        # self.steps = 0
         self.agent_step = 0
         self.accumulated_reward = 0
         self.make_choice_flag = False 
@@ -132,12 +145,12 @@ Methods:
         self.edge_distance = None
         self.destination_edge = None
         self.stage = "reset"
-        self.bussroute = self.parser.get_route_edges()
-        self.reward_calculator = RewardCalculator(self.edge_position)
+        self.bussroute = bussroute
+        self.out_dict = out_dict
+        self.reward_calculator = RewardCalculator(self.edge_locations)
+        self.index_dict = index_dict
         
-
-    
-
+    # @timeit
     def reset(self):
         '''
         Resets the environment to the initial state.
@@ -146,17 +159,17 @@ Methods:
         :rtype: tuple
         '''
 
-        self.steps = 0
+        # self.steps = 0
         self.agent_step = 0
         self.accumulated_reward = 0
         self.life = self.config['training_settings']['initial_life']
         self.make_choice_flag = True
-        out_dict = self.parser.get_out_dic()
-        index_dict = self.parser.get_edge_index()
+        
+        
 
-        self.vehicle_manager = VehicleManager(self.config['env']['num_of_vehicles'], self.edge_position, self.sumo, out_dict, index_dict)
-        self.person_manager = PersonManager(self.config['env']['num_of_people'], self.edge_position, self.sumo, index_dict)
-        self.stage_manager = StageManager(self.finder, self.edge_position, self.sumo, self.bussroute)
+        self.vehicle_manager = VehicleManager(self.config['env']['num_of_vehicles'], self.edge_locations, self.sumo, self.out_dict, self.index_dict)
+        self.person_manager = PersonManager(self.config['env']['num_of_people'], self.edge_locations, self.sumo, self.index_dict)
+        self.stage_manager = StageManager(self.finder, self.edge_locations, self.sumo, self.bussroute)
         self.step_manager = StepManager(self.sumo)
 
         self.stage = self.stage_manager.get_initial_stage()
@@ -171,12 +184,12 @@ Methods:
         self.old_edge = vedge
         choices = self.vehicle.get_out_dict()
         self.destination_edge = self.person.get_road()
-        dest_loc = self.edge_position[self.destination_edge]
+        dest_loc = self.edge_locations[self.destination_edge]
         state = self.obs.get_state(self.sumo, self.agent_step, self.vehicle, dest_loc, self.life, self.distcheck)
 
         return state, self.stage, choices, 
 
-    
+    # @timeit
     def step(self, action, validator):
         '''
         Performs a step in the environment based on the given action.
@@ -189,7 +202,7 @@ Methods:
         :rtype: tuple
         '''
 
-        self.steps = int(self.sumo.simulation.getTime())
+        # self.steps = int(self.sumo.simulation.getTime())
         self.agent_step += 1
         # self.make_choice_flag, self.old_edge = self.step_manager.null_step(self.vehicle, self.make_choice_flag, self.old_edge)
 
@@ -198,8 +211,8 @@ Methods:
             validator = 0
 
         vedge = self.vehicle.get_road()
-        vedge_loc = self.edge_position[vedge]
-        dest_edge_loc = self.edge_position[self.destination_edge]
+        vedge_loc = self.edge_locations[vedge]
+        dest_edge_loc = self.edge_locations[self.destination_edge]
 
         edge_distance = Utils.manhattan_distance(
             vedge_loc[0], vedge_loc[1], dest_edge_loc[0], dest_edge_loc[1]
@@ -220,10 +233,10 @@ Methods:
 
             vedge = self.vehicle.get_road()
             choices = self.vehicle.get_out_dict()
-            dest_loc = self.edge_position[self.destination_edge]
+            dest_loc = self.edge_locations[self.destination_edge]
 
             reward, self.make_choice_flag, self.distcheck, self.life = self.reward_calculator.calculate_reward(
-                self.old_dist, edge_distance, self.stage, self.destination_edge, vedge, self.make_choice_flag, self.life)
+                self.old_dist, edge_distance, self.destination_edge, vedge, self.make_choice_flag, self.life)
 
             self.stage, self.destination_edge = self.stage_manager.update_stage(
                 self.stage, self.destination_edge, vedge, self.person, self.vehicle
@@ -243,14 +256,12 @@ Methods:
         self.stage = "done"
         reward = self.penalty
         self.make_choice_flag = False
-        dest_loc = self.edge_position[self.destination_edge]
+        dest_loc = self.edge_locations[self.destination_edge]
         state = self.obs.get_state(self.sumo,self.agent_step, self.vehicle, dest_loc, self.life, self.distcheck)
         self.accumulated_reward += reward
         return state, reward, self.stage, choices
 
-
-
-
+    # @timeit
     def render(self, mode):
         '''
         Renders the environment based on the given mode.
@@ -267,7 +278,7 @@ Methods:
         elif mode == "no_gui":
             self.sumo = self.sumo_con.connect_no_gui()
     
-
+    # @timeit
     def close(self, episode, accu, current_epsilon):
         '''
         Closes the environment and prints out the graph of rewards.
@@ -289,7 +300,7 @@ Methods:
         self.epsilon_hist.append(current_epsilon)
 
         avg_reward = np.mean(self.rewards[-100:])
-        smoothed_rewards = Utils.smooth_data(self.rewards, 100)
+        # smoothed_rewards = Utils.smooth_data(self.rewards, 100)
 
         print_info = {
             "EP": episode,
@@ -303,7 +314,7 @@ Methods:
 
         x = list(range(1, len(self.rewards) + 1))
         file_name = self.path + "/Graphs/sumo-agent.png"
-        Utils.plot_learning_curve(x, smoothed_rewards, self.epsilon_hist, file_name)
+        # Utils.plot_learning_curve(x, smoothed_rewards, self.epsilon_hist, file_name)
         return
     
     def quiet_close(self):
@@ -313,68 +324,3 @@ Methods:
         self.sumo.close()
         return
    
-    
-    def get_steps_per_episode(self):
-        '''
-        Returns the number of steps per episode.
-
-        :return: Number of steps.
-        :rtype: int
-        '''
-        return self.sumo.simulation.getTime()
-    
-    def get_global_step(self):
-        '''
-        Returns the global step count.
-
-        :return: Global step count.
-        :rtype: int
-        '''
-        return self.agent_step
-    
-    def get_destination_edge_id(self):
-        '''
-        Returns the ID of the destination edge.
-
-        :return: Destination edge ID.
-        :rtype: str
-        '''
-        return self.destination_edge
-    
-    def get_vehicle_location_edge_id(self):
-        '''
-        Returns the ID of the vehicle's current edge.
-
-        :return: Vehicle location edge ID.
-        :rtype: str
-        '''
-        return self.vehicle.get_lane()
-    
-    
-    
-    def get_out_lanes(self):
-        '''
-        Returns the outgoing lanes from the current edge.
-
-        :return: Outgoing lanes.
-        :rtype: dict
-        '''
-        return self.vehicle.get_out_dict()
-    
-    def get_life(self):
-        '''
-        Returns the current life of the agent.
-
-        :return: Life of the agent.
-        :rtype: int
-        '''
-        return self.life
-    def get_legal_actions(self):
-        '''
-        Returns the legal actions of the agent.
-
-        :return: Legal actions.
-        :rtype: list
-        '''
-        return self.vehicle.get_out_dict()
-    

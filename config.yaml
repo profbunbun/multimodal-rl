@@ -6,7 +6,7 @@ logs:
   path: "Logs/logs.csv"
 # Training configuration settings.
 training_settings:
-  episodes: 50000                       # The number of episodes to run
+  episodes: 25000                       # The number of episodes to run
   experiment_path: "Experiments/3x3/"
   # experiment_path: "Experiments/balt3/"     # Path to the experiment directory
   sumoconfig: "Nets/3x3.sumocfg"    
@@ -37,18 +37,18 @@ optuna:
 
 # Hyperparameter ranges for the agent (used in the `create_agent` function).
 agent_hyperparameters:
-  learning_rate: 0.0001
+  learning_rate: [0.00001, 0.001]
   gamma: 0.9999                
   epsilon_decay: 0.9999
-  batch_size: 128
+  batch_size: 512
   memory_size: 100000
   epsilon_max:  1.0
   epsilon_min: 0.0
   n_layers: 2                       # Consider expanding if more layers are needed
   layer_sizes: 8                    # Consider expanding if more sizes are needed
-  activation: "leaky_relu"
+  activation: ["leaky_relu","relu","tanh"]
 
 
 # Logging configuration for Weights & Biases.
 wandb:
-  metric_name: "batch_avg_reward"       # Primary metric for tracking
+  metric_name: "cumulative_reward"       # Primary metric for tracking

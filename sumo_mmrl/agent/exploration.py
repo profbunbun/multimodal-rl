@@ -25,7 +25,7 @@ class Explorer:
         self.decay_rate = decay_rate
         self.epsilon_min = epsilon_min
 
-        self.direction_choices = ['r', 's', 'l']
+        self.direction_choices = ['R', 'r', 's', 'L', 'l', 't']
         self.policy_net = policy
         self.explore_count = 0
         self.exploit_count = 0

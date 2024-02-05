@@ -12,105 +12,15 @@ from .person_manager import PersonManager
 from .reward_calculator import RewardCalculator
 from ..utilities.env_utils import Utils
 from .step_manager import StepManager
-
 from functools import wraps
 import time
 
-def timeit(func):
-    @wraps(func)
-    def timeit_wrapper(*args, **kwargs):
-        start_time = time.perf_counter()
-        result = func(*args, **kwargs)
-        end_time = time.perf_counter()
-        total_time = end_time - start_time
-        print(f'Function {func.__name__} Took {total_time:.4f} seconds')
-        return result
-    return timeit_wrapper
-
 
 class Env:
-    """
-RL Environment for managing and simulating the interaction between vehicles, passengers, and the SUMO environment.
 
-Attributes:
-    :param dict config: Configuration settings for the environment.
-    :param str path: Path to the experiment files.
-    :param str sumo_config_path: Path to the SUMO configuration files.
-    :param int num_of_vehicles: Number of vehicles in the environment.
-    :param list types_of_passengers: Types of passengers in the environment.
-    :param str graph_path: Path to the graph output files.
-    :param int life: Initial life of the agent.
-    :param float penalty: Penalty for wrong actions.
-    :param int smoothing_window: Window size for smoothing the rewards.
-    :param Observation obs: Observation object to capture the environment's state.
-    :param OutMask out_mask: Object to manage the action space.
-    :param StopFinder finder: Object to manage bus stops.
-    :param NetParser parser: Object to parse the network files.
-    :param SUMOConnection sumo_con: Object to manage the SUMO connection.
-    :param RideSelect ride_selector: Object to select the ride for the passengers.
-    :param dict edge_locations: Dictionary of edge positions.
-    :param SUMO sumo: SUMO simulation object.
-    :param int steps: Current simulation step.
-    :param int agent_step: Current step of the agent.
-    :param float accumulated_reward: Accumulated reward of the agent.
-    :param bool make_choice_flag: Flag to indicate if the agent should make a choice.
-    :param str old_edge: ID of the previous edge the vehicle was on.
-    :param float old_dist: Previous distance to the destination.
-    :param list rewards: List of rewards per episode.
-    :param list epsilon_hist: History of epsilon values for exploration.
-    :param Vehicle vehicle: Current vehicle object.
-    :param Person person: Current person object.
-    :param int p_index: Index of the current person.
-    :param float distcheck: Distance checker for the current step.
-    :param float edge_distance: Distance to the destination edge.
-    :param str destination_edge: ID of the destination edge.
-    :param str stage: Current stage of the environment.
-    :param list bussroute: List of edges for the bus route.
-    :param RewardCalculator reward_calculator: Object to calculate rewards.
 
-Methods:
-    reset(): 
-        Resets the environment to the initial state.
-
-    step(action, validator): 
-        Performs a step in the environment based on the given action.
-
-    render(mode): 
-        Renders the environment based on the given mode.
-
-    close(episode, accu, current_epsilon): 
-        Closes the environment and prints out the graph of rewards.
-
-    get_steps_per_episode(): 
-        Returns the number of steps per episode.
-
-    get_global_step(): 
-        Returns the global step count.
-
-    get_destination_edge_id(): 
-        Returns the ID of the destination edge.
-
-    get_vehicle_location_edge_id(): 
-        Returns the ID of the vehicle's current edge.
-
-    get_best_choice(): 
-        Returns the best choice made by the agent.
-
-    get_out_lanes(): 
-        Returns the outgoing lanes from the current edge.
-
-    get_life(): 
-        Returns the current life of the agent.
-"""
-    # @timeit
     def __init__(self, config, edge_locations, bussroute, out_dict, index_dict):
-        '''
-        Initializes the RL Environment with the given configuration.
 
-        :param config: Configuration settings for the environment.
-        :type config: dict
-        '''
-        
 
         self.config = config  
         self.path = config['training_settings']['experiment_path']
@@ -125,12 +35,10 @@ Methods:
         self.obs = Observation()
         self.out_mask = OutMask()
         self.finder = StopFinder()
-        # self.parser = NetParser(self.sumo_config_path)
         self.sumo_con = SUMOConnection(self.sumo_config_path)
         self.ride_selector = RideSelect()  
         self.edge_locations = edge_locations
         self.sumo = None   
-        # self.steps = 0
         self.agent_step = 0
         self.accumulated_reward = 0
         self.make_choice_flag = False 
@@ -150,16 +58,9 @@ Methods:
         self.reward_calculator = RewardCalculator(self.edge_locations)
         self.index_dict = index_dict
         
-    # @timeit
+
     def reset(self):
-        '''
-        Resets the environment to the initial state.
-
-        :return: Initial state, stage, and choices.
-        :rtype: tuple
-        '''
-
-        # self.steps = 0
+  
         self.agent_step = 0
         self.accumulated_reward = 0
         self.life = self.config['training_settings']['initial_life']
@@ -189,7 +90,7 @@ Methods:
 
         return state, self.stage, choices, 
 
-    # @timeit
+
     def step(self, action, validator):
         '''
         Performs a step in the environment based on the given action.
@@ -202,9 +103,7 @@ Methods:
         :rtype: tuple
         '''
 
-        # self.steps = int(self.sumo.simulation.getTime())
         self.agent_step += 1
-        # self.make_choice_flag, self.old_edge = self.step_manager.null_step(self.vehicle, self.make_choice_flag, self.old_edge)
 
         if self.life <= 0:
             self.stage = "done"
@@ -224,10 +123,6 @@ Methods:
                 vedge = self.step_manager.perform_step(self.vehicle, action, self.destination_edge)
                 self.make_choice_flag = False
                 self.life -= 0.01
-
-            
-
-
 
             self.make_choice_flag, self.old_edge = self.step_manager.null_step(self.vehicle, self.make_choice_flag, self.old_edge)
 

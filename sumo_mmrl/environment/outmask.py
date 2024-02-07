@@ -21,23 +21,27 @@ class OutMask:
 
         outmask =[0,0,0,0,0,0]
 
-        for choice in choices.items():
-            if choice[0] == "R":
-                outmask[0] = 1
+        if choices is None:
+            outmask = outmask
+        else:
 
-            elif choice[0] == "r":
-                outmask[1] = 1
+            for choice in choices.items():
+                if choice[0] == "R":
+                    outmask[0] = 1
 
-            elif choice[0] == "s":
-                outmask[2] = 1
+                elif choice[0] == "r":
+                    outmask[1] = 1
 
-            elif choice[0] == "L":
-                outmask[3] = 1
-            
-            elif choice[0] == "l":
-                outmask[4] = 1
-            
-            elif choice[0] == "t":
-                outmask[5] = 1
+                elif choice[0] == "s":
+                    outmask[2] = 1
+
+                elif choice[0] == "L":
+                    outmask[3] = 1
+                
+                elif choice[0] == "l":
+                    outmask[4] = 1
+                
+                elif choice[0] == "t":
+                    outmask[5] = 1
 
         return outmask

@@ -112,7 +112,6 @@ class Env:
                 self.make_choice_flag = False
                 self.life -= 0.01
 
-            self.make_choice_flag, self.old_edge = self.step_manager.null_step(self.vehicle, self.make_choice_flag, self.old_edge)
 
             vedge = self.vehicle.get_road()
             choices = self.vehicle.get_out_dict()
@@ -127,9 +126,11 @@ class Env:
             if self.stage == "done": 
                 reward += 0.99
                 print("successfull dropoff")
-            choices = self.vehicle.get_out_dict()
+
+            self.make_choice_flag, self.old_edge = self.step_manager.null_step(self.vehicle, self.make_choice_flag, self.old_edge)
 
             state = self.obs.get_state(self.sumo,self.agent_step, self.vehicle, dest_loc, self.life, self.distcheck)
+            choices = self.vehicle.get_out_dict()
             self.old_edge = vedge
             self.old_dist = edge_distance
             return state, reward, self.stage, choices
@@ -146,12 +147,7 @@ class Env:
 
     # @timeit
     def render(self, mode):
-        '''
-        Renders the environment based on the given mode.
 
-        :param mode: Mode to render the environment ('gui', 'libsumo', 'no_gui').
-        :type mode: str
-        '''
         if mode == "gui":
             self.sumo = self.sumo_con.connect_gui()
 
@@ -163,36 +159,24 @@ class Env:
     
     # @timeit
     def close(self, episode, accu, current_epsilon):
-        
-        steps = self.sumo.simulation.getTime()
+
         self.sumo.close()
         acc_r = float(accu)
         self.rewards.append(acc_r)
-
         self.epsilon_hist.append(current_epsilon)
-
         avg_reward = np.mean(self.rewards[-100:])
-        # smoothed_rewards = Utils.smooth_data(self.rewards, 100)
 
         print_info = {
             "EP": episode,
             "Reward": f"{acc_r:.5}",
             "Avg Reward": f"{avg_reward:.3}",
             "epsilon": f"{current_epsilon:.3}",
-            "time": f"{steps}",
             "steps": f"{self.agent_step}",
             }
         print(", ".join(f"{k}: {v}" for k, v in print_info.items()))
-
-        # x = list(range(1, len(self.rewards) + 1))
-        # file_name = self.path + "/Graphs/sumo-agent.png"
-        # Utils.plot_learning_curve(x, smoothed_rewards, self.epsilon_hist, file_name)
         return
     
     def quiet_close(self):
-        '''
-        Closes the environment without printing out the graph of rewards.
-        '''
         self.sumo.close()
         return
    

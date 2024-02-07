@@ -103,36 +103,13 @@ class Explorer:
             index = self.direction_choices.index(action)
 
         
-        return action, index, valid, q_values
+        return action, index, valid
 
     def update_epsilon(self):
         """
         Update epsilon value using exponential decay.
         """
-        self.epsilon = max(self.epsilon * self.decay_rate, self.epsilon_min)
-
-    def get_exploration_stats(self):
-        """
-        Calculate the exploration vs exploitation statistics.
-
-        :return: Tuple containing explore ratio and exploit ratio.
-        :rtype: tuple
-        """
-        total = self.explore_count + self.exploit_count
-        if total > 0:
-            explore_ratio = self.explore_count / total
-            exploit_ratio = self.exploit_count / total
+        if self.epsilon < self.epsilon_min:
+            self.epsilon = 0.0
         else:
-            explore_ratio = exploit_ratio = 0
-        return explore_ratio, exploit_ratio
-
-    def save_stats(self, filename):
-        """
-        Save the current exploration vs exploitation stats to a file.
-
-        :param str filename: The name of the file to save the stats to.
-        """
-        explore_ratio, exploit_ratio = self.get_exploration_stats()
-        with open(filename, 'a') as file:
-            file.write(f"{explore_ratio}, {exploit_ratio}\n")
-
+            self.epsilon = self.epsilon * self.decay_rate

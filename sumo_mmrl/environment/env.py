@@ -2,14 +2,11 @@
 from .stage_manager import StageManager
 import numpy as np
 from .connect import SUMOConnection
-# from .net_parser import NetParser
 from .ride_select import RideSelect
-from .outmask import OutMask
 from .bus_stop import StopFinder
 from .observation import Observation
 from .vehicle_manager import VehicleManager 
 from .person_manager import PersonManager 
-from .reward_calculator import RewardCalculator
 from ..utilities.env_utils import Utils
 from .step_manager import StepManager
 from functools import wraps
@@ -31,9 +28,8 @@ class Env:
         self.life = config['training_settings']['initial_life']
         self.penalty = config['training_settings']['penalty']
         self.smoothing_window = config['training_settings']['smoothing_window']
-        
+    
         self.obs = Observation()
-        self.out_mask = OutMask()
         self.finder = StopFinder()
         self.sumo_con = SUMOConnection(self.sumo_config_path)
         self.ride_selector = RideSelect()  
@@ -53,9 +49,8 @@ class Env:
         self.edge_distance = None
         self.destination_edge = None
         self.stage = "reset"
-        self.bussroute = bussroute
+
         self.out_dict = out_dict
-        self.reward_calculator = RewardCalculator(self.edge_locations)
         self.index_dict = index_dict
         
 
@@ -70,7 +65,7 @@ class Env:
 
         self.vehicle_manager = VehicleManager(self.config['env']['num_of_vehicles'], self.edge_locations, self.sumo, self.out_dict, self.index_dict)
         self.person_manager = PersonManager(self.config['env']['num_of_people'], self.edge_locations, self.sumo, self.index_dict)
-        self.stage_manager = StageManager(self.finder, self.edge_locations, self.sumo, self.bussroute)
+        self.stage_manager = StageManager(self.finder, self.edge_locations, self.sumo)
         self.step_manager = StepManager(self.sumo)
 
         self.stage = self.stage_manager.get_initial_stage()
@@ -87,7 +82,6 @@ class Env:
         self.destination_edge = self.person.get_road()
         dest_loc = self.edge_locations[self.destination_edge]
         state = self.obs.get_state(self.sumo, self.agent_step, self.vehicle, dest_loc, self.life, self.distcheck)
-
         return state, self.stage, choices, 
 
 
@@ -95,12 +89,6 @@ class Env:
         '''
         Performs a step in the environment based on the given action.
 
-        :param action: Action to be performed.
-        :type action: int
-        :param validator: Validates if the step should be performed.
-        :type validator: int
-        :return: New state, reward, stage, and choices.
-        :rtype: tuple
         '''
 
         self.agent_step += 1
@@ -130,7 +118,7 @@ class Env:
             choices = self.vehicle.get_out_dict()
             dest_loc = self.edge_locations[self.destination_edge]
 
-            reward, self.make_choice_flag, self.distcheck, self.life = self.reward_calculator.calculate_reward(
+            reward, self.make_choice_flag, self.distcheck, self.life = self.stage_manager.calculate_reward(
                 self.old_dist, edge_distance, self.destination_edge, vedge, self.make_choice_flag, self.life)
 
             self.stage, self.destination_edge = self.stage_manager.update_stage(
@@ -175,18 +163,7 @@ class Env:
     
     # @timeit
     def close(self, episode, accu, current_epsilon):
-        '''
-        Closes the environment and prints out the graph of rewards.
-
-        :param episode: Current episode number.
-        :type episode: int
-        :param accu: Accumulated reward.
-        :type accu: float
-        :param current_epsilon: Current epsilon value for exploration.
-        :type current_epsilon: float
-        :return: Average reward.
-        :rtype: float
-        '''
+        
         steps = self.sumo.simulation.getTime()
         self.sumo.close()
         acc_r = float(accu)
@@ -207,8 +184,8 @@ class Env:
             }
         print(", ".join(f"{k}: {v}" for k, v in print_info.items()))
 
-        x = list(range(1, len(self.rewards) + 1))
-        file_name = self.path + "/Graphs/sumo-agent.png"
+        # x = list(range(1, len(self.rewards) + 1))
+        # file_name = self.path + "/Graphs/sumo-agent.png"
         # Utils.plot_learning_curve(x, smoothed_rewards, self.epsilon_hist, file_name)
         return
     

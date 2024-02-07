@@ -27,23 +27,10 @@ wandbc = WeightsAndBiasesCallback(metric_name=config['wandb']['metric_name'],wan
 
 @wandbc.track_in_wandb()
 def objective(trial):
-    """
-    Objective function for Optuna optimization.
-
-    This function sets up the environment, agent, and performs the training loop, logging information
-    and tracking the best reward obtained. It's used by the Optuna study to evaluate the performance
-    of different sets of hyperparameters.
-
-    :param trial: An individual trial object with hyperparameters suggested by Optuna.
-    :type trial: optuna.trial.Trial
-    :return: The best cumulative reward achieved during the training.
-    :rtype: float
-    """
 
     env = so.create_env(config=config)
     dagent= so.create_trial_agent(trial, config=config)
-    wandb.config.update({"learning_rate": trial.params['learning_rate']}, allow_val_change=True)
-
+  
     batch_rewards = []
     batch_avg_reward = 0
 
@@ -62,7 +49,7 @@ def objective(trial):
 
             next_state, new_reward, stage, legal_actions = env.step(action, validator)
 
-            # dagent.remember(state, action_index, next_state,new_reward)
+
             dagent.remember(state, action_index, next_state, new_reward, done=(stage == "done"))
             cumulative_reward += new_reward
             if len(dagent.memory) > dagent.batch_size:
@@ -87,8 +74,8 @@ def objective(trial):
         })
 
         dagent.decay()
-        # env.close(episode, cumulative_reward, dagent.get_epsilon())
-        env.quiet_close()
+        env.close(episode, cumulative_reward, dagent.get_epsilon())
+        # env.quiet_close()
         
         trial.report(cumulative_reward, episode)
         if trial.should_prune():
@@ -112,7 +99,7 @@ def main():
     pruner = optuna.pruners.MedianPruner()
     
     study = Utils.setup_study(study_name, storage_path, pruner)
-    study.optimize(objective, n_trials=100, callbacks=[wandbc])
+    study.optimize(objective, n_trials=16, callbacks=[wandbc])
 
     print(f"Best value: {study.best_value} (params: {study.best_params})")
 

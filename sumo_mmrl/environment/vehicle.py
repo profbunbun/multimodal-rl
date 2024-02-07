@@ -99,14 +99,7 @@ class Vehicle:
         return options
 
     def set_destination(self, action, destination_edge):
-        """
-        Set the destination of the vehicle based on the given action.
 
-        :param str action: Action to be taken.
-        :param str destination_edge: Destination edge ID.
-        :return: Target lane after action.
-        :rtype: str
-        """
 
         # self.sumo.vehicle.changeTarget(self.vehicle_id, destination_edge.partition("_")[0])
         # route = self.sumo.vehicle.getRoute(self.vehicle_id)
@@ -118,13 +111,10 @@ class Vehicle:
         outlist = list(self.out_dict[self.cur_loc].keys())
         if action in outlist:
             target_lane = self.out_dict[self.cur_loc][action]
-            self.sumo.vehicle.changeTarget(self.vehicle_id, target_lane)
+            # self.sumo.vehicle.changeTarget(self.vehicle_id, target_lane)
         return target_lane
 
     def pickup(self):
-        """
-        Perform a pickup action for the vehicle.
-        """
 
         reservation = self.sumo.person.getTaxiReservations(0)
         reservation_id = reservation[0]
@@ -132,38 +122,22 @@ class Vehicle:
         # print(reservation_id)
         
     def get_road(self):  
-        """
-        Get the current road ID of the vehicle.
 
-        :return: Current road ID.
-        :rtype: str
-        """  
         return self.sumo.vehicle.getRoadID(self.vehicle_id)
 
     def random_relocate(self):
-        """
-        Relocate the vehicle to a random lane.
-        """    
+ 
         new_lane=random.choice(list(self.index_dict.keys()))      
         self.sumo.vehicle.changeTarget(self.vehicle_id,edgeID=new_lane)
         self.sumo.vehicle.moveTo(self.vehicle_id,new_lane+"_0",5)
 
     def get_type(self):
-        """
-        Get the type parameter of the vehicle.
 
-        :return: Type of the vehicle.
-        :rtype: str
-        """
         return self.sumo.vehicle.getParameter(self.vehicle_id,
                                               "type")
         
     def teleport(self, dest):
-        """
-        Teleport the vehicle to the specified destination.
-
-        :param str dest: Destination edge ID.
-        """
+   
         self.sumo.vehicle.changeTarget(self.vehicle_id, edgeID=dest)
-        self.sumo.vehicle.moveTo(self.vehicle_id, dest+"_0", 5)
+        self.sumo.vehicle.moveTo(self.vehicle_id, dest+"_0", 1)
     

@@ -6,47 +6,45 @@ logs:
   path: "Logs/logs.csv"
 # Training configuration settings.
 training_settings:
-  episodes: 25000                       # The number of episodes to run
-  experiment_path: "Experiments/3x3/"
-  # experiment_path: "Experiments/balt3/"     # Path to the experiment directory
-  sumoconfig: "Nets/3x3.sumocfg"    
-  # sumoconfig: "Nets/osm.sumocfg"       # Configuration file for SUMO
+  episodes: 15000                    
+  # experiment_path: "Experiments/3x3/"
+  # sumoconfig: "Nets/3x3.sumocfg"    
+  experiment_path: "Experiments/balt3/"     
+  sumoconfig: "Nets/osm.sumocfg"       
   savepath: "models/"
-  num_vehic: 1                           # The number of vehicles to simulate
-  types: 1                               # The number of types of vehicles
-  max_steps_per_episode: 1000            # Maximum steps per episode
-  initial_life: .15                      # Starting life points for the agent
-  penalty: -0.2                        # Penalty for invalid or detrimental actions
-  smoothing_window: 100                  # Window size for smoothing reward curves
+  num_vehic: 1                          
+  types: 1                             
+  max_steps_per_episode: 1000          
+  initial_life: .15                     
+  penalty: -0.2                        
+  smoothing_window: 100                  
 
 # Environment settings.
 env:
-  num_of_vehicles: 1                     # Default number of vehicles in the environment
-  num_of_people: 1                       # Default number of people in the environment
-  types_of_passengers: 1                 # Default types or classes of passengers
+  num_of_vehicles: 1                     
+  num_of_people: 1                       
+  types_of_passengers: 1                
 
 # Graph Output.
 graph_output:
-  graph_path: "/Graphs/sumo-agent.png"  # Default path where learning curve graphs should be saved
+  graph_path: "/Graphs/sumo-agent.png"  
 
 # Optuna optimization settings.
 optuna:
-  n_trials: 100                          # The number of trials to run
-  storage_path: "sqlite:///db.sqlite3"   # Database URL for Optuna
-  study_name: null                       # Study name, null will generate a new name
+  n_trials: 16
+  storage_path: "sqlite:///db.sqlite3"
+  study_name: null                      
 
-# Hyperparameter ranges for the agent (used in the `create_agent` function).
+
 agent_hyperparameters:
-  learning_rate: [0.00001, 0.001]
+  learning_rate: 0.00001
   gamma: 0.9999                
-  epsilon_decay: 0.9999
-  batch_size: 512
-  memory_size: 100000
+  epsilon_decay: 0.9995
+  batch_size: 128
+  memory_size: 50000
   epsilon_max:  1.0
-  epsilon_min: 0.0
-  n_layers: 2                       # Consider expanding if more layers are needed
-  layer_sizes: 8                    # Consider expanding if more sizes are needed
-  activation: ["leaky_relu","relu","tanh"]
+  epsilon_min: 0.05
+
 
 
 # Logging configuration for Weights & Biases.

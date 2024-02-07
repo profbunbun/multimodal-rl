@@ -17,16 +17,14 @@ class Person:
         Initialize a Person instance with the given parameters.
         """
         self.person_id = person_id
-        start_edge = "1w"
-        # start_edge = "-521985670#5"
+        start_edge = "-521985670#5"
+        self.destination = "192469470#0"
         self.sumo = sumo
         self.index_dict = index_dict
         self.edge_position = edge_position
-        # self.new_lane = list(self.index_dict.keys())[21]
-        # self.new_lane = random.choice(list(self.index_dict.keys()))
-        # self.destination = "192469470#0"
-        self.destination = list(self.index_dict.keys())[0]
-        # self.destination = random.choice(list(self.index_dict.keys()))
+
+        # start_edge = "1w"
+        # self.destination = list(self.index_dict.keys())[0]
 
         self.sumo.person.add(person_id, start_edge, 20)
 
@@ -39,25 +37,13 @@ class Person:
         #   str(random.randint(1, types))
 
     def location(self):
-        """
-        Get the current location of the person.
-
-        :return: The current (x, y) position of the person.
-        :rtype: tuple
-        """
-
+ 
         ppos = self.sumo.person.getPosition(self.person_id)
 
         return ppos
 
     def get_destination(self):
-        """
-        Get the destination of the person.
-
-        :return: Destination edge ID.
-        :rtype: str
-        """
-
+ 
         return self.destination
 
     def remove_person(self):

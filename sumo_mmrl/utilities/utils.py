@@ -127,12 +127,7 @@ class Utils:
 
     
     def parse_arguments():
-        """
-        Parse command-line arguments.
-
-        :return: The parsed arguments.
-        :rtype: argparse.Namespace
-        """
+        
         parser = argparse.ArgumentParser(description="SUMO MMRL Optimization")
         parser.add_argument('--study_name', type=str, help='Name of the Optuna study.')
         # Add more arguments as needed

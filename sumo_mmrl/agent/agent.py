@@ -17,10 +17,8 @@ class Agent:
                  epsilon_decay=None, 
                  epsilon_max=None, 
                  epsilon_min=None, 
-                 memory_size=None, 
-
+                 memory_size=None,
                  batch_size=None,
-                 soft_update_factor=None,
                  ):
 
             self.path = path
@@ -31,11 +29,10 @@ class Agent:
             self.learning_rate = learning_rate 
             self.epsilon_decay = epsilon_decay 
 
-            self.soft_update_factor = soft_update_factor
             self.batch_size = batch_size 
             self.epsilon_max = epsilon_max 
             self.epsilon_min = epsilon_min 
-            self.soft_update_factor = soft_update_factor 
+
             
             self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -58,7 +55,6 @@ class Agent:
 
         self.memory.remember(state, action, reward, next_state, done)
 
-
     def choose_action(self, state, options):
 
         action, index, valid = self.exploration_strategy.choose_action(state, options)
@@ -71,8 +67,6 @@ class Agent:
             return None
         states, actions, next_states, rewards, dones = zip(*minibatch)
         self.perform_training_step(states, actions, next_states, rewards, dones)
-
-
 
     def perform_training_step(self, states, actions, next_states, rewards, dones):
 

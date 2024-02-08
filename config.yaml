@@ -2,22 +2,23 @@
 global:
   project_name: "sumo_mmrl"  # Name of the project
   entity: "aaronrls"         # User or team name
-logs:
-  path: "Logs/logs.csv"
+
 # Training configuration settings.
 training_settings:
-  episodes: 15000                    
-  # experiment_path: "Experiments/3x3/"
-  # sumoconfig: "Nets/3x3.sumocfg"    
-  experiment_path: "Experiments/balt3/"     
-  sumoconfig: "Nets/osm.sumocfg"       
-  savepath: "models/"
-  num_vehic: 1                          
-  types: 1                             
-  max_steps_per_episode: 1000          
+  episodes: 10000                  
+  experiment_path: "Experiments/3x3/"
+  sumoconfig: "Nets/3x3.sumocfg"    
+  # experiment_path: "Experiments/balt3/"     
+  # sumoconfig: "Nets/osm.sumocfg"       
+  savepath: "models/"                                   
   initial_life: .15                     
   penalty: -0.2                        
-  smoothing_window: 100                  
+            
+person_settings:
+  # start: "-521985670#5"
+  # destination: "192469470#0"
+  start: "1w"
+  destination: "10e"
 
 # Environment settings.
 env:
@@ -25,16 +26,11 @@ env:
   num_of_people: 1                       
   types_of_passengers: 1                
 
-# Graph Output.
-graph_output:
-  graph_path: "/Graphs/sumo-agent.png"  
-
 # Optuna optimization settings.
 optuna:
   n_trials: 16
   storage_path: "sqlite:///db.sqlite3"
   study_name: null                      
-
 
 agent_hyperparameters:
   learning_rate: 0.00001
@@ -44,6 +40,8 @@ agent_hyperparameters:
   memory_size: 50000
   epsilon_max:  1.0
   epsilon_min: 0.05
+  initial_life: .15                     
+  penalty: -0.2  
 
 
 

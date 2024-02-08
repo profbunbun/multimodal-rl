@@ -80,14 +80,7 @@ class Explorer:
         return action, act_values, index_choice
 
     def choose_action(self, state, options):
-        """
-        Choose an action based on epsilon-greedy strategy.
-
-        :param list state: The current state.
-        :param list options: Available actions.
-        :return: The chosen action, its index, and a validity flag.
-        :rtype: tuple
-        """
+        
         q_values = None
         randy = np.random.rand()
         if randy < self.epsilon:

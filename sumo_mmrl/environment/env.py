@@ -16,7 +16,7 @@ import time
 class Env:
 
 
-    def __init__(self, config, edge_locations, bussroute, out_dict, index_dict):
+    def __init__(self, config, edge_locations, out_dict, index_dict):
 
 
         self.config = config  
@@ -24,10 +24,10 @@ class Env:
         self.sumo_config_path = self.path + config['training_settings']['sumoconfig']
         self.num_of_vehicles = config['env']['num_of_vehicles']
         self.types_of_passengers = config['env']['types_of_passengers']
-        self.graph_path = self.path + config['graph_output']['graph_path']
-        self.life = config['training_settings']['initial_life']
-        self.penalty = config['training_settings']['penalty']
-        self.smoothing_window = config['training_settings']['smoothing_window']
+
+        self.life = config['agent_hyperparameters']['initial_life']
+        self.penalty = config['agent_hyperparameters']['penalty']
+
     
         self.obs = Observation()
         self.finder = StopFinder()
@@ -61,10 +61,8 @@ class Env:
         self.life = self.config['training_settings']['initial_life']
         self.make_choice_flag = True
         
-        
-
         self.vehicle_manager = VehicleManager(self.config['env']['num_of_vehicles'], self.edge_locations, self.sumo, self.out_dict, self.index_dict)
-        self.person_manager = PersonManager(self.config['env']['num_of_people'], self.edge_locations, self.sumo, self.index_dict)
+        self.person_manager = PersonManager(self.config['env']['num_of_people'], self.edge_locations, self.sumo, self.index_dict,self.config)
         self.stage_manager = StageManager(self.finder, self.edge_locations, self.sumo)
         self.step_manager = StepManager(self.sumo)
 

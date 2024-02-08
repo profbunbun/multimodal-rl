@@ -12,11 +12,11 @@ def create_env(config):
     edge_locations = (
             parser.get_edge_pos_dic()
         )  
-    bussroute = parser.get_route_edges()
+
     out_dict = parser.get_out_dic()
     index_dict = parser.get_edge_index()
 
-    return Env(config, edge_locations, bussroute, out_dict, index_dict)
+    return Env(config, edge_locations,  out_dict, index_dict)
 
 
 def create_agent(config):

@@ -2,9 +2,11 @@ import os
 import torch
 import torch.nn as nn
 import torch.optim as optim
+
 from .dqn import DQN
 from . import exploration, replay_memory
 from ..utilities.utils import Utils
+from torch.utils.data import DataLoader, TensorDataset
 config = Utils.load_yaml_config('config.yaml')
 
 class Agent:
@@ -44,6 +46,7 @@ class Agent:
 
             self.optimizer = optim.RMSprop(self.policy_net.parameters(),
                                         lr=self.learning_rate, momentum=0.9)
+            # self.policy_net, self.optimizer = amp.initialize(self.policy_net, self.optimizer, opt_level="O1")
             # self.optimizer = optim.RMSprop(self.policy_net.parameters(),
             #                             lr=self.learning_rate, momentum=0.9)
 
@@ -68,13 +71,14 @@ class Agent:
         states, actions, next_states, rewards, dones = zip(*minibatch)
         self.perform_training_step(states, actions, next_states, rewards, dones)
 
+
     def perform_training_step(self, states, actions, next_states, rewards, dones):
 
-        states =torch.tensor(states, device=self.device, dtype=torch.float32) 
-        actions = torch.tensor(actions, device=self.device, dtype=torch.long)
-        rewards = torch.tensor(rewards, device=self.device, dtype=torch.float32)
-        next_states = torch.tensor(next_states, device=self.device, dtype=torch.float32)
-        dones = torch.tensor(dones, device=self.device, dtype=torch.float32)
+        states =torch.as_tensor(states, device=self.device, dtype=torch.float32) 
+        actions = torch.as_tensor(actions, device=self.device, dtype=torch.long)
+        rewards = torch.as_tensor(rewards, device=self.device, dtype=torch.float32)
+        next_states = torch.as_tensor(next_states, device=self.device, dtype=torch.float32)
+        dones = torch.as_tensor(dones, device=self.device, dtype=torch.float32)
 
 
         actions = actions.unsqueeze(-1) if actions.dim() == 1 else actions

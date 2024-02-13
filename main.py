@@ -19,7 +19,7 @@ EPISODES = config['training_settings']['episodes']
 
 wandb_kwargs= {"project":config['global']['project_name'],
                "entity":config['global']['entity']}
-wandbc = WeightsAndBiasesCallback(metric_name=config['wandb']['metric_name'],wandb_kwargs=wandb_kwargs)
+wandbc = WeightsAndBiasesCallback(metric_name=config['wandb']['metric_name'],wandb_kwargs=wandb_kwargs,as_multirun=True)
 
 @wandbc.track_in_wandb()
 def objective(trial):
@@ -74,13 +74,14 @@ def objective(trial):
         env.close(episode, cumulative_reward, dagent.get_epsilon())
         # env.quiet_close()
         
-        trial.report(cumulative_reward, episode)
-        if trial.should_prune():
-            raise optuna.TrialPruned()
+        if episode > (EPISODES//2):
+            trial.report(cumulative_reward, episode)
+            if trial.should_prune():
+                raise optuna.TrialPruned()
         
     wandb.finish()
 
-    print("Batch Complete")      
+    # print("Batch Complete")      
     return cumulative_reward
 
 def main():
@@ -94,11 +95,10 @@ def main():
     study_name = sys.argv[1] if len(sys.argv) > 1 else None
     storage_path = config['optuna']['storage_path']
     pruner = optuna.pruners.MedianPruner(n_startup_trials=5)
-    
     study = Utils.setup_study(study_name, storage_path, pruner)
-    study.optimize(objective, n_trials=16, callbacks=[wandbc])
+    study.optimize(objective, n_trials=20, callbacks=[wandbc])
 
-    print(f"Best value: {study.best_value} (params: {study.best_params})")
+    # print(f"Best value: {study.best_value} (params: {study.best_params})")
 
 if __name__ == "__main__":
     main()

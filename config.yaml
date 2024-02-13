@@ -1,24 +1,24 @@
 # Global Configuration for the SUMO MMRL project.
 global:
   project_name: "sumo_mmrl"  # Name of the project
-  entity: "aaronrls"         # User or team name
+  entity: "ahoope5"         # User or team name
 
 # Training configuration settings.
 training_settings:
-  episodes: 10000                  
-  experiment_path: "Experiments/3x3/"
-  sumoconfig: "Nets/3x3.sumocfg"    
-  # experiment_path: "Experiments/balt3/"     
-  # sumoconfig: "Nets/osm.sumocfg"       
+  episodes: 20000               
+  # experiment_path: "Experiments/3x3/"
+  # sumoconfig: "Nets/3x3.sumocfg"    
+  experiment_path: "Experiments/balt3/"     
+  sumoconfig: "Nets/osm.sumocfg"       
   savepath: "models/"                                   
   initial_life: .15                     
   penalty: -0.2                        
             
 person_settings:
-  # start: "-521985670#5"
-  # destination: "192469470#0"
-  start: "1w"
-  destination: "10e"
+  start: "-521985670#5"
+  destination: "192469470#0"
+  # start: "1w"
+  # destination: "10e"
 
 # Environment settings.
 env:
@@ -28,7 +28,7 @@ env:
 
 # Optuna optimization settings.
 optuna:
-  n_trials: 16
+  n_trials: 20
   storage_path: "sqlite:///db.sqlite3"
   study_name: null                      
 
@@ -36,7 +36,7 @@ agent_hyperparameters:
   learning_rate: 0.00001
   gamma: 0.9999                
   epsilon_decay: 0.9995
-  batch_size: 128
+  batch_size: 512
   memory_size: 50000
   epsilon_max:  1.0
   epsilon_min: 0.05

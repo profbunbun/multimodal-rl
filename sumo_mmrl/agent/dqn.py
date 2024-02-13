@@ -6,7 +6,7 @@ class DQN(nn.Module):
 
     def __init__(self, n_observations, n_actions):
         super().__init__()
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        # self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         
         self.layers = nn.Sequential(
@@ -17,7 +17,7 @@ class DQN(nn.Module):
             nn.Linear(64,n_actions)
             )
 
-        self.layers.to(self.device)
+        # self.layers.to(self.device)
     
 
 

@@ -80,12 +80,12 @@ def objective(trial):
         env.close(episode, cumulative_reward, dagent.get_epsilon(), distance_travled)
         # env.quiet_close()
         
-        if episode > (EPISODES//2):
-            trial.report(cumulative_reward, episode)
-            if trial.should_prune():
-                raise optuna.TrialPruned()
+        # if episode > (EPISODES//2):
+        #     trial.report(cumulative_reward, episode)
+        #     if trial.should_prune():
+        #         raise optuna.TrialPruned()
         
-    wandb.finish()
+    # wandb.finish()
 
     # print("Batch Complete")      
     return cumulative_reward, distance_travled
@@ -99,7 +99,7 @@ def main():
     study = optuna.create_study(
                     storage=storage_path,
                     study_name=study_name,
-                    direction=["maximize","minimize"],
+                    directions=["maximize","minimize"],
                     pruner=pruner,
                 )
     study.optimize(objective, n_trials=10, callbacks=[wandbc])

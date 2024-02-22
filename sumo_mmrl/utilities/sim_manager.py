@@ -42,10 +42,10 @@ def create_agent(config):
 def create_trial_agent(trial,config):
    
     experiment_path = config['training_settings']['experiment_path']
-    learning_rate = config['agent_hyperparameters']['learning_rate']
-    # learning_rate = trial.suggest_float("learning_rate", *config['agent_hyperparameters']['learning_rate'])
-    gamma = config['agent_hyperparameters']['gamma']
-    epsilon_decay = config['agent_hyperparameters']['epsilon_decay']
+    # learning_rate = config['agent_hyperparameters']['learning_rate']
+    learning_rate = trial.suggest_categorical("learning_rate", config['agent_hyperparameters']['learning_rate'])
+    gamma = trial.suggest_categorical('gamma',config['agent_hyperparameters']['gamma'])
+    epsilon_decay = trial.suggest_categorical('epsilon_decay',config['agent_hyperparameters']['epsilon_decay'])
     batch_size = config['agent_hyperparameters']['batch_size']
     memory_size = config['agent_hyperparameters']['memory_size']
     epsilon_max = config['agent_hyperparameters']['epsilon_max']

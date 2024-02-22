@@ -46,6 +46,7 @@ class Env:
         self.person = None
         self.p_index = 0
         self.distcheck = 0
+        self.distcheck_final = 0
         self.edge_distance = None
         self.destination_edge = None
         self.stage = "reset"
@@ -74,12 +75,16 @@ class Env:
         self.vehicle = vehicles[int(vid_selected)]
         self.sumo.simulationStep()
         self.old_dist = 0
+        self.final_old_dist = 0
         vedge = self.vehicle.get_road()
         self.old_edge = vedge
         choices = self.vehicle.get_out_dict()
         self.destination_edge = self.person.get_road()
+        self.final_destination = self.person.get_destination()
         dest_loc = self.edge_locations[self.destination_edge]
-        state = self.obs.get_state(self.sumo, self.agent_step, self.vehicle, dest_loc, self.life, self.distcheck)
+        self.final_loc = self.edge_locations[self.final_destination]
+        self.picked_up = 0
+        state = self.obs.get_state(self.sumo, self.agent_step, self.vehicle, dest_loc, self.life, self.distcheck, self.final_loc, self.distcheck_final, self.picked_up)
         return state, self.stage, choices, vedge
 
 
@@ -103,10 +108,14 @@ class Env:
             vedge_loc[0], vedge_loc[1], dest_edge_loc[0], dest_edge_loc[1]
         )
 
+        final_edge_distance = Utils.manhattan_distance(
+            vedge_loc[0], vedge_loc[1], self.final_loc[0], self.final_loc[1]
+        )
+
 
         if validator == 1:
             if self.make_choice_flag:
-                vedge = self.step_manager.perform_step(self.vehicle, action, self.destination_edge)
+                vedge = self.step_manager.perform_step(self.vehicle, action, self.destination_edge) #here
                 self.make_choice_flag = False
                 self.life -= 0.01
 
@@ -115,11 +124,11 @@ class Env:
             choices = self.vehicle.get_out_dict()
             dest_loc = self.edge_locations[self.destination_edge]
 
-            reward, self.make_choice_flag, self.distcheck, self.life = self.stage_manager.calculate_reward(
-                self.old_dist, edge_distance, self.destination_edge, vedge, self.make_choice_flag, self.life)
+            reward, self.make_choice_flag, self.distcheck, self.life, self.distcheck_final = self.stage_manager.calculate_reward(
+                self.old_dist, edge_distance, self.destination_edge, vedge, self.make_choice_flag, self.life, self.final_destination, self.final_old_dist, final_edge_distance)
 
-            self.stage, self.destination_edge = self.stage_manager.update_stage(
-                self.stage, self.destination_edge, vedge, self.person, self.vehicle
+            self.stage, self.destination_edge, self.picked_up = self.stage_manager.update_stage(
+                self.stage, self.destination_edge, vedge, self.person, self.vehicle, self.final_destination
             )
             if self.stage == "done": 
                 reward += 0.99
@@ -127,10 +136,11 @@ class Env:
 
             self.make_choice_flag, self.old_edge = self.step_manager.null_step(self.vehicle, self.make_choice_flag, self.old_edge)
 
-            state = self.obs.get_state(self.sumo,self.agent_step, self.vehicle, dest_loc, self.life, self.distcheck)
+            state = self.obs.get_state(self.sumo, self.agent_step, self.vehicle, dest_loc, self.life, self.distcheck, self.final_loc, self.distcheck_final, self.picked_up)
             choices = self.vehicle.get_out_dict()
             self.old_edge = vedge
             self.old_dist = edge_distance
+            self.final_old_dist = final_edge_distance
             return state, reward, self.stage, choices, vedge
 
         choices = self.vehicle.get_out_dict()
@@ -139,7 +149,7 @@ class Env:
         reward = self.penalty
         self.make_choice_flag = False
         dest_loc = self.edge_locations[self.destination_edge]
-        state = self.obs.get_state(self.sumo,self.agent_step, self.vehicle, dest_loc, self.life, self.distcheck)
+        state = self.obs.get_state(self.sumo, self.agent_step, self.vehicle, dest_loc, self.life, self.distcheck, self.final_loc, self.distcheck_final, self.picked_up)
         self.accumulated_reward += reward
         return state, reward, self.stage, choices , vedge
 

@@ -9,7 +9,7 @@ class Observation:
         self.out_mask = OutMask()
 
     
-    def get_state(self, sumo, step, vehicle, destination_loc, life, distcheck):
+    def get_state(self, sumo, step, vehicle, destination_loc, life, distcheck, final_destination, distcheck_final_dest, picked_up):
       
         bounding_box = sumo.simulation.getNetBoundary()
         self.min_x, self.min_y = bounding_box[0]
@@ -26,11 +26,15 @@ class Observation:
         state.append(self.normalize(vloc[1], self.min_y, self.max_y))
         state.append(self.normalize(destination_loc[0], self.min_x, self.max_x))
         state.append(self.normalize(destination_loc[1], self.min_y, self.max_y))
+        state.append(self.normalize(final_destination[0], self.min_x, self.max_x))
+        state.append(self.normalize(final_destination[1], self.min_y, self.max_y))
         state.append(step * 0.0001)
         state.append(self.manhat_dist(vloc[0], vloc[1], destination_loc[0], destination_loc[1]))  
         state.extend(self.out_mask.get_outmask_valid(choices))
         state.append(life)
         state.append(distcheck)
+        state.append(distcheck_final_dest)
+        state.append(picked_up)
 
         return state
 

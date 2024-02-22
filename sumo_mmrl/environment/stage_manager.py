@@ -7,8 +7,9 @@ class StageManager:
         self.edge_position = edge_position
         self.sumo = sumo
         self.stage = "pickup"
+        self.pickedup = 0
 
-    def update_stage(self, current_stage, destination_edge, vedge, person, vehicle):
+    def update_stage(self, current_stage, destination_edge, vedge, person, vehicle, final_edge):
 
         new_stage = current_stage
         
@@ -18,6 +19,7 @@ class StageManager:
 
             if current_stage == "pickup":
                 new_stage = "picked up"
+                self.pickedup = 1
                 
                 new_destination_edge = self.finder.find_begin_stop(
                     person.get_road(), self.edge_position, self.sumo
@@ -40,16 +42,23 @@ class StageManager:
             elif current_stage == "final":
                 new_stage = "done"
                 # print(new_stage)
-        return new_stage, new_destination_edge
+        
+        elif vedge == final_edge and self.pickedup == 1:
+             new_stage = "done"
+             print('Skipped Bus')
+             new_destination_edge =final_edge
+
+        return new_stage, new_destination_edge, self.pickedup
 
     def get_initial_stage(self):
 
         return self.stage
     
-    def calculate_reward(self, old_dist, edge_distance, destination_edge, vedge, make_choice_flag, life):
+    def calculate_reward(self, old_dist, edge_distance, destination_edge, vedge, make_choice_flag, life, final_destination, final_old_dist, final_edge_distance):
         
         reward = 0
         distcheck = 0
+        distcheck_final = 0
 
         if old_dist > edge_distance:
             reward = 0.025
@@ -57,6 +66,12 @@ class StageManager:
         elif old_dist < edge_distance:
             reward = -0.02
             distcheck = 0
+        if  final_old_dist > final_edge_distance:
+            reward = 0.025
+            distcheck_final = 1
+        elif final_old_dist < final_edge_distance:
+            reward = -0.02
+            distcheck_final = 0
         # elif old_dist == edge_distance:
         #     reward = 0.01
         #     distcheck = 0
@@ -66,4 +81,9 @@ class StageManager:
             reward = 0.8
             make_choice_flag = True
 
-        return reward, make_choice_flag, distcheck, life
+        if vedge == final_destination and self.pickedup == 1:
+            life += 0.1
+            reward = 0.8
+            make_choice_flag = False
+
+        return reward, make_choice_flag, distcheck, life, distcheck_final

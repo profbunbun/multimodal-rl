@@ -30,7 +30,7 @@ def create_agent(config):
     epsilon_max = config['agent_hyperparameters']['epsilon_max']
     epsilon_min = config['agent_hyperparameters']['epsilon_min']
 
-    return Agent(14, 6, experiment_path,
+    return Agent(18, 6, experiment_path,
                     learning_rate,
                     gamma, 
                     epsilon_decay, 
@@ -52,7 +52,7 @@ def create_trial_agent(trial,config):
     epsilon_min = config['agent_hyperparameters']['epsilon_min']
 
 
-    return Agent(14, 6, experiment_path,
+    return Agent(18, 6, experiment_path,
                     learning_rate,
                     gamma, 
                     epsilon_decay, 

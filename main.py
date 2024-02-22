@@ -77,7 +77,7 @@ def objective(trial):
         })
 
         dagent.decay()
-        env.close(episode, cumulative_reward, dagent.get_epsilon(),distance_travled=distance_travled)
+        env.close(episode, cumulative_reward, dagent.get_epsilon(), distance_travled)
         # env.quiet_close()
         
         if episode > (EPISODES//2):
@@ -97,7 +97,7 @@ def main():
     storage_path = config['optuna']['storage_path']
     pruner = optuna.pruners.MedianPruner(n_startup_trials=5)
     study = Utils.setup_study(study_name, storage_path, pruner)
-    study.optimize(objective, n_trials=20, callbacks=[wandbc])
+    study.optimize(objective, n_trials=10, callbacks=[wandbc])
 
 
 

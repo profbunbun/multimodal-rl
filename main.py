@@ -29,21 +29,25 @@ def objective(trial):
   
     batch_rewards = []
     batch_avg_reward = 0
+    
 
 
     for episode in range(EPISODES):
+        route_taken = []
         
         cumulative_reward = 0
 
         env.render("libsumo")
         # env.render("gui")
-        state, stage, legal_actions = env.reset()
+        state, stage, legal_actions, edge = env.reset()
+        route_taken.append(edge)
         
         while stage != "done":
             action, action_index, validator = dagent.choose_action(state, legal_actions)
 
 
-            next_state, new_reward, stage, legal_actions = env.step(action, validator)
+            next_state, new_reward, stage, legal_actions, edge = env.step(action, validator)
+            route_taken.append(edge)
 
 
             dagent.remember(state, action_index, next_state, new_reward, done=(stage == "done"))
@@ -60,6 +64,7 @@ def objective(trial):
         batch_rewards.append(cumulative_reward)
         batch_np = np.array(batch_rewards)
         batch_avg_reward = batch_np.mean()
+        distance_travled = env.get_route_length(route_taken)
         
         wandb.log({
         "cumulative_reward": cumulative_reward,
@@ -67,11 +72,12 @@ def objective(trial):
         "episode": episode,
         "agent_steps": env.agent_step,
         "simulation_steps": env.sumo.simulation.getTime(),
-        "batch_avg_reward": batch_avg_reward
+        "batch_avg_reward": batch_avg_reward,
+        "Distance": distance_travled
         })
 
         dagent.decay()
-        env.close(episode, cumulative_reward, dagent.get_epsilon())
+        env.close(episode, cumulative_reward, dagent.get_epsilon(),distance_travled=distance_travled)
         # env.quiet_close()
         
         if episode > (EPISODES//2):
@@ -85,12 +91,7 @@ def objective(trial):
     return cumulative_reward
 
 def main():
-    """
-    Main function to execute the optimization process.
-
-    This function parses the command line arguments for the study name, sets up the Optuna study,
-    and starts the optimization process. The results are printed to the console.
-    """
+    
 
     study_name = sys.argv[1] if len(sys.argv) > 1 else None
     storage_path = config['optuna']['storage_path']
@@ -98,7 +99,7 @@ def main():
     study = Utils.setup_study(study_name, storage_path, pruner)
     study.optimize(objective, n_trials=20, callbacks=[wandbc])
 
-    # print(f"Best value: {study.best_value} (params: {study.best_params})")
+
 
 if __name__ == "__main__":
     main()

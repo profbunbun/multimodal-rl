@@ -80,7 +80,7 @@ class Env:
         self.destination_edge = self.person.get_road()
         dest_loc = self.edge_locations[self.destination_edge]
         state = self.obs.get_state(self.sumo, self.agent_step, self.vehicle, dest_loc, self.life, self.distcheck)
-        return state, self.stage, choices, 
+        return state, self.stage, choices, vedge
 
 
     def step(self, action, validator):
@@ -131,7 +131,7 @@ class Env:
             choices = self.vehicle.get_out_dict()
             self.old_edge = vedge
             self.old_dist = edge_distance
-            return state, reward, self.stage, choices
+            return state, reward, self.stage, choices, vedge
 
         choices = self.vehicle.get_out_dict()
 
@@ -141,7 +141,7 @@ class Env:
         dest_loc = self.edge_locations[self.destination_edge]
         state = self.obs.get_state(self.sumo,self.agent_step, self.vehicle, dest_loc, self.life, self.distcheck)
         self.accumulated_reward += reward
-        return state, reward, self.stage, choices
+        return state, reward, self.stage, choices , vedge
 
     # @timeit
     def render(self, mode):
@@ -156,7 +156,9 @@ class Env:
             self.sumo = self.sumo_con.connect_no_gui()
     
     # @timeit
-    def close(self, episode, accu, current_epsilon):
+    def close(self, episode, accu, current_epsilon, distance_traveled):
+
+        
 
         self.sumo.close()
         acc_r = float(accu)
@@ -168,8 +170,9 @@ class Env:
             "EP": episode,
             "Reward": f"{acc_r:.5}",
             "Avg Reward": f"{avg_reward:.3}",
-            "epsilon": f"{current_epsilon:.3}",
-            "steps": f"{self.agent_step}",
+            "Epsilon": f"{current_epsilon:.3}",
+            "Steps": f"{self.agent_step}",
+            "Distance": f"{distance_traveled}",
             }
         print(", ".join(f"{k}: {v}" for k, v in print_info.items()))
         return
@@ -177,4 +180,14 @@ class Env:
     def quiet_close(self):
         self.sumo.close()
         return
+    
+    def get_route_length(self, route):
+        distances = []
+        for edge in route:
+            # print(''.join([edge,'_0']))
+           distances.append(self.sumo.lane.getLength(''.join([edge,'_0'])))
+        return sum(distances)
+
+
+
    

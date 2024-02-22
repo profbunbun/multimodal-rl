@@ -33,25 +33,13 @@ class Explorer:
         self.last_reward = None
 
     def explore(self):
-        """
-        Randomly select an action.
-
-        :return: The selected action.
-        :rtype: str
-        """
+   
         action = np.random.choice(self.direction_choices)
         self.explore_count += 1
         return action
 
     def exploit(self, state):
-        """
-        Select action based on the policy network.
-
-        :param list state: The current state in an appropriate format (e.g., list, array, tensor).
-        :return: The chosen action based on the policy network's output and the action values.
-        :rtype: tuple
-        """
-        # Convert state to tensor if it's not already and ensure it's on the correct device
+        
         if not isinstance(state, T.Tensor):
             state = T.tensor(state, dtype=T.float32)
 
@@ -62,7 +50,7 @@ class Explorer:
         # Unsqueeze the tensor to add a batch dimension, necessary for batch normalization
         state = state.unsqueeze(0)
 
-        # Use the network in evaluation mode for single-sample inference
+
         self.policy_net.eval()
         with T.no_grad():
             act_values = self.policy_net(state)

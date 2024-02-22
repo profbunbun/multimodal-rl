@@ -88,15 +88,20 @@ def objective(trial):
     wandb.finish()
 
     # print("Batch Complete")      
-    return cumulative_reward
+    return cumulative_reward, distance_travled
 
 def main():
     
 
     study_name = sys.argv[1] if len(sys.argv) > 1 else None
     storage_path = config['optuna']['storage_path']
-    pruner = optuna.pruners.MedianPruner(n_startup_trials=5)
-    study = Utils.setup_study(study_name, storage_path, pruner)
+    pruner = optuna.pruners.MedianPruner(n_startup_trials=10)
+    study = optuna.create_study(
+                    storage=storage_path,
+                    study_name=study_name,
+                    direction=["maximize","minimize"],
+                    pruner=pruner,
+                )
     study.optimize(objective, n_trials=10, callbacks=[wandbc])
 
 

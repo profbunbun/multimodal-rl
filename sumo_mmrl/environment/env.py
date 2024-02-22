@@ -196,7 +196,7 @@ class Env:
         for edge in route:
             # print(''.join([edge,'_0']))
            distances.append(self.sumo.lane.getLength(''.join([edge,'_0'])))
-        return sum(distances)
+        return round(sum(distances))
 
 
 

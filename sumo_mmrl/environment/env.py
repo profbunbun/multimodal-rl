@@ -65,7 +65,7 @@ class Env:
         self.vehicle_manager = VehicleManager(self.num_of_vehicles, self.edge_locations, self.sumo, self.out_dict, self.index_dict)
         self.person_manager = PersonManager(self.num_people, self.edge_locations, self.sumo, self.index_dict,self.config)
         self.stage_manager = StageManager(self.finder, self.edge_locations, self.sumo)
-        self.step_manager = StepManager(self.sumo)
+
 
         self.stage = self.stage_manager.get_initial_stage()
         vehicles = self.vehicle_manager.create_vehicles()
@@ -115,7 +115,7 @@ class Env:
 
         if validator == 1:
             if self.make_choice_flag:
-                vedge = self.step_manager.perform_step(self.vehicle, action, self.destination_edge) #here
+                vedge = self.perform_step(self.vehicle, action, self.destination_edge)
                 self.make_choice_flag = False
                 self.life -= 0.01
 
@@ -134,7 +134,7 @@ class Env:
                 reward += 0.99 + self.life
                 print("successfull dropoff")
 
-            self.make_choice_flag, self.old_edge = self.step_manager.null_step(self.vehicle, self.make_choice_flag, self.old_edge)
+            self.make_choice_flag, self.old_edge = self.null_step(self.vehicle, self.make_choice_flag, self.old_edge)
 
             state = self.obs.get_state(self.sumo, self.agent_step, self.vehicle, dest_loc, self.life, self.distcheck, self.final_loc, self.distcheck_final, self.picked_up)
             choices = self.vehicle.get_out_dict()
@@ -196,6 +196,30 @@ class Env:
             # print(''.join([edge,'_0']))
            distances.append(self.sumo.lane.getLength(''.join([edge,'_0'])))
         return round(sum(distances))
+    
+    def null_step(self, vehicle, make_choice_flag, old_edge):
+
+        vedge = vehicle.get_road()
+
+        while not make_choice_flag:
+            self.sumo.simulationStep()
+            vedge = vehicle.get_road()
+
+            if (":" in vedge) or (old_edge == vedge):
+                make_choice_flag = False
+            else:
+                make_choice_flag = True
+            old_edge = vedge
+
+        return make_choice_flag, old_edge
+
+    def perform_step(self, vehicle, action, destination_edge):
+   
+        target = vehicle.set_destination(action, destination_edge)
+        vehicle.teleport(target)
+        self.sumo.simulationStep()
+        vedge = vehicle.get_road()
+        return  vedge
 
 
 

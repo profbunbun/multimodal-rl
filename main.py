@@ -18,7 +18,7 @@ wandb.init(project=config['wandb']['project_name'],
 
 def main_training_loop():
     env = so.create_env(config=config)
-    dagent = so.create_agent(config=config)  # Assuming create_agent is a method to create an agent
+    dagent = so.create_agent(config=config)
 
     for episode in range(EPISODES):
         route_taken = []

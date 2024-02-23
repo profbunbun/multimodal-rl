@@ -2,25 +2,9 @@ import numpy as np
 import torch as T
 
 class Explorer:
-    """
-    Explorer class for managing exploration and exploitation in a reinforcement learning agent.
-
-    :param torch.nn.Module policy: The policy network used for exploitation.
-    :param float epsilon_max: The maximum epsilon for exploration.
-    :param float decay_rate: The rate at which epsilon decays.
-    :param float epsilon_min: The minimum epsilon for exploration.
-    """
 
     def __init__(self, policy, epsilon_max=1, decay_rate=0.999, epsilon_min=0.1):
-        """
-        Initialize the explorer.
-
-        Args:
-            policy: The policy network used for exploitation.
-            epsilon_max (float): The maximum epsilon for exploration.
-            decay_rate (float): The rate at which epsilon decays.
-            epsilon_min (float): The minimum epsilon for exploration.
-        """
+   
         self.epsilon = epsilon_max
         self.decay_rate = decay_rate
         self.epsilon_min = epsilon_min
@@ -29,7 +13,15 @@ class Explorer:
         self.policy_net = policy
         self.explore_count = 0
         self.exploit_count = 0
-        np.random.seed(0)
+        # np.random.seed(0)
+        np.random.seed(1)
+        # np.random.seed(9)
+        # np.random.seed(20)
+        # np.random.seed(42)
+        # np.random.seed(66)
+        # np.random.seed(616)
+        # np.random.seed(9000)
+        # np.random.seed(8675309)
         self.last_reward = None
 
     def explore(self):
@@ -43,20 +35,16 @@ class Explorer:
         if not isinstance(state, T.Tensor):
             state = T.tensor(state, dtype=T.float32)
 
-        # Infer the device from the policy network's parameters
         device = next(self.policy_net.parameters()).device
         state = state.to(device)
 
-        # Unsqueeze the tensor to add a batch dimension, necessary for batch normalization
         state = state.unsqueeze(0)
-
 
         self.policy_net.eval()
         with T.no_grad():
             act_values = self.policy_net(state)
-        self.policy_net.train()  # Revert to training mode
+        self.policy_net.train()
 
-        # Choose the action with the highest value
         index_choice = T.argmax(act_values)
         num_of_choices = len(self.direction_choices)
 
@@ -65,16 +53,15 @@ class Explorer:
         else:
             action  = None
         self.exploit_count += 1
-        return action, act_values, index_choice
+        return action, index_choice
 
     def choose_action(self, state, options):
-        
-        q_values = None
+
         randy = np.random.rand()
         if randy < self.epsilon:
             action= self.explore()
         else:
-            action, q_values, index = self.exploit(state)
+            action, index = self.exploit(state)
 
         if action == None:
             valid = 0
@@ -87,9 +74,7 @@ class Explorer:
         return action, index, valid
 
     def update_epsilon(self):
-        """
-        Update epsilon value using exponential decay.
-        """
+
         if self.epsilon < self.epsilon_min:
             self.epsilon = 0.0
         else:

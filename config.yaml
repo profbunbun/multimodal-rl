@@ -1,7 +1,9 @@
 # Global Configuration for the SUMO MMRL project.
 wandb:
-  project_name: "sumo_mmrl"  # Name of the project
-  entity: "ahoope5"         # User or team name
+  project_name: "sumo-rl"  # Name of the project
+  entity: "researchlab-yr404"
+  name: "sumo-rl"
+  group: "3x3"
 
 # Training configuration settings.
 training_settings:
@@ -26,25 +28,14 @@ env:
   num_of_people: 1                       
   types_of_passengers: 1                
 
-# Optuna optimization settings.
-optuna:
-  n_trials: 20
-  storage_path: "sqlite:///db.sqlite3"
-  study_name: null                      
 
 agent_hyperparameters:
   learning_rate: 0.00001
-  gamma: 0.9999                
-  epsilon_decay: 0.9995
+  gamma: 0.9999               
+  epsilon_decay: 0.9996
   batch_size: 1024
   memory_size: 50000
   epsilon_max:  1.0
   epsilon_min: 0.05
   initial_life: .15                     
   penalty: -0.2  
-
-
-
-# Logging configuration for Weights & Biases.
-wandb:
-  metric_name: "cumulative_reward"       # Primary metric for tracking

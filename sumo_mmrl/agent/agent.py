@@ -6,7 +6,6 @@ import torch.optim as optim
 from .dqn import DQN
 from . import exploration, replay_memory
 from ..utilities.utils import Utils
-from torch.utils.data import DataLoader, TensorDataset
 config = Utils.load_yaml_config('config.yaml')
 
 class Agent:
@@ -46,10 +45,7 @@ class Agent:
 
             self.optimizer = optim.RMSprop(self.policy_net.parameters(),
                                         lr=self.learning_rate, momentum=0.9)
-            # self.policy_net, self.optimizer = amp.initialize(self.policy_net, self.optimizer, opt_level="O1")
-            # self.optimizer = optim.RMSprop(self.policy_net.parameters(),
-            #                             lr=self.learning_rate, momentum=0.9)
-
+            
             self.exploration_strategy = exploration.Explorer(self.policy_net, self.epsilon_max, self.epsilon_decay, self.epsilon_min)
 
             self.memory = replay_memory.ReplayMemory(self.memory_size)

@@ -4,7 +4,7 @@ This module sets up and runs the training environment using Weights & Biases for
 It runs the main training loop without hyperparameter optimization.
 """
 from sumo_mmrl import Utils
-from sumo_mmrl.utilities import sim_manager as so
+from sumo_mmrl.environment import sim_manager as so
 import wandb
 
 config = Utils.load_yaml_config('config.yaml')

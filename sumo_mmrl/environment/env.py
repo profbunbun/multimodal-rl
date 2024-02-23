@@ -7,10 +7,8 @@ from .bus_stop import StopFinder
 from .observation import Observation
 from .vehicle_manager import VehicleManager 
 from .person_manager import PersonManager 
-from ..utilities.env_utils import Utils
+from ..utilities.utils import Utils
 from .step_manager import StepManager
-from functools import wraps
-import time
 
 
 class Env:
@@ -24,9 +22,11 @@ class Env:
         self.sumo_config_path = self.path + config['training_settings']['sumoconfig']
         self.num_of_vehicles = config['env']['num_of_vehicles']
         self.types_of_passengers = config['env']['types_of_passengers']
-
         self.life = config['agent_hyperparameters']['initial_life']
         self.penalty = config['agent_hyperparameters']['penalty']
+        self.start_life = self.config['training_settings']['initial_life']
+        self.num_of_vehicles = self.config['env']['num_of_vehicles']
+        self.num_people = self.config['env']['num_of_people']
 
     
         self.obs = Observation()
@@ -59,11 +59,11 @@ class Env:
   
         self.agent_step = 0
         self.accumulated_reward = 0
-        self.life = self.config['training_settings']['initial_life']
+        self.life = self.start_life
         self.make_choice_flag = True
         
-        self.vehicle_manager = VehicleManager(self.config['env']['num_of_vehicles'], self.edge_locations, self.sumo, self.out_dict, self.index_dict)
-        self.person_manager = PersonManager(self.config['env']['num_of_people'], self.edge_locations, self.sumo, self.index_dict,self.config)
+        self.vehicle_manager = VehicleManager(self.num_of_vehicles, self.edge_locations, self.sumo, self.out_dict, self.index_dict)
+        self.person_manager = PersonManager(self.num_people, self.edge_locations, self.sumo, self.index_dict,self.config)
         self.stage_manager = StageManager(self.finder, self.edge_locations, self.sumo)
         self.step_manager = StepManager(self.sumo)
 
@@ -153,7 +153,6 @@ class Env:
         self.accumulated_reward += reward
         return state, reward, self.stage, choices , vedge
 
-    # @timeit
     def render(self, mode):
 
         if mode == "gui":

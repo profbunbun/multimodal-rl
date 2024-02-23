@@ -39,7 +39,7 @@ class Observation:
         return state
 
     def manhat_dist(self, x1, y1, x2, y2):
-        distance = (x1 - x2) + (y1 - y2)
+        distance = abs(x1 - x2) + abs(y1 - y2)
         return distance / self.max_manhat_dist
     
     def normalize(self, value, min_value, max_value):

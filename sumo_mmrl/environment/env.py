@@ -131,7 +131,7 @@ class Env:
                 self.stage, self.destination_edge, vedge, self.person, self.vehicle, self.final_destination
             )
             if self.stage == "done": 
-                reward += 0.99
+                reward += 0.99 + self.life
                 print("successfull dropoff")
 
             self.make_choice_flag, self.old_edge = self.step_manager.null_step(self.vehicle, self.make_choice_flag, self.old_edge)

@@ -67,10 +67,10 @@ class StageManager:
             reward = -0.02
             distcheck = 0
         if  final_old_dist > final_edge_distance:
-            reward = 0.025
-            distcheck_final = 1
+            reward = 0.025 * self.pickedup
+            distcheck_final = 1  * self.pickedup
         elif final_old_dist < final_edge_distance:
-            reward = -0.02
+            reward = -0.02 * self.pickedup
             distcheck_final = 0
         # elif old_dist == edge_distance:
         #     reward = 0.01

@@ -2,26 +2,30 @@
 wandb:
   project_name: "sumo-rl"  # Name of the project
   entity: "researchlab-yr404"
-  name: "sumo-rl-1"
-  # group: "3x3"
-  group: "Balt1"
+  name: "sumo-rl-7"
+  group: "3x3-3"
+  # group: "Balt1-3"
 
 # Training configuration settings.
 training_settings:
   episodes: 20000               
-  # experiment_path: "Experiments/3x3/"
-  # sumoconfig: "Nets/3x3.sumocfg"    
-  experiment_path: "Experiments/balt3/"     
-  sumoconfig: "Nets/osm.sumocfg"       
-  savepath: "models/"                                   
+  experiment_path: "Experiments/3x3_7/"
+  sumoconfig: "Nets/3x3.sumocfg"    
+  # experiment_path: 'Experiments/balt_19/'
+  # sumoconfig: "Nets/osm.sumocfg"
+  savepath: "models/"                        
   initial_life: .15                     
-  penalty: -0.2                        
+  penalty: -0.2 
+  seed: 7
+  
+
+                         
             
 person_settings:
-  start: "-521985670#5"
-  destination: "192469470#0"
-  # start: "1w"
-  # destination: "10e"
+  # start: "-521985670#5"
+  # destination: "192469470#0"
+  start: "1w"
+  destination: "10e"
 
 # Environment settings.
 env:
@@ -31,7 +35,7 @@ env:
 
 
 agent_hyperparameters:
-  learning_rate: 0.00001
+  learning_rate: 0.000001
   gamma: 0.999              
   epsilon_decay: 0.9996
   batch_size: 1024

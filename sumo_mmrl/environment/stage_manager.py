@@ -61,30 +61,28 @@ class StageManager:
         distcheck_final = 0
 
         if old_dist > edge_distance:
-            reward = 0.025
+            # reward = 0.02
             distcheck = 1
         elif old_dist < edge_distance:
-            reward = -0.02
+            # reward = -0.025
             distcheck = 0
             
         if  final_old_dist > final_edge_distance:
-            reward = 0.025 * self.pickedup
+            # reward = 0.02 * self.pickedup
             distcheck_final = 1  * self.pickedup
         elif final_old_dist < final_edge_distance:
-            reward = -0.02 * self.pickedup
+            # reward = -0.025 * self.pickedup
             distcheck_final = 0
-        # elif old_dist == edge_distance:
-        #     reward = 0.01
-        #     distcheck = 0
+     
 
         if vedge == destination_edge:
             life += 0.1
-            reward = 0.8
+            # reward = 0.8
             make_choice_flag = True
 
         if vedge == final_destination and self.pickedup == 1:
             life += 0.1
-            reward = 0.8
+            # reward = 0.8
             make_choice_flag = False
 
         return reward, make_choice_flag, distcheck, life, distcheck_final

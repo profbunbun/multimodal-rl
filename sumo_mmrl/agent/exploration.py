@@ -1,6 +1,9 @@
 import numpy as np
 import torch as T
+from ..utilities.utils import Utils
 
+config = Utils.load_yaml_config('config.yaml')
+randy = config['training_settings']['seed']
 class Explorer:
 
     def __init__(self, policy, epsilon_max=1, decay_rate=0.999, epsilon_min=0.1):
@@ -13,15 +16,8 @@ class Explorer:
         self.policy_net = policy
         self.explore_count = 0
         self.exploit_count = 0
-        # np.random.seed(0)
-        np.random.seed(1)
-        # np.random.seed(9)
-        # np.random.seed(20)
-        # np.random.seed(42)
-        # np.random.seed(66)
-        # np.random.seed(616)
-        # np.random.seed(9000)
-        # np.random.seed(8675309)
+        np.random.seed(randy)
+        
         self.last_reward = None
 
     def explore(self):

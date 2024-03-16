@@ -88,11 +88,7 @@ class Env:
         return state, self.stage, choices, vedge
 
 
-    def step(self, action, validator):
-        '''
-        Performs a step in the environment based on the given action.
-
-        '''
+    def step(self, action, validator,distance_traveled):
 
         self.agent_step += 1
 
@@ -131,7 +127,7 @@ class Env:
                 self.stage, self.destination_edge, vedge, self.person, self.vehicle, self.final_destination
             )
             if self.stage == "done": 
-                reward += 0.99 + self.life
+                reward += 0.99 + self.life - (distance_traveled * 0.001)
                 print("successfull dropoff")
 
             self.make_choice_flag, self.old_edge = self.null_step(self.vehicle, self.make_choice_flag, self.old_edge)

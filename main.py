@@ -10,6 +10,7 @@ import wandb
 config = Utils.load_yaml_config('config.yaml')
 EPISODES = config['training_settings']['episodes']
 
+
 wandb.init(project=config['wandb']['project_name'],
            entity=config['wandb']['entity'],
            name=config['wandb']['name'],
@@ -19,6 +20,7 @@ wandb.init(project=config['wandb']['project_name'],
 def main_training_loop():
     env = so.create_env(config=config)
     dagent = so.create_agent(config=config)
+
 
     for episode in range(EPISODES):
         route_taken = []
@@ -30,7 +32,8 @@ def main_training_loop():
         
         while stage != "done":
             action, action_index, validator = dagent.choose_action(state, legal_actions)
-            next_state, new_reward, stage, legal_actions, edge = env.step(action, validator)
+            distance_traveled = env.get_route_length(route_taken)
+            next_state, new_reward, stage, legal_actions, edge = env.step(action, validator, distance_traveled)
             route_taken.append(edge)
             dagent.remember(state, action_index, next_state, new_reward, done=(stage == "done"))
             cumulative_reward += new_reward
@@ -53,6 +56,7 @@ def main_training_loop():
 
         dagent.decay()
         env.close(episode, cumulative_reward, dagent.get_epsilon(), distance_traveled)
+        dagent.save_model(episode)
     
     wandb.finish()
 

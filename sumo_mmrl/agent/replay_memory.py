@@ -1,7 +1,11 @@
-import torch
+
 from collections import namedtuple, deque
 import random
+from ..utilities.utils import Utils
 
+config = Utils.load_yaml_config('config.yaml')
+randy = config['training_settings']['seed']
+random.seed(randy)
 Transition = namedtuple('Transition',
                         ('state', 'action', 'next_state', 'reward', 'done'))
 
